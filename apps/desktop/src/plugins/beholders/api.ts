@@ -48,6 +48,8 @@ let rest: null | Rest = null
 let os: null | PluginOs = null
 let t: PluginTranslate = key => key
 
+const PANELS: readonly BeholderPanel[] = ['create', 'detail', 'edit', 'new']
+
 const STORE_KEYS = {
   lastCrewId: 'lastCrewId',
   panel: 'panel'
@@ -56,8 +58,16 @@ const STORE_KEYS = {
 /** The crew whose detail pane is open. Persisted so a restart lands where you left. */
 export const $selectedCrewId = atom<string>('')
 
-/** The right-hand pane: the selected crew's detail, or the new-crew picker. */
-export const $panel = atom<'detail' | 'new'>('detail')
+/** The right-hand pane. Mutually exclusive views of one selection, not modals:
+ *  the crew's detail, the blueprint picker, a blank editor, or the editor for
+ *  the selected crew. Persisted so a restart lands where the user left. */
+export type BeholderPanel = 'create' | 'detail' | 'edit' | 'new'
+
+export const $panel = atom<BeholderPanel>('detail')
+
+/** Crew-list filter. Deliberately NOT persisted: a stale search reads as an
+ *  empty library on the next launch. */
+export const $search = atom<string>('')
 
 /** The run the detail pane is showing. Empty means "the latest run". */
 export const $selectedRunId = atom<string>('')
@@ -354,6 +364,7 @@ export function __resetForTests(): void {
   rest = null
   os = null
   t = key => key
+  $search.set('')
   seenRunning.clear()
   notifiedRuns.clear()
 }

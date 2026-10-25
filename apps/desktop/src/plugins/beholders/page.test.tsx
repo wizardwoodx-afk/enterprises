@@ -7,7 +7,7 @@
  * wiring. Kanban's board tests set the precedent.
  */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // eslint-disable-next-line no-restricted-imports
@@ -156,13 +156,22 @@ describe('Beholders page', () => {
 
     mount(<BeholderPage />)
 
-    const button = await screen.findByText('Run crew')
+    // `gather` declares `{topic}`, so the run form asks for it first and the
+    // button stays disabled until it is filled — no runs with invented subjects.
+    const field = await screen.findByPlaceholderText('Value for topic')
+    const button = screen.getByText('Run crew').closest('button')
+
+    expect(button?.disabled).toBe(true)
 
     await act(async () => {
-      button.closest('button')?.click()
+      fireEvent.change(field, { target: { value: 'tidal turbines' } })
     })
 
-    await waitFor(() => expect(api.startRun).toHaveBeenCalledWith('crew_1', {}))
+    await act(async () => {
+      button?.click()
+    })
+
+    await waitFor(() => expect(api.startRun).toHaveBeenCalledWith('crew_1', { topic: 'tidal turbines' }))
     await waitFor(() => expect($selectedRunId.get()).toBe('run_1'))
   })
 
@@ -177,7 +186,7 @@ describe('Beholders page', () => {
     expect(api.deleteCrew).not.toHaveBeenCalled()
 
     // The trash control only opens the dialog; nothing is destroyed yet.
-    const trash = screen.getByRole('button', { name: '' }) as HTMLElement
+    const trash = screen.getByRole('button', { name: 'Delete crew' }) as HTMLElement
 
     await act(async () => {
       trash.click()

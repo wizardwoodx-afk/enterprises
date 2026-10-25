@@ -1,6 +1,9 @@
 /**
- * The Beholders page: crews on the left, the selected crew (agents, tasks,
- * runs) on the right, and the live timeline under it.
+ * The Beholders page: crews on the left, the selected crew on the right.
+ *
+ * Three panes share the right-hand side — the crew's detail, the new-crew
+ * picker, and the editor. They are mutually exclusive views of one selection,
+ * so a single atom (`$panel`) drives them rather than nested modals.
  *
  * Everything here is SDK-only — `useQuery`, the design-language primitives,
  * `host.navigate`, `ctx.os`. No `@/…` imports, so this file would compile
@@ -15,22 +18,22 @@ import {
   ConfirmDialog,
   type CrewBlueprint,
   type CrewDefinition,
-  type CrewEvent,
   type CrewRun,
   type CrewSummary,
   EmptyState,
   ErrorState,
-  host,
+  Input,
   Tip,
   useMutation,
   useQuery,
   useQueryClient,
   useValue
 } from '@beyond/plugin-sdk'
-import { type ReactNode, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import {
   $panel,
+  $search,
   $selectedCrewId,
   $selectedRunId,
   anyRunning,
@@ -40,7 +43,6 @@ import {
   crewKey,
   crewsKey,
   deleteCrew,
-  describeEvent,
   fetchBlueprints,
   fetchCrew,
   fetchCrews,
@@ -51,9 +53,20 @@ import {
   runKey,
   runsKey,
   startRun,
-  statusTone
+  statusTone,
+  updateCrew
 } from './api'
+import {
+  type CrewDraft,
+  draftFromCrew,
+  draftToInput,
+  emptyDraft,
+  placeholdersOf
+} from './draft'
+import { CrewEditor } from './editor'
 import { type BeholderMessages, useBeholderI18n } from './i18n'
+import { RunInputs } from './inputs'
+import { formatDuration, Timeline } from './timeline'
 
 // ------------------------------------------------------------------ helpers
 function StatusBadge({ k, status }: { k: BeholderMessages; status: CrewRun['status'] }) {
@@ -73,12 +86,27 @@ function StatusBadge({ k, status }: { k: BeholderMessages; status: CrewRun['stat
   )
 }
 
-function Section({ children, title }: { children: ReactNode; title: string }) {
+function Section({ children, title }: { children: React.ReactNode; title: string }) {
   return (
     <section className="flex flex-col gap-2">
       <h3 className="text-[0.6875rem] font-semibold tracking-wide text-(--ui-text-tertiary) uppercase">{title}</h3>
       {children}
     </section>
+  )
+}
+
+/** Row-shaped placeholder, so the list does not jump when data lands. */
+function ListSkeleton() {
+  return (
+    <div aria-hidden className="flex flex-col gap-1">
+      {[0, 1, 2].map(row => (
+        <div className="flex flex-col gap-1.5 rounded-[3px] px-2 py-1.5" key={row}>
+          <div className="h-3 w-2/3 animate-pulse rounded-[2px] bg-(--ui-bg-quaternary)" />
+          <div className="h-2.5 w-full animate-pulse rounded-[2px] bg-(--ui-bg-quaternary)" />
+          <div className="h-2 w-1/2 animate-pulse rounded-[2px] bg-(--ui-bg-quaternary)" />
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -88,9 +116,14 @@ function CrewRow({ crew, selected }: { crew: CrewSummary; selected: boolean }) {
     <button
       className={cn(
         'flex w-full flex-col gap-1 rounded-[3px] px-2 py-1.5 text-left transition-colors',
-        selected ? 'bg-(--chrome-action-hover) text-foreground' : 'text-(--ui-text-secondary) hover:bg-(--chrome-action-hover)'
+        selected
+          ? 'bg-(--chrome-action-hover) text-foreground'
+          : 'text-(--ui-text-secondary) hover:bg-(--chrome-action-hover)'
       )}
-      onClick={() => $selectedCrewId.set(crew.id)}
+      onClick={() => {
+        $selectedCrewId.set(crew.id)
+        $panel.set('detail')
+      }}
       type="button"
     >
       <span className="flex items-center gap-1.5">
@@ -109,7 +142,7 @@ function CrewRow({ crew, selected }: { crew: CrewSummary; selected: boolean }) {
   )
 }
 
-// --------------------------------------------------------------- new crew form
+// --------------------------------------------------------------- blueprints
 function BlueprintCard({
   blueprint,
   busy,
@@ -133,7 +166,7 @@ function BlueprintCard({
       <p className="text-[0.625rem] text-(--ui-text-tertiary)">
         {blueprint.agents.map(agent => agent.role).join(' · ')}
       </p>
-      <div>
+      <div className="flex items-center gap-1.5">
         <Button disabled={busy} onClick={() => onUse(blueprint)} size="xs" variant="secondary">
           <Codicon name="add" size="0.7rem" />
           {k.fromBlueprint}
@@ -143,7 +176,7 @@ function BlueprintCard({
   )
 }
 
-function NewCrewPanel() {
+function NewCrewPanel({ onBlank }: { onBlank: () => void }) {
   const k = useBeholderI18n()
   const queryClient = useQueryClient()
 
@@ -167,24 +200,30 @@ function NewCrewPanel() {
       queryClient.setQueryData(crewKey(crew.id), crew)
       $selectedCrewId.set(crew.id)
       $panel.set('detail')
-      host.notify({ message: `${crew.name} created` })
     }
   })
 
-  if (isLoading) {
-    return <p className="text-xs text-(--ui-text-tertiary)">{k.loading}</p>
-  }
-
-  if (blueprintsError) {
-    return <ErrorState description={(blueprintsError as Error).message} title={k.notReady} />
-  }
-
   return (
     <div className="flex flex-col gap-2">
+      <h2 className="text-xs font-semibold">{k.blueprints}</h2>
+
       {create.error && <ErrorState description={(create.error as Error).message} title={k.newCrew} />}
+      {isLoading && <ListSkeleton />}
+      {blueprintsError && <ErrorState description={(blueprintsError as Error).message} title={k.notReady} />}
+
       {(blueprints ?? []).map(blueprint => (
         <BlueprintCard blueprint={blueprint} busy={create.isPending} key={blueprint.id} onUse={create.mutate} />
       ))}
+
+      <div className="mt-1 flex flex-col gap-1 border-t border-(--ui-stroke-secondary) pt-2">
+        <p className="text-[0.625rem] text-(--ui-text-tertiary)">{k.orFromScratch}</p>
+        <div>
+          <Button onClick={onBlank} size="xs" variant="outline">
+            <Codicon name="edit" size="0.7rem" />
+            {k.blankCrew}
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -214,7 +253,9 @@ function AgentList({ crew, k }: { crew: CrewDefinition; k: BeholderMessages }) {
                 )}
               </span>
               {agent.goal && <span className="text-[0.6875rem] text-(--ui-text-secondary)">{agent.goal}</span>}
-              {agent.backstory && <span className="text-[0.625rem] text-(--ui-text-tertiary)">{agent.backstory}</span>}
+              {agent.backstory && (
+                <span className="text-[0.625rem] text-(--ui-text-tertiary)">{agent.backstory}</span>
+              )}
             </li>
           )
         })}
@@ -249,30 +290,7 @@ function TaskList({ crew, k }: { crew: CrewDefinition; k: BeholderMessages }) {
   )
 }
 
-function Timeline({ events, k }: { events: CrewEvent[]; k: BeholderMessages }) {
-  if (!events.length) {
-    return <p className="text-[0.6875rem] text-(--ui-text-tertiary)">{k.noEvents}</p>
-  }
-
-  return (
-    <ol className="beholders-timeline flex max-h-64 flex-col gap-0.5 overflow-y-auto">
-      {events.map(event => (
-        <li
-          className={cn(
-            'grid grid-cols-[3.5rem_1fr] items-start gap-2 rounded-[3px] px-1 py-0.5 text-[0.6875rem]',
-            event.type.startsWith('crew.task') ? 'text-(--ui-text-secondary)' : 'font-medium'
-          )}
-          key={event.seq}
-        >
-          <span className="text-[0.625rem] text-(--ui-text-tertiary) tabular-nums">{event.at.slice(11, 19)}</span>
-          <span className="truncate">{describeEvent(event)}</span>
-        </li>
-      ))}
-    </ol>
-  )
-}
-
-function RunDetail({ runId, k }: { runId: string; k: BeholderMessages }) {
+function RunDetail({ k, runId }: { k: BeholderMessages; runId: string }) {
   const { data: run } = useQuery({
     queryFn: () => fetchRunWithNotify(runId),
     queryKey: runKey(runId),
@@ -283,17 +301,32 @@ function RunDetail({ runId, k }: { runId: string; k: BeholderMessages }) {
     return <p className="text-[0.6875rem] text-(--ui-text-tertiary)">{k.loading}</p>
   }
 
+  const live = !['cancelled', 'failed', 'succeeded'].includes(run.status)
+
+  const elapsed =
+    run.finished_at && run.started_at
+      ? Date.parse(run.finished_at) - Date.parse(run.started_at)
+      : undefined
+
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <StatusBadge k={k} status={run.status} />
-        <span className="text-[0.6875rem] text-(--ui-text-tertiary)">{run.id}</span>
-        {run.status === 'running' || run.status === 'queued' ? (
+        {elapsed !== undefined && elapsed > 0 && (
+          <span className="text-[0.625rem] text-(--ui-text-tertiary) tabular-nums">
+            {formatDuration(elapsed)}
+          </span>
+        )}
+        <span className="truncate text-[0.625rem] text-(--ui-text-tertiary)">{run.id}</span>
+        {live ? (
           <Button onClick={() => void cancelRun(run.id)} size="xs" variant="text">
             {k.cancelRun}
           </Button>
         ) : null}
       </div>
+
+      <Timeline events={run.events ?? []} k={k} live={live} />
+
       {run.result && (
         <div className="flex flex-col gap-1">
           <span className="text-[0.6875rem] font-semibold text-(--ui-text-tertiary) uppercase">{k.result}</span>
@@ -303,7 +336,6 @@ function RunDetail({ runId, k }: { runId: string; k: BeholderMessages }) {
         </div>
       )}
       {run.error && <ErrorState description={run.error} title={k.statusFailed} />}
-      <Timeline events={run.events ?? []} k={k} />
     </div>
   )
 }
@@ -318,30 +350,41 @@ function RunsPanel({ crew, k }: { crew: CrewDefinition; k: BeholderMessages }) {
   })
 
   const run = useMutation({
-    mutationFn: () => startRun(crew.id, {}),
+    mutationFn: (values: Record<string, string>) => startRun(crew.id, values),
     onSuccess: summary => {
       $selectedRunId.set(summary.id)
       invalidateAll()
     }
   })
 
-  // `$selectedRunId` is app-wide, so a run picked in ANOTHER crew must not
-  // open here: fall back to this crew's newest run instead of fetching an id
-  // this crew cannot see.
+  // `$selectedRunId` is app-wide, so a run picked in ANOTHER crew must not open
+  // here: fall back to this crew's newest run.
   const selectedBelongsToCrew = runs?.some(summary => summary.id === selectedRunId) ?? false
   const activeRunId = selectedBelongsToCrew ? selectedRunId : runs?.[0]?.id
+  const inputs = placeholdersOf(crew.tasks)
 
   return (
     <Section title={k.runs}>
-      <div className="flex items-center gap-2">
-        <Button disabled={run.isPending} onClick={() => run.mutate()} size="xs" variant="default">
-          <Codicon name="play" size="0.7rem" />
-          {k.runCrew}
-        </Button>
-        {runs?.length ? <span className="text-[0.625rem] text-(--ui-text-tertiary)">{k.runCount(runs.length)}</span> : null}
-      </div>
-
       {run.error && <ErrorState description={(run.error as Error).message} title={k.runCrew} />}
+
+      <RunInputs
+        inputs={inputs}
+        k={k}
+        onRun={values => run.mutate(values)}
+        running={run.isPending}
+      />
+
+      {inputs.length === 0 && (
+        <div className="flex items-center gap-2">
+          <Button disabled={run.isPending} onClick={() => run.mutate({})} size="xs" variant="default">
+            <Codicon name="play" size="0.7rem" />
+            {k.runCrew}
+          </Button>
+          {runs?.length ? (
+            <span className="text-[0.625rem] text-(--ui-text-tertiary)">{k.runCount(runs.length)}</span>
+          ) : null}
+        </div>
+      )}
 
       {runs?.length ? (
         <div className="flex flex-wrap gap-1">
@@ -369,7 +412,7 @@ function RunsPanel({ crew, k }: { crew: CrewDefinition; k: BeholderMessages }) {
   )
 }
 
-function CrewDetail({ crewId }: { crewId: string }) {
+function CrewDetail({ crewId, onEdit }: { crewId: string; onEdit: (draft: CrewDraft) => void }) {
   const k = useBeholderI18n()
   const queryClient = useQueryClient()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -403,16 +446,29 @@ function CrewDetail({ crewId }: { crewId: string }) {
       <header className="flex flex-col gap-1">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-semibold">{crew.name}</h2>
-          <Tip label={k.deleteCrew}>
-            <Button
-              disabled={remove.isPending}
-              onClick={() => setConfirmingDelete(true)}
-              size="icon-xs"
-              variant="ghost"
-            >
-              <Codicon name="trash" size="0.75rem" />
-            </Button>
-          </Tip>
+          <div className="flex items-center gap-0.5">
+            <Tip label={k.editCrew}>
+              <Button
+                aria-label={k.editCrew}
+                onClick={() => onEdit(draftFromCrew(crew))}
+                size="icon-xs"
+                variant="ghost"
+              >
+                <Codicon name="edit" size="0.75rem" />
+              </Button>
+            </Tip>
+            <Tip label={k.deleteCrew}>
+              <Button
+                aria-label={k.deleteCrew}
+                disabled={remove.isPending}
+                onClick={() => setConfirmingDelete(true)}
+                size="icon-xs"
+                variant="ghost"
+              >
+                <Codicon name="trash" size="0.75rem" />
+              </Button>
+            </Tip>
+          </div>
           <ConfirmDialog
             confirmLabel={k.deleteCrew}
             description={k.deleteConfirm}
@@ -438,19 +494,66 @@ function CrewDetail({ crewId }: { crewId: string }) {
   )
 }
 
+/** Editor host: saves through the same mutations the picker uses. */
+function EditorPanel({ crewId, draft }: { crewId?: string; draft: CrewDraft }) {
+  const k = useBeholderI18n()
+  const queryClient = useQueryClient()
+
+  const save = useMutation({
+    mutationFn: (next: CrewDraft) =>
+      crewId ? updateCrew(crewId, draftToInput(next)) : createCrew(draftToInput(next)),
+    onSuccess: crew => {
+      queryClient.setQueryData(crewKey(crew.id), crew)
+      $selectedCrewId.set(crew.id)
+      $panel.set('detail')
+    }
+  })
+
+  return (
+    <CrewEditor
+      draft={draft}
+      error={save.error ? (save.error as Error).message : undefined}
+      k={k}
+      onCancel={() => $panel.set(crewId ? 'detail' : 'new')}
+      onSave={next => save.mutate(next)}
+      saving={save.isPending}
+      title={crewId ? k.editCrew : k.createCrew}
+    />
+  )
+}
+
 // ------------------------------------------------------------------ the page
 export function BeholderPage() {
   const k = useBeholderI18n()
   const selectedCrewId = useValue($selectedCrewId)
   const panel = useValue($panel)
+  const search = useValue($search)
+  const [draft, setDraft] = useState<CrewDraft>(emptyDraft)
 
   const { data: crews, error, isLoading } = useQuery({
     queryFn: fetchCrews,
     queryKey: crewsKey(),
-    // Nothing changes a crew list except this window; a slow poll keeps a
-    // second window (or the CLI) from going stale without a socket.
+    // Nothing changes a crew list except this window; a slow poll keeps a second
+    // window (or the CLI) from going stale without a socket.
     refetchInterval: pollInterval(false)
   })
+
+  const visible = useMemo(() => {
+    const needle = search.trim().toLowerCase()
+
+    if (!needle) {
+      return crews ?? []
+    }
+
+    return (crews ?? []).filter(crew =>
+      [crew.name, crew.description, ...crew.roles].some(value => value.toLowerCase().includes(needle))
+    )
+  }, [crews, search])
+
+  const startBlank = () => {
+    setDraft(emptyDraft())
+    $panel.set('create')
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -473,25 +576,46 @@ export function BeholderPage() {
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-[16rem_1fr]">
-        <aside className="flex min-h-0 flex-col gap-1 overflow-y-auto border-r border-(--ui-stroke-secondary) p-2">
-          {isLoading && <p className="px-1 text-[0.6875rem] text-(--ui-text-tertiary)">{k.loading}</p>}
-          {error && <ErrorState description={(error as Error).message} title={k.notReady} />}
-          {crews?.map(crew => (
-            <CrewRow crew={crew} key={crew.id} selected={crew.id === selectedCrewId} />
-          ))}
-          {crews?.length === 0 && !isLoading && (
-            <EmptyState description={k.emptyDescription} title={k.emptyTitle} />
-          )}
+        <aside className="flex min-h-0 flex-col gap-1 border-r border-(--ui-stroke-secondary) p-2">
+          <Input
+            aria-label={k.searchCrews}
+            className="mb-1"
+            onChange={event => $search.set(event.target.value)}
+            placeholder={k.searchCrews}
+            value={search}
+          />
+          <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
+            {isLoading && <ListSkeleton />}
+            {error && <ErrorState description={(error as Error).message} title={k.notReady} />}
+            {visible.map(crew => (
+              <CrewRow crew={crew} key={crew.id} selected={crew.id === selectedCrewId && panel === 'detail'} />
+            ))}
+            {!isLoading && !error && crews?.length === 0 && (
+              <EmptyState description={k.emptyDescription} title={k.emptyTitle} />
+            )}
+            {!isLoading && crews?.length ? (
+              visible.length === 0 ? (
+                <EmptyState description={k.noMatchesHint(search)} title={k.noMatches} />
+              ) : null
+            ) : null}
+          </div>
         </aside>
 
         <main className="min-h-0 overflow-y-auto p-4">
-          {panel === 'new' ? (
-            <div className="flex flex-col gap-2">
-              <h2 className="text-xs font-semibold">{k.blueprints}</h2>
-              <NewCrewPanel />
-            </div>
+          {panel === 'edit' && selectedCrewId ? (
+            <EditorPanel crewId={selectedCrewId} draft={draft} />
+          ) : panel === 'create' ? (
+            <EditorPanel draft={draft} />
+          ) : panel === 'new' ? (
+            <NewCrewPanel onBlank={startBlank} />
           ) : selectedCrewId ? (
-            <CrewDetail crewId={selectedCrewId} />
+            <CrewDetail
+              crewId={selectedCrewId}
+              onEdit={next => {
+                setDraft(next)
+                $panel.set('edit')
+              }}
+            />
           ) : (
             <EmptyState description={k.noCrewSelected} title={k.title} />
           )}

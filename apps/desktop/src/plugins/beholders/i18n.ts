@@ -14,6 +14,7 @@ import { useMemo } from 'react'
 type BeholderMessages = {
   nav: string
   open: string
+  orFromScratch: string
   newCrew: string
   runCrew: string
   cancelRun: string
@@ -27,6 +28,7 @@ type BeholderMessages = {
   crews: string
   runs: string
   blueprints: string
+  blankCrew: string
   fromBlueprint: string
   deleteCrew: string
   deleteConfirm: string
@@ -50,6 +52,52 @@ type BeholderMessages = {
   statusCancelled: string
   runCount: (count: number) => string
   runningCount: (count: number) => string
+  // search + list
+  searchCrews: string
+  noMatches: string
+  noMatchesHint: (query: string) => string
+  // editor
+  createCrew: string
+  editCrew: string
+  saveCrew: string
+  saving: string
+  cancel: string
+  crewName: string
+  crewNameHint: string
+  crewDescription: string
+  crewDescriptionHint: string
+  addAgent: string
+  addTask: string
+  removeAgent: string
+  removeTask: string
+  keepOneAgent: string
+  agentRole: string
+  agentRoleHint: string
+  agentGoal: string
+  agentGoalHint: string
+  agentBackstory: string
+  agentBackstoryHint: string
+  allowDelegation: string
+  taskName: string
+  taskNameHint: string
+  taskAgent: string
+  anyAgent: string
+  taskDescription: string
+  taskDescriptionHint: string
+  taskExpectedOutput: string
+  taskExpectedOutputHint: string
+  taskContext: string
+  placeholdersHint: string
+  inputsDetected: string
+  unknownAgent: (role: string) => string
+  firstAgent: string
+  managerHint: string
+  fixIssues: (count: number) => string
+  // run form
+  inputPlaceholder: (name: string) => string
+  fillInputs: string
+  // run detail
+  elapsed: string
   notify: { succeeded: (crew: string) => string; failed: (crew: string) => string; cancelled: (crew: string) => string }
   event: {
     runStarted: string
@@ -65,6 +113,7 @@ type BeholderMessages = {
 
 const EN: BeholderMessages = {
   agents: 'Agents',
+  blankCrew: 'Start blank',
   blueprints: 'Start from a blueprint',
   cancelRun: 'Stop',
   crews: 'Crews',
@@ -101,10 +150,53 @@ const EN: BeholderMessages = {
     succeeded: (crew: string) => `${crew} run finished`
   },
   open: 'Open Beholders',
+  orFromScratch: 'Or start from scratch',
   process: 'Process',
   result: 'Result',
   runCount: (count: number) => `${count} runs`,
   runCrew: 'Run crew',
+  searchCrews: 'Search crews',
+  noMatches: 'No crews match',
+  noMatchesHint: (query: string) => `Nothing named "${query}".`,
+  createCrew: 'New crew',
+  editCrew: 'Edit crew',
+  saveCrew: 'Save crew',
+  saving: 'Saving…',
+  cancel: 'Cancel',
+  crewName: 'Name',
+  crewNameHint: 'Research Desk',
+  crewDescription: 'Description',
+  crewDescriptionHint: 'What this team is for',
+  addAgent: 'Add agent',
+  addTask: 'Add task',
+  removeAgent: 'Remove agent',
+  removeTask: 'Remove task',
+  keepOneAgent: 'A crew needs at least one agent.',
+  agentRole: 'Role',
+  agentRoleHint: 'Researcher',
+  agentGoal: 'Goal',
+  agentGoalHint: 'What this role is trying to achieve',
+  agentBackstory: 'Backstory',
+  agentBackstoryHint: 'How this agent thinks and works',
+  allowDelegation: 'May hand work to other agents',
+  taskName: 'Task',
+  taskNameHint: 'gather',
+  taskAgent: 'Assigned to',
+  anyAgent: 'Let the crew decide',
+  taskDescription: 'Instruction',
+  taskDescriptionHint: 'Collect evidence about {topic}…',
+  taskExpectedOutput: 'Expected output',
+  taskExpectedOutputHint: 'A cited evidence list',
+  taskContext: 'Uses output from',
+  placeholdersHint: 'Wrap a variable in braces — {topic} — to ask for it at run time.',
+  inputsDetected: 'This crew asks for',
+  unknownAgent: (role: string) => `"${role}" is not an agent of this crew.`,
+  firstAgent: 'The first agent leads',
+  managerHint: 'The manager delegates; it does not work the queue itself.',
+  fixIssues: (count: number) => `${count} ${count === 1 ? 'thing needs' : 'things need'} fixing before this can be saved.`,
+  inputPlaceholder: (name: string) => `Value for ${name}`,
+  fillInputs: 'Fill every value to run.',
+  elapsed: 'elapsed',
   runningCount: (count: number) => `${count} running`,
   runs: 'Runs',
   sequential: 'Sequential — one task at a time',
@@ -132,13 +224,32 @@ export function useBeholderI18n(): BeholderMessages {
 
   return useMemo(
     () => ({
+      addAgent: t('addAgent'),
+      addTask: t('addTask'),
+      agentBackstory: t('agentBackstory'),
+      agentBackstoryHint: t('agentBackstoryHint'),
+      agentGoal: t('agentGoal'),
+      agentGoalHint: t('agentGoalHint'),
+      agentRole: t('agentRole'),
+      agentRoleHint: t('agentRoleHint'),
       agents: t('agents'),
+      allowDelegation: t('allowDelegation'),
+      anyAgent: t('anyAgent'),
+      blankCrew: t('blankCrew'),
       blueprints: t('blueprints'),
+      cancel: t('cancel'),
       cancelRun: t('cancelRun'),
+      createCrew: t('createCrew'),
+      crewDescription: t('crewDescription'),
+      crewDescriptionHint: t('crewDescriptionHint'),
+      crewName: t('crewName'),
+      crewNameHint: t('crewNameHint'),
       crews: t('crews'),
       deleteConfirm: t('deleteConfirm'),
       deleteCrew: t('deleteCrew'),
       deleting: t('deleting'),
+      editCrew: t('editCrew'),
+      elapsed: t('elapsed'),
       emptyDescription: t('emptyDescription'),
       emptyTitle: t('emptyTitle'),
       event: {
@@ -151,16 +262,25 @@ export function useBeholderI18n(): BeholderMessages {
         taskFailed: (task: string) => t('event.taskFailed', task),
         taskStarted: (task: string) => t('event.taskStarted', task)
       },
+      fillInputs: t('fillInputs'),
+      firstAgent: t('firstAgent'),
+      fixIssues: (count: number) => t('fixIssues', count),
       fromBlueprint: t('fromBlueprint'),
       hierarchical: t('hierarchical'),
+      inputPlaceholder: (name: string) => t('inputPlaceholder', name),
       inputs: t('inputs'),
+      inputsDetected: t('inputsDetected'),
       inputsHint: t('inputsHint'),
+      keepOneAgent: t('keepOneAgent'),
       loading: t('loading'),
       manager: t('manager'),
+      managerHint: t('managerHint'),
       nav: t('nav'),
       newCrew: t('newCrew'),
       noCrewSelected: t('noCrewSelected'),
       noEvents: t('noEvents'),
+      noMatches: t('noMatches'),
+      noMatchesHint: (query: string) => t('noMatchesHint', query),
       noRuns: t('noRuns'),
       notReady: t('notReady'),
       notify: {
@@ -169,12 +289,19 @@ export function useBeholderI18n(): BeholderMessages {
         succeeded: (crew: string) => t('notify.succeeded', crew)
       },
       open: t('open'),
+      orFromScratch: t('orFromScratch'),
+      placeholdersHint: t('placeholdersHint'),
       process: t('process'),
+      removeAgent: t('removeAgent'),
+      removeTask: t('removeTask'),
       result: t('result'),
       runCount: (count: number) => t('runCount', count),
       runCrew: t('runCrew'),
       runningCount: (count: number) => t('runningCount', count),
       runs: t('runs'),
+      saveCrew: t('saveCrew'),
+      saving: t('saving'),
+      searchCrews: t('searchCrews'),
       sequential: t('sequential'),
       statusCancelled: t('statusCancelled'),
       statusFailed: t('statusFailed'),
@@ -182,9 +309,18 @@ export function useBeholderI18n(): BeholderMessages {
       statusRunning: t('statusRunning'),
       statusSucceeded: t('statusSucceeded'),
       subtitle: t('subtitle'),
+      taskAgent: t('taskAgent'),
+      taskContext: t('taskContext'),
+      taskDescription: t('taskDescription'),
+      taskDescriptionHint: t('taskDescriptionHint'),
+      taskExpectedOutput: t('taskExpectedOutput'),
+      taskExpectedOutputHint: t('taskExpectedOutputHint'),
+      taskName: t('taskName'),
+      taskNameHint: t('taskNameHint'),
       tasks: t('tasks'),
       timeline: t('timeline'),
-      title: t('title')
+      title: t('title'),
+      unknownAgent: (role: string) => t('unknownAgent', role),
     }),
     [t]
   )
