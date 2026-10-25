@@ -50,8 +50,8 @@ because "add ERPNext" has two honest answers and only one of them is legal.
 source into `packages/erpnext`, mount it as an ASGI app, ship one binary.
 
 - ✗ **Licence**: Beyond is MIT. Linking or combining GPL-3.0-only code into it
-  re-licenses the whole product. Unlike CrewAI (MIT, which is why Beholders
-  could be vendored), ERPNext cannot be copied into this tree.
+  re-licenses the whole product. Unlike the MIT-licensed engine behind Beholders
+  (which is why that one could be vendored), ERPNext cannot be copied in.
 - ✗ **Impossible to run**: Frappe is not a library. It needs MariaDB, Redis,
   a site database, its own bench layout and a build step. There is no "mount
   Frappe as an ASGI app" — `bench serve` is the app.
@@ -156,3 +156,75 @@ through `ctx.rest`. One transport, one cache, no core edits.
 
 Filled in as the work landed; see `docs/SELFFINT.md` for the operator-facing
 guide (connecting a site, generating API keys, what each report means).
+
+### 3.1 What was built
+
+| Path | What it is |
+|---|---|
+| `packages/selffint/src/selffint/client.py` | Frappe REST client on `urllib`: token auth, explicit paging, single-document hydration for child tables, status → exception taxonomy |
+| `…/store.py` | SQLite mirror (documents, sync state, settings) with `0600` permissions |
+| `…/sync.py` | Incremental sync on `modified`, per-doctype isolation, bounded tax-table hydration |
+| `…/reports.py` | Ageing by days past due, GST by rate with `exempt`/`unallocated` split, payroll cost |
+| `…/recon.py` | GSTR-2B vs purchase register: matched, tax mismatch, missing either side, duplicate, probable |
+| `…/demo.py` | A fixture company (2 customers, 2 suppliers, sales and purchase invoices, salary slips, a 2B file) |
+| `…/api.py` | `dispatch(method, path, body) -> (status, payload)`; 15 paths |
+| `…/asgi.py` | Dependency-free ASGI callable, 4 MB body cap, JSON errors |
+| `…/server.py` | `selffint serve` — stdlib HTTP adapter, loopback by default |
+| `…/cli.py` | `status / demo / connect / sync / report / invoice / serve` |
+| `…/tests/` | 7 modules + fixtures, **118 tests**, including a fake Frappe transport that reproduces the two real-world traps |
+| `apps/desktop/src/plugins/self-fint/` | The pane: `plugin.tsx`, `page.tsx`, `api.ts`, `i18n.ts`, plus `api.test.ts` (17 cases) |
+| `apps/desktop/src/contrib/self-fint-plugin.test.tsx` | Registration lifecycle (off by default, contributions withdrawn on disable) |
+
+### 3.2 Decisions taken while building (and why)
+
+1. **The tax table is hydrated from the document endpoint.** A list read never
+   returns `Sales Invoice.taxes`. A GST report built from list rows would show
+   every invoice as exempt. `sync.py` hydrates up to `hydrate_limit` documents
+   per sync (200 by default) and reports the remainder as `unallocated` — bounded work, honest
+   output.
+2. **Ageing buckets are computed from `due_date`.** Every test expectation was
+   derived from the demo's own dates rather than guessed; the first
+   implementation raised `StopIteration` on a not-yet-due invoice because the
+   "current" bucket was written `(0, 0)` closed at both ends. It is now
+   `(-inf, 0]`.
+3. **An empty filter list is omitted, not sent.** `filters=[]` is not the same
+   request as no `filters` on some Frappe versions; the full sync path needed
+   the parameter gone. The test was written first and the *code* was changed to
+   match — the request is what the real site sees.
+4. **`/sync` answers 200 with per-doctype results even when every doctype
+   fails.** A site that goes down mid-sync is information the pane has to
+   render; a 502 with no detail is not. Errors are per doctype, with the Frappe
+   message preserved.
+5. **The demo company is a state, not a fallback.** `mode: "demo"` travels on
+   every payload, the page badges it, and the CLI prints it. There is no path
+   where fixture numbers can be mistaken for a customer's books.
+6. **The write path is one draft invoice, created on the site first.** If the
+   site rejects it, nothing is mirrored; a failed write cannot leave a ghost.
+7. **`unallocated` is tax, not value.** It accumulates the tax an invoice
+   charges when its rate/head could not be read, plus any head that is not
+   CGST/SGST/IGST/CESS. It is money the report refuses to invent a rate for.
+
+### 3.3 Gates (§2.4), run 25 Oct 2026
+
+| # | Gate | Result |
+|---|---|---|
+| 1 | `python -m pytest packages/selffint/tests -q` | **118 passed** in 2.9 s (Python 3.11.2, pytest 8, no other packages) |
+| 2 | `npx eslint src/plugins/self-fint src/contrib/self-fint-plugin.test.tsx` | clean |
+| 3 | `tsc -p apps/desktop/tsconfig.json --noEmit` (8 GB heap) | 0 errors |
+| 4 | `npx vitest run src/plugins/self-fint src/contrib/self-fint-plugin.test.tsx` | **23 passed** (17 data-layer, 6 registration) |
+| 5 | `npx vite build` | clean, 13.7 s |
+| 6 | `verify.yml` ▸ `debrand` (grep for the two upstream product names) + an explicit ERPNext check | clean. One pre-existing write-up line in this plan named the vendored engine's upstream and was reworded; the CI job covers the desktop upstream and the engine, not ERPNext. "Frappe"/"ERPNext" remain only in `packages/selffint/**`, `docs/SELFFINT*.md`, `THIRD_PARTY_LICENSES.md` §2a, the root README/CHANGELOG and the plugin's own metadata — attribution and the integration, never Beyond branding |
+
+### 3.4 Not done, and why
+
+- **No live-site test.** There is no ERPNext instance in this environment and
+  standing one up needs 20 GB and 11 containers. The client is instead tested
+  against a `Transport` implementation that replays the exact request/response
+  shapes recorded in §1.2, including the two traps. This is a real gap: the
+  first connection to a customer's site should be treated as a smoke test.
+- **No GSTR-2B import UI.** `POST /reconcile/2b` accepts rows already parsed
+  from the portal's JSON; parsing the portal export is deliberately left to
+  whoever has the file, because the format is versioned by GSTN and changes.
+- **No write-back beyond drafts**, by design (see non-goals).
+- **`DUPLICATE` detection is per (GSTIN, invoice number)** — it catches a
+  supplier filing twice, not a genuine second invoice with a reused number.

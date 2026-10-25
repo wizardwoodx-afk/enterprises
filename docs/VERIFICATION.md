@@ -17,6 +17,9 @@ npm 10.9.8, after the Beyond rebrand. Re-run the commands to reproduce.
 | Beholders service (Python) | `python -m pytest tests` in `packages/beholders` | ✅ 47 passed |
 | Beholders engine import | `python -c "from beholders import Agent, Task, Crew, Process, Flow"` | ✅ imports; telemetry off |
 | Beholders renderer | `npx vitest run src/plugins/beholders src/contrib/beholders-plugin.test.tsx` | ✅ 62 passed (5 files) |
+| SelfFint service (Python) | `python -m pytest tests` in `packages/selffint` | ✅ 118 passed |
+| SelfFint renderer | `npx vitest run src/plugins/self-fint src/contrib/self-fint-plugin.test.tsx` | ✅ 23 passed (2 files) |
+| SelfFint lint | `npx eslint src/plugins/self-fint src/contrib/self-fint-plugin.test.tsx` | ✅ clean |
 | Plugin surface (scoped) | `npx vitest run src/plugins src/sdk src/contrib` | ⚠️ 1,217 passed · 1 failed of 1,218 (pre-existing) |
 
 The renderer — the entire UI across ~4,300 files — type-checks and builds clean

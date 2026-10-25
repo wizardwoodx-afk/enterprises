@@ -6,6 +6,33 @@ project uses [semantic versioning][semver].
 [kac]: https://keepachangelog.com/en/1.1.0/
 [semver]: https://semver.org/spec/v2.0.0.html
 
+## [Unreleased]
+
+### Added
+
+- **SelfFint**, a finance surface that reads a company's books out of a live
+  **ERPNext** site: receivables ageing by days past due, GST by rate, input
+  credit reconciled against GSTR-2B, and payroll cost — plus one write path, a
+  **draft** Sales Invoice.
+  - `packages/selffint` (MIT, **no runtime dependencies**): a token-auth Frappe
+    REST client on `urllib` with explicit paging and child-table hydration, a
+    SQLite mirror with per-doctype watermarks, the reports, the 2B reconciler,
+    a `dispatch()` behind ASGI / stdlib HTTP / CLI, and a demo company.
+  - `apps/desktop/src/plugins/self-fint`: a `/self-fint` page (Overview,
+    Invoices, Parties, Reports), a sidebar row and two palette commands. Off by
+    default; enable it in Capabilities ▸ Plugins.
+  - `docs/SELFFINT.md` (operator guide) and `docs/SELFFINT-PLAN.md` (research,
+    decision, execution record).
+- 118 Python tests, including a fake Frappe transport that reproduces the two
+  traps that break most integrations: the list endpoint never returns child
+  tables, and the default page length is 20.
+
+### Changed
+
+- `THIRD_PARTY_LICENSES.md` gains §2a: ERPNext is **interoperated with, not
+  bundled**. No Frappe code lives in this tree, which is what keeps Beyond MIT
+  while talking to a GPL-3.0 program.
+
 ## [1.0.0] — 2026-10-25
 
 The first release under the Beyond name: the desktop app, rebranded and with a

@@ -44,6 +44,13 @@ flows) and the service layer that exposes it on `/api/plugins/beholders/*`. It i
 a page-level capability, not part of the chat path; see
 [`BEHOLDERS.md`](./BEHOLDERS.md).
 
+A second Python package is **not** vendored but integrated across a process
+boundary: `packages/selffint/` — **SelfFint** — is an MIT, standard-library-only
+client that reads a company's books from a remote **ERPNext** site over HTTP and
+serves `/api/plugins/self-fint/*`. It shares no code with ERPNext and cannot:
+that program is GPL-3.0-only and is not a library. See
+[`SELFFINT.md`](./SELFFINT.md).
+
 `apps/desktop/electron/` is deliberately decomposed into focused modules rather
 than one `main.ts` — resolution, probing, health, ownership, recycling, IPC,
 windows and updater behaviour each live in their own file with their own tests
@@ -58,7 +65,7 @@ windows and updater behaviour each live in their own file with their own tests
 | `src/components/` | Shared UI (assistant-ui bindings, chat, onboarding, pane shell, primitives) |
 | `src/api/` | Typed clients for the gateway HTTP surface, incl. `canonical-protocol.ts` |
 | `src/store/` | nanostores atoms — the single source of reactive state |
-| `src/plugins/`, `src/sdk/` | Bundled plugins (kanban, radio, beyond-bots, beholders) and the public plugin SDK surface |
+| `src/plugins/`, `src/sdk/` | Bundled plugins (kanban, radio, beyond-bots, beholders, self-fint) and the public plugin SDK surface |
 | `src/themes/`, `src/i18n/` | Theme system and per-profile i18n |
 | `src/lib/` | Framework-free helpers: transport, keybinds, preview, clipboard, tour |
 

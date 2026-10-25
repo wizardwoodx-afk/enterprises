@@ -86,6 +86,7 @@ tests-js/                root JS test suites + the mock inference server used by
 tests/fixtures/          fixtures referenced by desktop tests
 tests/install/e2e-assets/ install/update smoke assets referenced by desktop tests
 packages/beholders/      the Beholders crew runtime (vendored engine + service layer)
+packages/selffint/       SelfFint — the ERPNext connector, mirror and finance reports
 scripts/                 build + release tooling the desktop build shells out to
 tools/                   Beyond-local tooling: icon generation
 ```
@@ -116,6 +117,12 @@ with sequential or hierarchical processes) — is a bundled plugin backed by
 process and manager, validated before they are saved — and run with the values
 their `{placeholders}` ask for. It ships off by default; enable it in
 Capabilities ▸ Plugins. See [docs/BEHOLDERS.md](docs/BEHOLDERS.md).
+
+**SelfFint** — receivables, GST, input credit and payroll cost read from a live
+**ERPNext** site, plus a draft-invoice door back. ERPNext is GPL-3.0, so it stays
+behind a process boundary: `packages/selffint` is MIT, standard-library-only, and
+speaks Frappe's REST API over HTTP. It ships off by default; enable it in
+Capabilities ▸ Plugins. See [docs/SELFFINT.md](docs/SELFFINT.md).
 
 Backend resolution order (non-bundled builds): explicit source-root override →
 development checkout → completed managed install → `BEYOND_DESKTOP_RUNTIME`

@@ -145,7 +145,10 @@ def _book_row(raw: dict[str, Any]) -> dict[str, Any]:
         tax = _money(
             raw.get("tax")
             or raw.get("total_tax")
+            # `total_taxes_and_charges` is ERPNext's parent field; `tax_amount`
+            # is the child-row field, and CSV uploads use it. Both mean the tax.
             or raw.get("total_taxes_and_charges")
+            or raw.get("tax_amount")
             or 0
         )
     return {

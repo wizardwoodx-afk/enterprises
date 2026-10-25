@@ -98,6 +98,41 @@ No upstream source file carries an endorsement of this redistribution.
 
 ---
 
+## 2a. Integrated, not bundled (SelfFint / ERPNext)
+
+`packages/selffint` — the **SelfFint** finance surface — talks to **ERPNext**
+over its REST API. **No ERPNext or Frappe source code is contained in this
+repository, and none is linked into any Beyond binary.** The integration is a
+network client: an ERPNext site is a separate program, installed and licensed by
+the customer, that Beyond sends authenticated HTTP requests to.
+
+This is why the file you are reading has no ERPNext section under "bundled
+software": there is nothing to redistribute.
+
+| | |
+|---|---|
+| Interoperated with | ERPNext, on Frappe Framework |
+| Upstream licence | **GPL-3.0-only** |
+| Upstream repositories | https://github.com/**frappe/erpnext**, https://github.com/**frappe/frappe** |
+| Shipping form | Not shipped. A user-supplied remote service, reached over HTTPS |
+| Beyond's side | `packages/selffint`, MIT, standard library only |
+| Interface used | The documented REST API (`/api/resource/…`, `/api/method/…`) and token authentication |
+
+Because GPL-3.0 obligations attach to distribution of the covered program and
+this repository distributes none of it, Beyond's own code stays MIT. Running an
+ERPNext site alongside Beyond does not change either licence.
+
+If a future change ever embeds ERPNext code or a Frappe module in this tree, the
+whole of Beyond would have to be relicensed to comply — the decision is recorded
+in `docs/SELFFINT-PLAN.md` §2 so it is not made by accident.
+
+Trademark note: "ERPNext" and "Frappe" are names of the upstream project and its
+company. They are used descriptively, to say what the integration talks to.
+Nothing here suggests affiliation with, sponsorship by, or endorsement from
+Frappe Technologies.
+
+---
+
 ## 3. Third-party package names that cannot be renamed
 
 Some dependencies are **published packages whose names are fixed by the npm
@@ -163,12 +198,13 @@ licenses as shipped with their packages.
 
 "Hermes", "Nous", "Nous Research" and the Nous Research logo are trademarks or
 registered trademarks of Nous Research. "CrewAI" and the CrewAI logo are
-trademarks or registered trademarks of CrewAI, Inc. "Beyond", "Beholders" and
-their marks are used by this project.
+trademarks or registered trademarks of CrewAI, Inc. "ERPNext" and "Frappe" are
+trademarks of Frappe Technologies. "Beyond", "Beholders", "SelfFint" and their
+marks are used by this project.
 
-Nothing in this repository grants any right to use the Nous Research or CrewAI
-marks, and this project is not affiliated with, sponsored by, or endorsed by
-either company.
+Nothing in this repository grants any right to use the Nous Research, CrewAI or
+Frappe marks, and this project is not affiliated with, sponsored by, or endorsed
+by any of those companies.
 
 ---
 
