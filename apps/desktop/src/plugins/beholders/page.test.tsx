@@ -166,6 +166,27 @@ describe('Beholders page', () => {
     await waitFor(() => expect($selectedRunId.get()).toBe('run_1'))
   })
 
+  it('asks before deleting a crew', async () => {
+    $selectedCrewId.set('crew_1')
+
+    const api = await import('./api')
+
+    mount(<BeholderPage />)
+
+    await screen.findByText('Research Desk')
+    expect(api.deleteCrew).not.toHaveBeenCalled()
+
+    // The trash control only opens the dialog; nothing is destroyed yet.
+    const trash = screen.getByRole('button', { name: '' }) as HTMLElement
+
+    await act(async () => {
+      trash.click()
+    })
+
+    expect(screen.getByText('Delete this crew? Its run history stays in the log.')).toBeTruthy()
+    expect(api.deleteCrew).not.toHaveBeenCalled()
+  })
+
   it('surfaces a service failure as an error instead of an empty list', async () => {
     const api = await import('./api')
 

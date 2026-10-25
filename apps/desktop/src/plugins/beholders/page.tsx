@@ -12,6 +12,7 @@ import {
   Button,
   cn,
   Codicon,
+  ConfirmDialog,
   type CrewBlueprint,
   type CrewDefinition,
   type CrewEvent,
@@ -26,7 +27,7 @@ import {
   useQueryClient,
   useValue
 } from '@beyond/plugin-sdk'
-import type { ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 
 import {
   $panel,
@@ -371,17 +372,21 @@ function RunsPanel({ crew, k }: { crew: CrewDefinition; k: BeholderMessages }) {
 function CrewDetail({ crewId }: { crewId: string }) {
   const k = useBeholderI18n()
   const queryClient = useQueryClient()
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const { data: crew, error } = useQuery({
     queryFn: () => fetchCrew(crewId),
     queryKey: crewKey(crewId)
   })
 
+  // Deleting a crew is not undoable, so it goes through the shared confirmation
+  // dialog rather than firing on the first click of a hover-revealed icon.
   const remove = useMutation({
     mutationFn: () => deleteCrew(crewId),
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: crewKey(crewId) })
       invalidateAll()
+      setConfirmingDelete(false)
     }
   })
 
@@ -399,10 +404,27 @@ function CrewDetail({ crewId }: { crewId: string }) {
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-semibold">{crew.name}</h2>
           <Tip label={k.deleteCrew}>
-            <Button disabled={remove.isPending} onClick={() => remove.mutate()} size="icon-xs" variant="ghost">
+            <Button
+              disabled={remove.isPending}
+              onClick={() => setConfirmingDelete(true)}
+              size="icon-xs"
+              variant="ghost"
+            >
               <Codicon name="trash" size="0.75rem" />
             </Button>
           </Tip>
+          <ConfirmDialog
+            confirmLabel={k.deleteCrew}
+            description={k.deleteConfirm}
+            destructive
+            onClose={() => setConfirmingDelete(false)}
+            // ConfirmDialog wants a void AsyncFn; the record it returns is not used.
+            onConfirm={async () => {
+              await remove.mutateAsync()
+            }}
+            open={confirmingDelete}
+            title={crew.name}
+          />
         </div>
         {crew.description && <p className="text-[0.6875rem] text-(--ui-text-tertiary)">{crew.description}</p>}
         <p className="text-[0.625rem] text-(--ui-text-tertiary)">
