@@ -8,14 +8,14 @@ Beyond drives an agent runtime over HTTP and WebSocket: the same sessions,
 memory, skills and configuration are shared with the command-line and messaging
 surfaces, so nothing starts from zero and nothing is duplicated.
 
-| | |
-|---|---|
-| **Stack** | Electron 44 · React 19 · Vite 8 (rolldown) · Tailwind 4 · TypeScript 6 |
-| **License** | MIT — see [LICENSE](LICENSE) |
-| **Attribution** | [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) |
-| **Branding** | [docs/BRANDING.md](docs/BRANDING.md) |
-| **Version** | 1.0.0 — [CHANGELOG.md](CHANGELOG.md) |
-| **Size** | 4,760 files · ~57 MB of source |
+|                 |                                                                        |
+| --------------- | ---------------------------------------------------------------------- |
+| **Stack**       | Electron 44 · React 19 · Vite 8 (rolldown) · Tailwind 4 · TypeScript 6 |
+| **License**     | MIT — see [LICENSE](LICENSE)                                           |
+| **Attribution** | [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)                     |
+| **Branding**    | [docs/BRANDING.md](docs/BRANDING.md)                                   |
+| **Version**     | 1.0.0 — [CHANGELOG.md](CHANGELOG.md)                                   |
+| **Size**        | 4,760 files · ~57 MB of source                                         |
 
 > Beyond is derived from an MIT-licensed upstream project. All upstream names,
 > copyright notices and fixed third-party package identities are recorded in
@@ -141,7 +141,7 @@ Requires Pillow (`python3 -m venv .venv && .venv/bin/pip install pillow`).
 - **`get-windows`** is a Windows-only native helper in the root-install graph.
   On Linux/macOS `npm ci` can fail building it; use `npm ci --ignore-scripts` if
   you only need typecheck/build/test of the renderer.
-- **Packaging** needs the Electron binary *and* an `electron-rebuild` of
+- **Packaging** needs the Electron binary _and_ an `electron-rebuild` of
   `node-pty`.
 - **`tsc -p tsconfig.json`** may exhaust Node's default heap on the renderer's
   type graph; run it with `NODE_OPTIONS=--max-old-space-size=8192`.
