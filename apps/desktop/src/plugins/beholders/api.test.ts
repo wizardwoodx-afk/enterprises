@@ -145,6 +145,10 @@ describe('cache keys and polling', () => {
     expect(anyRunning([{ status: 'succeeded' }] as never)).toBe(false)
     expect(anyRunning([{ status: 'succeeded' }, { status: 'running' }] as never)).toBe(true)
     expect(anyRunning(undefined)).toBe(false)
+
+    // React Query asks for the interval before the first fetch resolves.
+    expect(anyRunning([undefined])).toBe(false)
+    expect(anyRunning([undefined, { status: 'queued' }] as never)).toBe(true)
   })
 
   it('maps statuses to badge tones', () => {

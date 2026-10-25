@@ -199,9 +199,16 @@ export async function cancelRun(runId: string): Promise<CrewRunSummary> {
 }
 
 // ------------------------------------------------------------------- state
-/** Whether any run in `runs` is still going — drives the fast poll. */
-export function anyRunning(runs: readonly CrewRunSummary[] | undefined): boolean {
-  return Boolean(runs?.some(run => !isTerminalRun(run.status)))
+/**
+ * Whether any run in `runs` is still going — drives the fast poll.
+ *
+ * Tolerant of `undefined` entries on purpose: React Query calls
+ * `refetchInterval(query => …)` BEFORE the first fetch resolves, so the natural
+ * call sites pass `[query.state.data]` with nothing in it yet. Throwing there
+ * takes the whole page down on mount.
+ */
+export function anyRunning(runs: readonly (CrewRunSummary | undefined)[] | undefined): boolean {
+  return Boolean(runs?.some(run => run !== undefined && !isTerminalRun(run.status)))
 }
 
 /** Poll cadence for a query: fast while work is in flight, lazy otherwise. */

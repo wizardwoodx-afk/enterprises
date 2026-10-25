@@ -16,7 +16,6 @@ import {
   type CrewDefinition,
   type CrewEvent,
   type CrewRun,
-  type CrewRunSummary,
   type CrewSummary,
   EmptyState,
   ErrorState,
@@ -276,7 +275,7 @@ function RunDetail({ runId, k }: { runId: string; k: BeholderMessages }) {
   const { data: run } = useQuery({
     queryFn: () => fetchRunWithNotify(runId),
     queryKey: runKey(runId),
-    refetchInterval: query => pollInterval(anyRunning([query.state.data as CrewRunSummary]))
+    refetchInterval: query => pollInterval(anyRunning([query.state.data]))
   })
 
   if (!run) {
@@ -314,7 +313,7 @@ function RunsPanel({ crew, k }: { crew: CrewDefinition; k: BeholderMessages }) {
   const { data: runs } = useQuery({
     queryFn: () => fetchRuns(crew.id),
     queryKey: runsKey(crew.id),
-    refetchInterval: query => pollInterval(anyRunning(query.state.data as CrewRunSummary[] | undefined))
+    refetchInterval: query => pollInterval(anyRunning(query.state.data))
   })
 
   const run = useMutation({

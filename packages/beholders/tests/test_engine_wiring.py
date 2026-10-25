@@ -10,7 +10,25 @@ from __future__ import annotations
 
 import pytest
 
-pytest.importorskip("pydantic", reason="engine dependencies not installed")
+def _engine_available() -> bool:
+    """True when the engine's dependency tree is actually importable.
+
+    ``beholders`` imports lazily, so ``importorskip('beholders')`` would always
+    pass and then fail inside a test. Touching a real engine name is the only
+    honest probe.
+    """
+    try:
+        import beholders
+
+        beholders.Crew  # noqa: B018 - attribute access triggers the bootstrap
+    except Exception:  # noqa: BLE001 - any import-time failure means "not installed"
+        return False
+    return True
+
+
+pytestmark = pytest.mark.skipif(
+    not _engine_available(), reason="the engine's dependencies are not installed"
+)
 
 from beholders.service.api import BeholdersApi  # noqa: E402
 from beholders.service.models import CrewDefinition, EventType, RunStatus  # noqa: E402

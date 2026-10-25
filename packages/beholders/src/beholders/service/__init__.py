@@ -2,13 +2,15 @@
 
 Three doors onto one set of handlers:
 
-* :mod:`beholders.service.api`    — mount-relative REST (desktop plugin router)
+* :mod:`beholders.service.api`    — mount-relative REST handlers
+* :mod:`beholders.service.asgi`   — bare ASGI mount for the Beyond gateway
 * :mod:`beholders.service.server` — stdlib HTTP adapter for ``beholders serve``
-* :mod:`beholders.service.rpc`    — ``crew.*`` JSON-RPC methods on the gateway
+* :mod:`beholders.service.rpc`    — ``crew.*`` JSON-RPC methods
 """
 from __future__ import annotations
 
 from .api import BLUEPRINTS, BeholdersApi, Response
+from .asgi import asgi_app
 from .models import (
     AgentSpec,
     CrewDefinition,
@@ -39,5 +41,6 @@ __all__ = [
     "RunRegistry",
     "RunStatus",
     "TaskSpec",
+    "asgi_app",
     "default_home",
 ]

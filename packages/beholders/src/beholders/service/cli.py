@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 import sys
 from typing import Any
 
 from .api import BeholdersApi
-from .models import CrewDefinition
+from .models import RunStatus
 from .runs import RunRegistry
-from .store import CrewStore
+from .store import CrewNotFound, CrewStore
 
 
 def _print(payload: Any) -> None:
@@ -25,35 +26,38 @@ def cmd_serve(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_crews(args: argparse.Namespace) -> int:
-    api, _ = _api()
+def cmd_crews(_args: argparse.Namespace) -> int:
+    api = _api()
     status, payload = api.dispatch("GET", "/crews")
     _print(payload)
     return 0 if status < 400 else 1
 
 
 def cmd_create(args: argparse.Namespace) -> int:
-    api, _ = _api()
-    data = json.loads(args.file) if args.file.startswith("{") else json.load(open(args.file))
+    api = _api()
+    data = json.loads(args.file) if args.file.startswith("{") else json.loads(Path(args.file).read_text())
     status, payload = api.dispatch("POST", "/crews", data)
     _print(payload)
     return 0 if status < 400 else 1
 
 
 def cmd_run(args: argparse.Namespace) -> int:
-    api, runs = _api()
-    worker = RunRegistry()
-    crew = api.store.get(args.crew)
-    record = worker.start(crew, json.loads(args.inputs) if args.inputs else {})
+    api = _api()
+    try:
+        crew = api.store.get(args.crew)
+    except CrewNotFound:
+        _print({"ok": False, "error": f"unknown crew {args.crew!r}"})
+        return 1
+    record = api.runs.start(crew, json.loads(args.inputs) if args.inputs else {})
     print(f"run {record.id} ({record.crew_name}) — waiting…", file=sys.stderr)
-    worker.wait(record.id, timeout=args.timeout)
-    _print(worker.get(record.id).to_dict())
-    return 0 if worker.get(record.id).status.value == "succeeded" else 1
+    api.runs.wait(record.id, timeout=args.timeout)
+    final = api.runs.get(record.id)
+    _print(final.to_dict())
+    return 0 if final.status is RunStatus.SUCCEEDED else 1
 
 
-def _api() -> tuple[BeholdersApi, RunRegistry]:
-    runs = RunRegistry()
-    return BeholdersApi(store=CrewStore(), runs=runs), runs
+def _api() -> BeholdersApi:
+    return BeholdersApi(store=CrewStore(), runs=RunRegistry())
 
 
 def build_parser() -> argparse.ArgumentParser:

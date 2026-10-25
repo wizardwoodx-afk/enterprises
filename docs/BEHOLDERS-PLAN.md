@@ -87,6 +87,7 @@ the simpler shape was the honest one:
    `seq`-ordered so a socket can be layered on later without a wire change.
 2. **No JSON-RPC wiring into `tui_gateway`.** `CrewRpc` implements the `crew.*`
    methods and is tested, but the gateway that would serve them lives outside
-   this checkout. The desktop talks REST (`ctx.rest`) today; mounting
-   `BeholdersApi` in the gateway is the one-line step that turns on the RPC door
-   as well, and `apps/shared/src/crew-contract.ts` already lists the methods.
+   this checkout. The desktop talks REST (`ctx.rest`) today, through
+   `beholders.service.asgi` — a dependency-free ASGI callable the gateway mounts
+   at `/api/plugins/beholders`. That mount is the single integration point; the
+   `crew.*` RPC door is already written and tested behind it.

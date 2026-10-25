@@ -286,3 +286,41 @@ def test_rpc_rejects_non_object_params(store):
     rpc = CrewRpc(BeholdersApi(store=store))
     response = handle_request(rpc, {"jsonrpc": "2.0", "id": 1, "method": "crew.list", "params": [1, 2]})
     assert response["error"]["code"] == -32602
+
+
+# ----------------------------------------------------------------------- cli
+def test_cli_lists_crews(monkeypatch, tmp_path, capsys):
+    from beholders.service import cli
+
+    monkeypatch.setenv("BEHOLDERS_HOME", str(tmp_path / "home"))
+    CrewStore().create(CREW)
+
+    assert cli.main(["crews"]) == 0
+    assert "Research Desk" in capsys.readouterr().out
+
+
+def test_cli_create_from_a_file(monkeypatch, tmp_path, capsys):
+    from beholders.service import cli
+
+    monkeypatch.setenv("BEHOLDERS_HOME", str(tmp_path / "home"))
+    source = tmp_path / "crew.json"
+    source.write_text(json.dumps(CREW), encoding="utf-8")
+
+    assert cli.main(["create", str(source)]) == 0
+    assert "Research Desk" in capsys.readouterr().out
+
+
+def test_cli_run_of_an_unknown_crew_is_a_clean_failure(monkeypatch, tmp_path, capsys):
+    from beholders.service import cli
+
+    monkeypatch.setenv("BEHOLDERS_HOME", str(tmp_path / "home"))
+
+    assert cli.main(["run", "crew_missing"]) == 1
+    assert "unknown crew" in capsys.readouterr().out
+
+
+def test_cli_rejects_an_unknown_subcommand():
+    from beholders.service import cli
+
+    with pytest.raises(SystemExit):
+        cli.main(["frobnicate"])

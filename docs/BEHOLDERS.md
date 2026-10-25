@@ -87,6 +87,7 @@ seam that makes the engine usable by an application.
 | `runs.py` | `RunRegistry` — off-thread execution, cooperative cancellation, event log, history cap; `EngineExecutor` translates a definition into real engine objects |
 | `api.py` | `BeholdersApi` — mount-relative REST handlers plus the starter blueprints |
 | `rpc.py` | `CrewRpc` — the `crew.*` JSON-RPC methods, on the same handlers |
+| `asgi.py` | Bare ASGI mount for the gateway — the integration seam |
 | `server.py` | A stdlib `http.server` adapter (`beholders serve`) for development |
 | `cli.py` | `beholders crews / create / run / serve` |
 
@@ -99,8 +100,22 @@ implementations drifting apart.
 
 ### Mounting it in the gateway
 
-The desktop's REST door calls `/api/plugins/beholders/*`. Mount `BeholdersApi`
-there once; the plugin then works unchanged. For development, run it standalone:
+The desktop's REST door calls `/api/plugins/beholders/*`. `beholders.service.asgi`
+is a dependency-free ASGI callable, so the mount is two lines wherever the
+gateway's app factory is:
+
+```python
+from beholders.service import BeholdersApi, asgi_app
+
+app.mount("/api/plugins/beholders", asgi_app(BeholdersApi()))
+```
+
+Hand-rolled ASGI rather than Starlette/FastAPI on purpose: a plugin must not drag
+a second web framework — with its own pins and middleware — into the gateway's
+import graph. `packages/beholders/tests/test_asgi_mount.py` drives the mount through a fake
+ASGI host and asserts the exact requests `api.ts` sends.
+
+For development, run the same handlers standalone over stdlib HTTP:
 
 ```console
 $ pip install -e packages/beholders
@@ -195,7 +210,7 @@ Beyond is a local-first desktop product: nothing leaves the machine on its own.
 # Python: the service and its tests need only pytest + the engine's deps
 cd packages/beholders
 python -m venv .venv && .venv/bin/pip install -e '.[dev]'
-.venv/bin/python -m pytest tests          # 35 tests
+.venv/bin/python -m pytest tests          # 47 tests
 
 # Renderer
 cd apps/desktop
@@ -209,6 +224,7 @@ What each gate covers:
 | `compileall` + `from beholders import Agent, Task, Crew, Process, Flow` | the vendored rename broke an import |
 | `test_service.py` | REST/RPC/store/registry behaviour, cancellation, history cap |
 | `test_engine_wiring.py` | definition → real `Agent`/`Task`/`Crew` translation (LLM stubbed) |
+| `test_asgi_mount.py` | the gateway mount stops answering what the plugin sends |
 | `test_contract_parity.py` | Python and TypeScript drifted |
 | `api.test.ts` | the paths, verbs and bodies the client sends |
 | `plugin.test.tsx` | the plugin registers/withdraws every contribution |
