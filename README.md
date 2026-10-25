@@ -14,6 +14,7 @@ surfaces, so nothing starts from zero and nothing is duplicated.
 | **License** | MIT — see [LICENSE](LICENSE) |
 | **Attribution** | [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) |
 | **Branding** | [docs/BRANDING.md](docs/BRANDING.md) |
+| **Version** | 1.0.0 — [CHANGELOG.md](CHANGELOG.md) |
 | **Size** | 4,760 files · ~57 MB of source |
 
 > Beyond is derived from an MIT-licensed upstream project. All upstream names,
@@ -111,8 +112,10 @@ Three boundaries:
 
 **Beholders** — crew orchestration (role-playing agents working through tasks,
 with sequential or hierarchical processes) — is a bundled plugin backed by
-`packages/beholders`. It ships off by default; enable it in Capabilities ▸
-Plugins. See [docs/BEHOLDERS.md](docs/BEHOLDERS.md).
+`packages/beholders`. Crews can be built in the app — agents, tasks, context,
+process and manager, validated before they are saved — and run with the values
+their `{placeholders}` ask for. It ships off by default; enable it in
+Capabilities ▸ Plugins. See [docs/BEHOLDERS.md](docs/BEHOLDERS.md).
 
 Backend resolution order (non-bundled builds): explicit source-root override →
 development checkout → completed managed install → `BEYOND_DESKTOP_RUNTIME`

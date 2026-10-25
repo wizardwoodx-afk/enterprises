@@ -10,7 +10,7 @@ npm 10.9.8, after the Beyond rebrand. Re-run the commands to reproduce.
 | Install | `npm ci --ignore-scripts` | ✅ 1,415 packages |
 | Renderer typecheck | `npx tsc -p apps/desktop/tsconfig.json --noEmit` | ✅ 0 errors |
 | Electron typecheck | `npx tsc -p apps/desktop/tsconfig.electron.json --noEmit` | ✅ 0 errors |
-| Renderer production build | `npx vite build` (in `apps/desktop`) | ✅ built in 63 s |
+| Renderer production build | `npx vite build` (in `apps/desktop`) | ✅ built in 51.8 s (re-run after the Beholders UI) |
 | Electron-side suite | `npx vitest run --project electron` | ⚠️ 3,780 passed · 16 failed · 32 skipped (3,828) |
 | Icon generator | `python3 tools/generate-beyond-icons.py` | ✅ 86 files, deterministic |
 | Icon presence | `python3 tools/generate-beyond-icons.py --check` | ✅ all present |
