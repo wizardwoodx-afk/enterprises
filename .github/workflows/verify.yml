@@ -1,0 +1,44 @@
+name: verify
+
+# Guards the two things that can silently rot in a vendored mirror:
+# the source drifting from its pinned upstream commit, and the renderer
+# no longer compiling.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  drift:
+    name: upstream drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Compare tree with the commit pinned in upstream.json
+        run: ./tools/sync-upstream.sh --check
+
+  build:
+    name: renderer typecheck + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # --ignore-scripts: the root install graph includes get-windows, a
+      # Windows-only native helper that cannot compile on Linux. Neither the
+      # typecheck nor the renderer build needs install scripts.
+      - run: npm ci --ignore-scripts
+      - name: Typecheck renderer
+        working-directory: apps/desktop
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: npx tsc -p tsconfig.json --noEmit
+      - name: Build renderer
+        working-directory: apps/desktop
+        run: npx vite build

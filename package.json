@@ -1,0 +1,84 @@
+{
+  "name": "hermes-desktop-clone",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hermes Desktop — the native desktop app for Hermes Agent (Nous Research). Vendored source mirror of NousResearch/hermes-agent apps/desktop.",
+  "workspaces": [
+    "apps/*",
+    "tests-js"
+  ],
+  "scripts": {
+    "postinstall": "echo 'Node dependencies installed. Desktop: npm run dev --workspace apps/desktop'",
+    "install:desktop": "npm install --workspace apps/desktop",
+    "dev": "npm run dev --workspace apps/desktop",
+    "build": "npm run build --workspace apps/desktop",
+    "start": "npm run start --workspace apps/desktop",
+    "pack": "npm run pack --workspace apps/desktop",
+    "dist:mac": "npm run dist:mac --workspace apps/desktop",
+    "dist:win": "npm run dist:win --workspace apps/desktop",
+    "dist:linux": "npm run dist:linux --workspace apps/desktop",
+    "typecheck": "npm run typecheck --workspace apps/desktop",
+    "lint": "npm run lint --workspace apps/desktop",
+    "test": "npm run test --workspace apps/desktop",
+    "test:ui": "npm run test:ui --workspace apps/desktop",
+    "test:e2e": "npm run test:e2e --workspace apps/desktop",
+    "check": "npm run --ws check",
+    "fix": "npm run --ws fix",
+    "sync:upstream": "bash tools/sync-upstream.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wizardwoodx-afk/enterprises.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint": "10.12.0",
+    "eslint-plugin-perfectionist": "5.10.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-unused-imports": "4.4.1",
+    "globals": "17.7.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.64.0"
+  },
+  "overrides": {
+    "@electron/osx-sign": {
+      "isbinaryfile": "5.0.7"
+    },
+    "lodash": "4.18.1",
+    "protobufjs": "^8.7.1",
+    "brace-expansion": "5.0.12",
+    "mermaid": "11.16.1",
+    "dompurify": "3.4.17",
+    "katex": "0.18.4",
+    "ip-address": "10.7.4",
+    "nanoid@^3": "3.3.20",
+    "nanoid@^6": "6.0.0",
+    "js-yaml@^4": "4.3.2",
+    "undici@^6": "6.29.0",
+    "undici@^7": "7.30.0",
+    "postcss": "8.5.29",
+    "postcss-selector-parser": "7.1.6",
+    "tar": "7.5.22",
+    "source-map-js": "1.2.2",
+    "yaml": "2.9.1",
+    "vitest": "4.1.12",
+    "@vitest/mocker": "4.1.12"
+  },
+  "engines": {
+    "node": "^22.22.0 || ^24.11.0 || >=26.0.0"
+  },
+  "allowScripts": {
+    "unicode-animations": false,
+    "esbuild@0.28.1": true,
+    "node-pty@1.1.0": true,
+    "electron-winstaller@5.4.0": true,
+    "fsevents@2.3.2": true,
+    "fsevents@2.3.3": true,
+    "get-windows@9.3.0": true
+  },
+  "dependencies": {
+    "js-yaml": "4.3.2",
+    "semver": "7.7.4"
+  }
+}
