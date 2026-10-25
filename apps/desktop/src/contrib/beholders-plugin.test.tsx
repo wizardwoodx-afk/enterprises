@@ -7,8 +7,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { discoverBundledPlugins } from '@/contrib/plugins'
 import { $pluginDecisions, $pluginRecords, setPluginEnabled } from '@/contrib/plugins-store'
 import { registry } from '@/contrib/registry'
-
-import plugin from './plugin'
+import { BeholderPage } from '@/plugins/beholders/page'
+import plugin from '@/plugins/beholders/plugin'
 
 vi.mock('@/contrib/runtime-loader', () => ({ watchRuntimePlugins: vi.fn() }))
 
@@ -85,13 +85,19 @@ describe('bundled Beholders plugin', () => {
     expect($pluginDecisions.get().beholders).toBe(false)
   })
 
-  it('mounts the page as a component, never by calling render inline', () => {
+  it('mounts the page as a component, never by calling render inline', async () => {
     // Calling render() during registration would adopt the plugin's hooks into
-    // the host (React #310 when the plugin is later replaced). The contribution
-    // must hand back a valid element whose type is the page component.
-    const element = plugin.register ? registry.getArea('routes') : undefined
+    // the host (React #310 when the plugin is later replaced). The route must
+    // hand back an element whose type IS the page component.
+    $pluginDecisions.set({ accent: false, beholders: false, kanban: false, 'beyond-bots': false })
+    discoverBundledPlugins()
+    await setPluginEnabled('beholders', true)
 
-    expect(element).toBeDefined()
+    const route = registry.getArea('routes').find(item => item.source === 'plugin:beholders')
+    const element = route?.render?.()
+
+    expect(isValidElement(element)).toBe(true)
+    expect((element as { type: unknown }).type).toBe(BeholderPage)
   })
 })
 
@@ -107,7 +113,7 @@ describe('the plugin ships the files the docs promise', () => {
 
 describe('page component', () => {
   it('renders an element without touching hooks at registration time', async () => {
-    const { BeholderPage } = await import('./page')
+    const { BeholderPage } = await import('@/plugins/beholders/page')
     const element = <BeholderPage />
 
     expect(isValidElement(element)).toBe(true)

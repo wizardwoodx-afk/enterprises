@@ -38,13 +38,13 @@ such surface. So a real merge has three layers:
    `kickoff` are the API, not branding. Renaming them would break every example
    and the mental model. Only the *product* name moves.
 3. **The service layer is the actual merge.** A new `beholders.service` package
-   adapts the engine to Beyond's transport: it owns a run registry, streams
+   adapts the engine to Beyond's transport: it owns a run registry, records
    agent/task lifecycle events, and exposes `crew.*` methods that match the
    gateway contract shape used everywhere else in the app.
 4. **The UI is a bundled plugin**, not a core edit. Beyond's plugin system exists
    for exactly this (see `src/plugins/README.md`): `ctx.register` contributes a
-   route, a sidebar row, a palette command and a statusbar item; `ctx.rest` and
-   `ctx.socket` carry the traffic. No core files change.
+   route, a sidebar row, a palette command and a statusbar item; `ctx.rest`
+   carries the traffic. No core files change.
 5. **Attribution stays in `THIRD_PARTY_LICENSES.md`**, matching the rule already
    enforced by CI for the desktop.
 
@@ -54,7 +54,7 @@ such surface. So a real merge has three layers:
 |---|---|
 | `packages/beholders/src/beholders/` | debranded engine (vendored) |
 | `packages/beholders/src/beholders_core/` | debranded core (vendored) |
-| `packages/beholders/src/beholders/service/` | **new** — run registry, JSON-RPC methods, event stream, REST router |
+| `packages/beholders/src/beholders/service/` | **new** — crew store, run registry, event log, REST router, `crew.*` JSON-RPC, stdlib HTTP adapter |
 | `packages/beholders/pyproject.toml` | distribution metadata, `beholders` CLI entry point |
 | `packages/beholders/tests/` | service-level tests (no LLM calls) |
 | `apps/desktop/src/plugins/beholders/` | **new** — the `/beholders` pane |
@@ -71,3 +71,22 @@ such surface. So a real merge has three layers:
 - TypeScript: `tsc` clean for renderer + electron.
 - Branding audit: no upstream engine name outside the license files.
 - The existing electron suite must not regress (baseline 3,780 passed).
+
+---
+
+## What shipped, and the two things that did not
+
+Delivered as designed above. Two details differ from the sketch, both because
+the simpler shape was the honest one:
+
+1. **No `ctx.socket` event stream.** The plan had the service push run events
+   over the plugin WebSocket. It instead records them on the run and the UI polls
+   (`2 s` active, `15 s` idle) — one cache shared by the page and the statusbar
+   pill. A polling baseline was needed anyway for OAuth remotes, and cooperative
+   cancellation already requires the client to poll the record. The event log is
+   `seq`-ordered so a socket can be layered on later without a wire change.
+2. **No JSON-RPC wiring into `tui_gateway`.** `CrewRpc` implements the `crew.*`
+   methods and is tested, but the gateway that would serve them lives outside
+   this checkout. The desktop talks REST (`ctx.rest`) today; mounting
+   `BeholdersApi` in the gateway is the one-line step that turns on the RPC door
+   as well, and `apps/shared/src/crew-contract.ts` already lists the methods.

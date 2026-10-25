@@ -24,7 +24,9 @@ framework because every example, doc and mental model depends on them:
 | **Flow** | Stateful orchestration *around* crews — the engine's event-driven layer |
 | **kickoff** | Run a crew |
 
-Only the **product name** moved. `crewai` → `beholders` everywhere.
+Only the **product name** moved: every module, identifier, env var and host
+carries the Beholders name now, and the upstream name survives only in the
+license files listed at the top.
 
 ---
 
@@ -221,20 +223,23 @@ contract.
 
 ### Updating the vendored engine
 
-Re-vendor from a pinned upstream commit (recorded in
-`THIRD_PARTY_LICENSES.md` §2) into `packages/beholders/src`, then apply the
-rename in this order — compound and longest first, or the shorter rules corrupt
-the longer ones:
+Re-vendor from the pinned upstream commit recorded in
+`THIRD_PARTY_LICENSES.md` §2 into `packages/beholders/src`, then apply the
+rename in this order — **compound and longest first**, or a shorter rule
+corrupts every longer name it has already produced:
 
-```
-beholders_core   ← crewai_core
-beholders_cli    ← crewai_cli
-beholders        ← crewai
-BEHOLDERS        ← CREWAI
-Beholders        ← CrewAI
-Beholders        ← crewAI
-Beholders        ← Crewai
-```
+| New value | Replaces |
+|---|---|
+| `beholders_core` | the upstream core package |
+| `beholders_cli` | the upstream CLI package |
+| `beholders` | the upstream engine package |
+| `BEHOLDERS` | the upstream env-var prefix |
+| `Beholders` | the product name, in **all** of its casings, mixed-case included |
+
+The exact upstream literals live in the license files, not here. Mixed casing is
+the trap: a sweep that handles the all-lowercase and the canonical spelling will
+still miss the capital-A-I variant, and one that handles `Xxx` needlessly but not
+`xxxYyy` leaves header prefixes behind.
 
 Then re-apply the three non-mechanical edits: the lazy `beholders/__init__.py`,
 the telemetry kill switch, and the deleted `beholders/cli/` shim. The parity and

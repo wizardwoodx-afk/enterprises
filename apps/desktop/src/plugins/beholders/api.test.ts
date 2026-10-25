@@ -1,11 +1,6 @@
 import { type PluginOs, type PluginRestOptions, type PluginStorage } from '@beyond/plugin-sdk'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-// The Beholders data layer is a thin, typed wrapper over `ctx.rest`. What is
-// worth testing is not "did fetch run" but the contract with the Python
-// service: which paths and verbs we send, and the client-side rules that decide
-// when a crew list is refreshed and when a run notifies.
-
 import {
   __resetForTests,
   anyRunning,
@@ -85,12 +80,14 @@ describe('beholders rest contract', () => {
 
     await fetchRunWithNotify('run_missing').catch(() => undefined)
     expect(calls[0].path).toBe('/runs/run_missing')
+
   })
 })
 
 describe('run notification', () => {
   it('notifies once, and only for a run this session watched working', async () => {
     let status = 'running'
+
     const { notify } = harness(() => ({
       ok: true,
       run: { crew_id: 'crew_1', crew_name: 'Research Desk', error: '', id: 'run_1', result: 'done', status }

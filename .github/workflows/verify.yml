@@ -59,19 +59,28 @@ jobs:
       - name: Check for leftover upstream marks
         run: |
           # Allowed: THIRD_PARTY_LICENSES.md (the attribution file), LICENSE (the
-          # MIT notice texts), the lockfile (fixed registry names) and this workflow.
+          # MIT notice texts), package-lock.json (fixed registry names), the
+          # vendored model catalog (fixed model ids) and this workflow.
           #
           # Two upstreams are covered:
           #   hermes|nous  -> the desktop app this fork is based on (now Beyond)
           #   crewai       -> the agent engine vendored in packages/beholders (now Beholders)
+          #
+          # False positives excluded: "synchronous"/"asynchronous" contain "nous",
+          # the cc.noUsage i18n key contains "nous", and the vendored model price
+          # catalog contains third-party MODEL ids (NousResearch/Hermes-*, ...),
+          # which are registry identities like the npm names in the lockfile —
+          # renaming them breaks model resolution.
           set +e
           hits=$(grep -rniE "hermes|nous|crewai" \
             --exclude-dir=node_modules --exclude-dir=.git \
             --exclude-dir=dist --exclude-dir=build --exclude-dir=__pycache__ \
             --exclude-dir=.venv --exclude-dir=*.egg-info \
             --exclude=THIRD_PARTY_LICENSES.md --exclude=LICENSE \
-            --exclude=package-lock.json --exclude=verify.yml . \
-            | grep -viE "nous_?e|grammarnous|@nous-research/ui|hermes-(parser|estree)|hermespar|whermes|oyhermes")
+            --exclude=package-lock.json --exclude=verify.yml \
+            --exclude=model_prices_and_context_window.json . \
+            | grep -viE "nous_?e|grammarnous|@nous-research/ui|hermes-(parser|estree)|hermespar|whermes|oyhermes" \
+            | grep -viE "chronous|noUsage")
           if [ -n "$hits" ]; then
             echo "::error::Upstream branding found outside THIRD_PARTY_LICENSES.md"
             echo "$hits" | head -40

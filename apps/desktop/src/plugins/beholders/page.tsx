@@ -325,7 +325,11 @@ function RunsPanel({ crew, k }: { crew: CrewDefinition; k: BeholderMessages }) {
     }
   })
 
-  const activeRunId = selectedRunId || runs?.[0]?.id
+  // `$selectedRunId` is app-wide, so a run picked in ANOTHER crew must not
+  // open here: fall back to this crew's newest run instead of fetching an id
+  // this crew cannot see.
+  const selectedBelongsToCrew = runs?.some(summary => summary.id === selectedRunId) ?? false
+  const activeRunId = selectedBelongsToCrew ? selectedRunId : runs?.[0]?.id
 
   return (
     <Section title={k.runs}>
@@ -351,9 +355,7 @@ function RunsPanel({ crew, k }: { crew: CrewDefinition; k: BeholderMessages }) {
               onClick={() => $selectedRunId.set(summary.id)}
               type="button"
             >
-              <Badge size="xs" variant={statusTone(summary.status)}>
-                {summary.status}
-              </Badge>
+              <StatusBadge k={k} status={summary.status} />
               <span className="text-(--ui-text-tertiary) tabular-nums">{summary.started_at.slice(11, 19)}</span>
             </button>
           ))}

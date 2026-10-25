@@ -115,6 +115,16 @@ nowhere else. Beyond does not claim any affiliation with their publishers.
 `hermes-parser` / `hermes-estree` are unrelated to the Hermes Agent project: they
 are Meta's JavaScript parser used across the React Native / Metro toolchain.
 
+### Third-party model identifiers
+
+`packages/beholders/src/beholders/llms/litellm_catalog/model_prices_and_context_window.json`
+is a vendored snapshot of published model prices and context windows. Its keys
+are **provider model ids** (`<provider>/<publisher>/<model>`), some of which carry
+the name of the model's publisher or of a model family. They are registry
+identities in exactly the sense the npm names above are: renaming one breaks
+model resolution. The file is excluded from the branding guard for that reason
+and appears nowhere else in the tree.
+
 ---
 
 ## 4. Other bundled third-party software
