@@ -11,7 +11,7 @@ export const esNotices = {
   butterbar: {
     goTo: (index, total) => `Mostrar aviso ${index} de ${total}`,
     legal: {
-      before: 'El uso de Hermes Agent está sujeto a nuestros ',
+      before: 'El uso de Beyond Agent está sujeto a nuestros ',
       terms: 'Términos del servicio',
       between: ' y a nuestra ',
       privacy: 'Política de privacidad',
@@ -31,13 +31,13 @@ export const esNotices = {
     desktopCommands: esDesktopCommands
   },
   keepAwakeOffer: {
-    title: 'Tu equipo entró en suspensión mientras Hermes trabajaba',
+    title: 'Tu equipo entró en suspensión mientras Beyond trabajaba',
     message:
-      'Hermes puede mantener tu equipo activo mientras se ejecuta una tarea. La pantalla se sigue apagando, y con batería el equipo aún puede entrar en suspensión.',
+      'Beyond puede mantener tu equipo activo mientras se ejecuta una tarea. La pantalla se sigue apagando, y con batería el equipo aún puede entrar en suspensión.',
     action: 'Mantener activo mientras trabaja'
   },
   billingBlock: {
-    titleNous: 'Sin créditos de Nous',
+    titleBeyond: 'Sin créditos de Beyond',
     titleProvider: provider => `Sin créditos — ${provider}`,
     fallbackMessage: 'Tu cuenta se quedó sin créditos. Añade créditos para continuar.',
     openBilling: 'Abrir facturación',

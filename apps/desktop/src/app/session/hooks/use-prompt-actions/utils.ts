@@ -1,5 +1,5 @@
 import type { AppendMessage } from '@assistant-ui/react'
-import { JsonRpcGatewayError } from '@hermes/shared'
+import { JsonRpcGatewayError } from '@beyond/shared'
 
 import { translateNow, type Translations } from '@/i18n'
 import type { ChatMessage } from '@/lib/chat-messages'
@@ -505,7 +505,7 @@ export function imageFilenameFromPath(filePath: string): string {
 export async function readImageForRemoteAttach(
   filePath: string
 ): Promise<{ contentBase64: string; filename: string } | null> {
-  const dataUrl = await window.hermesDesktop?.readFileDataUrl(filePath)
+  const dataUrl = await window.beyondDesktop?.readFileDataUrl(filePath)
 
   if (isReadFileErrorResult(dataUrl)) {
     return null
@@ -521,7 +521,7 @@ export async function readImageForRemoteAttach(
 // Prefer the attach-specific IPC (256 MiB) so remote uploads are not stuck on
 // the preview/Settings default; fall back for older Electron shells.
 export async function readFileDataUrlForAttach(filePath: string): Promise<string | null> {
-  const reader = window.hermesDesktop?.readFileDataUrlForAttach ?? window.hermesDesktop?.readFileDataUrl
+  const reader = window.beyondDesktop?.readFileDataUrlForAttach ?? window.beyondDesktop?.readFileDataUrl
 
   if (!reader) {
     return null
@@ -778,7 +778,7 @@ export function visibleUserIndexAtOrdinal(messages: readonly ChatMessage[], targ
 export interface SubmitTextOptions {
   /** Original slash invocation: retries must not re-expand a prepared prompt. */
   retryText?: string
-  /** Captured by slash dispatch before asynchronous expansion. */
+  /** Captured by slash dispatch before asynchrobeyond expansion. */
   destination?: SubmissionDestination
   /** Stable caller-owned identity; retain across uncertain admission retries. */
   submission_id?: string

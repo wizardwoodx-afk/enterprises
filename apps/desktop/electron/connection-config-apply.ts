@@ -18,7 +18,7 @@ interface ApplyConnectionConfigAtomicallyOptions<TConfig, TRegistry> {
 /**
  * Commit the legacy config and v2 registry as one recoverable Apply boundary.
  * File replacement itself is atomic per file; this wrapper restores both
- * previous snapshots when the second write or synchronous re-home fails.
+ * previous snapshots when the second write or synchrobeyond re-home fails.
  */
 export async function applyConnectionConfigAtomically<TConfig, TRegistry>({
   apply,

@@ -1,14 +1,14 @@
-# Sourced, never executed: how a POSIX shell gets the Hermes dev environment.
-# `activate` (interactive, reversible) and `scripts/run-in-hermes-env` (a child
+# Sourced, never executed: how a POSIX shell gets the Beyond dev environment.
+# `activate` (interactive, reversible) and `scripts/run-in-beyond-env` (a child
 # process, one-way) both build on it; neither owns any of it.
 #
-#   hermes_sync REPO [FLAG]         bring the install up to date (setup-hermes.sh)
-#   hermes_compose_env REPO DIALECT print the composed environment, `sh` or `fish`
-#   hermes_apply_env SCRIPT         evaluate a composed `sh` script into this shell
-#   hermes_activation_current REPO  is the inherited environment still REPO's?
-#   hermes_ensure_env REPO          sync, compose and apply unless it is current
+#   beyond_sync REPO [FLAG]         bring the install up to date (setup-beyond.sh)
+#   beyond_compose_env REPO DIALECT print the composed environment, `sh` or `fish`
+#   beyond_apply_env SCRIPT         evaluate a composed `sh` script into this shell
+#   beyond_activation_current REPO  is the inherited environment still REPO's?
+#   beyond_ensure_env REPO          sync, compose and apply unless it is current
 #
-# pm records, beside the installed-state file named by __HERMES_ACTIVATED, one
+# pm records, beside the installed-state file named by __BEYOND_ACTIVATED, one
 # stamp per dependency input carrying the exact mtime that input had when the
 # install was last verified against it (pm.environments.record_activation_inputs).
 # Any input whose mtime DIFFERS from its stamp (newer or older, since a branch
@@ -19,26 +19,26 @@
 # stale, and so does an install that did not build the test environment:
 # every environment this library composes includes it.
 
-# hermes_sync REPO [--test-environment[=EXTRAS]]: run setup in a child, so a
+# beyond_sync REPO [--test-environment[=EXTRAS]]: run setup in a child, so a
 # failure cannot exit or half-change the caller's shell and setup never
 # republishes launchers or shell config. Progress goes to stderr.
-hermes_sync() {
+beyond_sync() {
     local repo="$1" test_environment="${2:---test-environment}"
     (
         unset PYTHONHOME PYTHONPATH VIRTUAL_ENV
-        bash "$repo/setup-hermes.sh" --runtime-only "$test_environment"
+        bash "$repo/setup-beyond.sh" --runtime-only "$test_environment"
     ) >&2
 }
 
-# hermes_bootstrap_python REPO: print the interpreter that can run pm before
+# beyond_bootstrap_python REPO: print the interpreter that can run pm before
 # any dependency is importable. It only emits the environment; it installs nothing.
-hermes_bootstrap_python() {
+beyond_bootstrap_python() {
     local repo="$1" store candidate
     for candidate in "$repo/.venv/bin/python" "$repo/.venv/Scripts/python.exe" \
                      "$repo/venv/bin/python" "$repo/venv/Scripts/python.exe"; do
         [ -x "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
     done
-    for store in "${HERMES_RUNTIME_DIR:-}" "$repo/../tools" "${HERMES_HOME:-$HOME/.hermes}/tools"; do
+    for store in "${BEYOND_RUNTIME_DIR:-}" "$repo/../tools" "${BEYOND_HOME:-$HOME/.beyond}/tools"; do
         [ -n "$store" ] || continue
         for candidate in "$store"/python-*/bin/python3 "$store"/python-*/python.exe \
                          "$store"/python-*/bin/python "$store"/python-*/bin/python.exe; do
@@ -48,24 +48,24 @@ hermes_bootstrap_python() {
     return 1
 }
 
-# hermes_compose_env REPO DIALECT: print the environment of the installed state
+# beyond_compose_env REPO DIALECT: print the environment of the installed state
 # as a script for a shell of DIALECT (`sh` or `fish`).
-hermes_compose_env() {
+beyond_compose_env() {
     local repo="$1" dialect="$2" python script
-    python="$(hermes_bootstrap_python "$repo")" || {
-        echo "no bootstrap Python found; run setup-hermes.sh" >&2
+    python="$(beyond_bootstrap_python "$repo")" || {
+        echo "no bootstrap Python found; run setup-beyond.sh" >&2
         return 1
     }
     script="$(PYTHONHOME= PYTHONPATH="$repo" "$python" -m pm.environments --format "$dialect")" &&
         [ -n "$script" ] || {
-        echo "could not read pm env (run ./setup-hermes.sh first)" >&2
+        echo "could not read pm env (run ./setup-beyond.sh first)" >&2
         return 1
     }
     printf '%s\n' "$script"
 }
 
-# hermes_apply_env SCRIPT: evaluate a script from `hermes_compose_env REPO sh`.
-hermes_apply_env() {
+# beyond_apply_env SCRIPT: evaluate a script from `beyond_compose_env REPO sh`.
+beyond_apply_env() {
     # Resolved before the eval replaces PATH.
     local cygpath name
     cygpath="$(command -v cygpath 2>/dev/null || :)"
@@ -83,13 +83,13 @@ hermes_apply_env() {
     fi
 }
 
-# hermes_activation_current REPO: status 0 when the inherited environment
+# beyond_activation_current REPO: status 0 when the inherited environment
 # matches REPO's current inputs.
-hermes_activation_current() {
+beyond_activation_current() {
     local repo="$1" sentinel stamps stamp input stamped=0
-    [ -n "${__HERMES_ACTIVATED:-}" ] && [ -e "${__HERMES_ACTIVATED}" ] || return 1
+    [ -n "${__BEYOND_ACTIVATED:-}" ] && [ -e "${__BEYOND_ACTIVATED}" ] || return 1
     # activate.ps1 records a Windows path; Git Bash accepts it with slashes.
-    sentinel="${__HERMES_ACTIVATED//\\//}"
+    sentinel="${__BEYOND_ACTIVATED//\\//}"
     stamps="${sentinel%/*}/inputs"
     [ -f "$stamps/.project-root" ] && [ -f "$stamps/.test-environment" ] || return 1
     local owner="$repo" recorded
@@ -112,15 +112,15 @@ hermes_activation_current() {
     [ "$stamped" = 1 ]
 }
 
-# hermes_ensure_env REPO: leave this shell with REPO's environment, doing
+# beyond_ensure_env REPO: leave this shell with REPO's environment, doing
 # nothing when the inherited one is current.
-hermes_ensure_env() {
+beyond_ensure_env() {
     local repo="$1" script
-    hermes_activation_current "$repo" && return 0
-    hermes_sync "$repo" || {
+    beyond_activation_current "$repo" && return 0
+    beyond_sync "$repo" || {
         echo "setup failed" >&2
         return 1
     }
-    script="$(hermes_compose_env "$repo" sh)" || return 1
-    hermes_apply_env "$script"
+    script="$(beyond_compose_env "$repo" sh)" || return 1
+    beyond_apply_env "$script"
 }

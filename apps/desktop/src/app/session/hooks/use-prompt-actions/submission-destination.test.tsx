@@ -92,7 +92,7 @@ describe('submission intent destinations', () => {
     await act(async () => { expect(await b.result.current('same text')).toBe(true) })
     const other = second.requestGateway.mock.calls.find(call => call[0] === 'prompt.submit')![1]!
     expect(other.submission_id).not.toBe(original.submission_id)
-    const retained = Object.values(JSON.parse(localStorage.getItem('hermes.desktop.preparedSubmissions.v1')!))
+    const retained = Object.values(JSON.parse(localStorage.getItem('beyond.desktop.preparedSubmissions.v1')!))
     expect(retained).toHaveLength(1)
     expect(retained[0]).toMatchObject({ id: original.submission_id, params: original })
     await act(async () => { expect(await a.result.current('same text', { submission_id: String(original.submission_id) })).toBe(true) })
@@ -101,10 +101,10 @@ describe('submission intent destinations', () => {
 
   it('stages canonical images on the captured owner without a legacy image RPC', async () => {
     const { uploadComposerAttachment } = await import('.')
-    const original = window.hermesDesktop
+    const original = window.beyondDesktop
     const gate = deferred<string>()
     const api = vi.fn(async () => ({ path: '/owner/cache/images/exact.png', mime_type: 'image/png' }))
-    window.hermesDesktop = { ...original, readFileDataUrl: () => gate.promise, api } as never
+    window.beyondDesktop = { ...original, readFileDataUrl: () => gate.promise, api } as never
     $connection.set({ connectionId: 'local', wsUrl: 'ws://localhost/ws?native_dial=1' } as never)
     $activeGatewayProfile.set('alice')
     const request = vi.fn() as GatewayRequest
@@ -119,7 +119,7 @@ describe('submission intent destinations', () => {
       expect(staged).toMatchObject({ path: '/owner/cache/images/exact.png', mime: 'image/png', attachedSessionId: 'runtime-a' })
       expect(api).toHaveBeenCalledWith(expect.objectContaining({ method: 'POST', path: '/api/chat/image-upload', connectionId: 'local', profile: 'alice', body: { data_url: 'data:image/png;base64,aGVsbG8=', filename: 'exact.png' } }))
       expect(request).not.toHaveBeenCalled()
-    } finally { window.hermesDesktop = original }
+    } finally { window.beyondDesktop = original }
   })
 
   it('retains exact canonical image parameters and identity through ambiguous submit and remount', async () => {
@@ -137,7 +137,7 @@ describe('submission intent destinations', () => {
     await act(async () => { expect(await hook.result.current('image retry', { submission_id: 'image-retry', attachments: [image] })).toBe(true) })
     expect(requestGateway.mock.calls.filter(call => call[0] === 'prompt.submit')[1][1]).toEqual(first)
     expect(deps.syncAttachmentsForSubmit).toHaveBeenCalledOnce()
-    expect(window.localStorage.getItem('hermes.desktop.preparedSubmissions.v1')).not.toContain('image retry')
+    expect(window.localStorage.getItem('beyond.desktop.preparedSubmissions.v1')).not.toContain('image retry')
   })
 
 
@@ -194,11 +194,11 @@ describe('submission intent destinations', () => {
     await act(async () => {
       expect(await hook.result.current('retry me', { submission_id: 'explicit-retry' })).toBe(false)
     })
-    const journal = window.localStorage.getItem('hermes.desktop.preparedSubmissions.v1')
+    const journal = window.localStorage.getItem('beyond.desktop.preparedSubmissions.v1')
     expect(journal).toContain('retry me')
     hook.unmount()
     window.localStorage.clear()
-    window.localStorage.setItem('hermes.desktop.preparedSubmissions.v1', journal!)
+    window.localStorage.setItem('beyond.desktop.preparedSubmissions.v1', journal!)
     // A same-text send in another profile/session is a different intent; it
     // must neither reuse nor retire the original uncertain admission.
     $activeGatewayProfile.set('bob')
@@ -305,12 +305,12 @@ describe('submission intent destinations', () => {
     await act(async () => {
       expect(await hook.result.current(input, { submission_id: 'new-session-retry' })).toBe(false)
     })
-    const serialized = window.localStorage.getItem('hermes.desktop.preparedSubmissions.v1')
+    const serialized = window.localStorage.getItem('beyond.desktop.preparedSubmissions.v1')
     expect(serialized).toBeTruthy()
     expect(Object.values(JSON.parse(serialized!))[0]).toMatchObject({ owner: { connectionId: 'local', profile: 'default' } })
     hook.unmount()
     window.localStorage.clear()
-    window.localStorage.setItem('hermes.desktop.preparedSubmissions.v1', serialized!)
+    window.localStorage.setItem('beyond.desktop.preparedSubmissions.v1', serialized!)
     loseAck = false
     hook = mount()
     await act(async () => {
@@ -463,8 +463,8 @@ describe('submission intent destinations', () => {
   it('captures an attachment upload owner before native byte reading yields', async () => {
     const { uploadComposerAttachment } = await import('.')
     const gate = deferred<string>()
-    const original = window.hermesDesktop
-    window.hermesDesktop = { ...original, readFileDataUrl: vi.fn(() => gate.promise) } as never
+    const original = window.beyondDesktop
+    window.beyondDesktop = { ...original, readFileDataUrl: vi.fn(() => gate.promise) } as never
     $sessions.set([{ id: 'stored-a', connection_id: 'owner-a', profile: 'alice' }] as never)
     wire.request.mockResolvedValue({ attached: true, ref_text: '@file:staged.txt' })
     const ambient = vi.fn(async () => ({ attached: true, ref_text: '@file:wrong.txt' })) as GatewayRequest
@@ -497,7 +497,7 @@ describe('submission intent destinations', () => {
       )
       expect(ambient).not.toHaveBeenCalled()
     } finally {
-      window.hermesDesktop = original
+      window.beyondDesktop = original
     }
   })
 

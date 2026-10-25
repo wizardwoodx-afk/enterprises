@@ -21,7 +21,7 @@ import {
 
 // A routed session.create returns a stored id on the owner's socket, but the
 // surface that will pin that socket (the selected primary thread, or a tile)
-// is published later and asynchronously. The hold names the owner in
+// is published later and asynchrobeyondly. The hold names the owner in
 // foregroundSessionScopes — the gateway keep-set — from the moment the create
 // returns until the foreground publication takes over, the caller releases
 // it, or a bounded TTL expires. Nothing latches.

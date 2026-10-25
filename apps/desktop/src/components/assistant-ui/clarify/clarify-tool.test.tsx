@@ -40,7 +40,7 @@ vi.mock('@assistant-ui/react', () => ({
   useAuiState: () => messageRunning
 }))
 
-/** Seed a live `clarify` server request; the card answers it synchronously with
+/** Seed a live `clarify` server request; the card answers it synchrobeyondly with
  *  `respondToServerRequest`, so the returned spy sees the response frame. */
 function liveServerRequest(id: string) {
   const respond = vi.fn()

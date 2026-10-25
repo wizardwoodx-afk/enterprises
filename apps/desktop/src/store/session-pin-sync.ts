@@ -23,7 +23,7 @@
 
 import { atom } from 'nanostores'
 
-import { setSessionPinnedRemote } from '@/hermes'
+import { setSessionPinnedRemote } from '@/beyond'
 import { onConnectionScopeChange } from '@/lib/connection-scoped'
 import { $pinnedSessionIds, pinSession, unpinSession } from '@/store/layout'
 import { $activeGatewayProfile, normalizeProfileKey } from '@/store/profile'
@@ -38,7 +38,7 @@ import {
   setSessions
 } from '@/store/session'
 import { isSessionRemovalPending } from '@/store/session-removal'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/beyond'
 
 // pin ids we've successfully PATCHed pinned=true this session.
 const mirrored = new Set<string>()
@@ -274,7 +274,7 @@ function pullRemotePins(): void {
     }
 
     if (row.pinned && !heldLocally) {
-      // Mark mirrored first: pinSession fires the pin listener synchronously,
+      // Mark mirrored first: pinSession fires the pin listener synchrobeyondly,
       // and the nested reconcile must not see this as a new pin to PATCH.
       mirrored.add(pinId)
       pinSession(pinId)
@@ -290,7 +290,7 @@ function pullRemotePins(): void {
 
 // Re-entrancy guard: reconcile() is subscribed to every loaded-session slice
 // and $pinnedSessionIds, and pullRemotePins() mutates $pinnedSessionIds (via
-// pinSession/unpinSession), which fires reconcile() again synchronously.
+// pinSession/unpinSession), which fires reconcile() again synchrobeyondly.
 // Without this guard, a session whose pin state oscillates — two rows with the
 // same durable id but conflicting `pinned` flags, possible when profile
 // databases share session ids — drives an unbounded re-entrant loop that
@@ -317,11 +317,11 @@ function reconcile(): void {
 
 function reconcileInner(): void {
   // Config/session REST is only reachable through the Electron bridge.
-  if (!window.hermesDesktop) {
+  if (!window.beyondDesktop) {
     return
   }
 
-  // Push before pull. The pin listener fires synchronously on a local toggle,
+  // Push before pull. The pin listener fires synchrobeyondly on a local toggle,
   // so this reconcile runs before the PATCH for that toggle exists anywhere.
   // The push pass below records the intent (`pending`, then `unconfirmed` via
   // writePin) — only then may the pull read the page, where those fences stop
@@ -404,7 +404,7 @@ export function resetSessionPinMirror(): void {
 /**
  * Forget one id's sync bookkeeping. The dead-session prune calls this before
  * unpinning a pin whose session is gone, so the reconcile listener (fired
- * synchronously by `unpinSession`) doesn't re-PATCH the dead id — which would
+ * synchrobeyondly by `unpinSession`) doesn't re-PATCH the dead id — which would
  * produce exactly the 404 the prune exists to remove.
  */
 export function forgetPinSyncState(id: string): void {

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Hermes Agent bootstrap: clone, acquire uv/Python, then hand the checkout to
+# Beyond Agent bootstrap: clone, acquire uv/Python, then hand the checkout to
 # the same completion an update runs -- command publication, product builds and
 # post-build maintenance -- so a fresh install and a finished update land in one
 # state. Heavy dependencies (tool binaries, browsers, node) are pm's job:
-# `hermes pm install`.
+# `beyond pm install`.
 #
-# Stage protocol kept for Hermes-Setup:
+# Stage protocol kept for Beyond-Setup:
 #   --manifest            print the stage list as JSON
 #   --stage NAME [--json] run one stage
 #   --non-interactive     skip stages that need input
@@ -20,14 +20,14 @@ set -u
 # hygiene can't break the locked sync the way it used to before pm owned it.
 export UV_NO_CONFIG=1
 
-REPO_URL="${HERMES_REPO_URL:-https://github.com/NousResearch/hermes-agent.git}"
+REPO_URL="${BEYOND_REPO_URL:-https://github.com/beyond-app/beyond.git}"
 BRANCH="main"
 INSTALL_COMMIT=""
 # The update channel to install: stable (the latest published release, the default for the
 # official repository's main line) or main (every commit). An explicit choice is persisted.
-CHANNEL="${HERMES_INSTALL_CHANNEL:-}"
-INSTALL_DIR="${HERMES_INSTALL_DIR:-}"
-HERMES_HOME="${HERMES_HOME:-$HOME/.hermes}"
+CHANNEL="${BEYOND_INSTALL_CHANNEL:-}"
+INSTALL_DIR="${BEYOND_INSTALL_DIR:-}"
+BEYOND_HOME="${BEYOND_HOME:-$HOME/.beyond}"
 STAGE=""
 WANT_MANIFEST=false
 JSON=false
@@ -45,7 +45,7 @@ INSTALL_IN_STAGE=false
 
 while [ $# -gt 0 ]; do
     case "$1" in
-        --branch|-Branch|--commit|-Commit|--channel|-Channel|--dir|--hermes-home|-HermesHome|--stage|-Stage)
+        --branch|-Branch|--commit|-Commit|--channel|-Channel|--dir|--beyond-home|-BeyondHome|--stage|-Stage)
             option="$1"
             if [ $# -lt 2 ] || [ -z "$2" ] || [[ "$2" == -* ]]; then
                 printf '%s needs a value\n' "$option" >&2
@@ -56,7 +56,7 @@ while [ $# -gt 0 ]; do
                 --commit|-Commit) INSTALL_COMMIT="$2" ;;
                 --channel|-Channel) CHANNEL="$2" ;;
                 --dir) INSTALL_DIR="$2" ;;
-                --hermes-home|-HermesHome) HERMES_HOME="$2" ;;
+                --beyond-home|-BeyondHome) BEYOND_HOME="$2" ;;
                 --stage|-Stage) STAGE="$2" ;;
             esac
             shift 2 ;;
@@ -70,20 +70,20 @@ while [ $# -gt 0 ]; do
         --verbose|-Verbose) VERBOSE=true; shift ;;
         -h|--help)
             echo "Usage: install.sh [--channel stable|main] [--branch NAME] [--commit SHA]"
-            echo "                  [--dir PATH] [--hermes-home PATH]"
+            echo "                  [--dir PATH] [--beyond-home PATH]"
             echo "                  [--manifest] [--stage NAME] [--json]"
             echo "                  [--non-interactive] [--include-desktop] [--verbose]"
             echo "                  [--skip-browser] [--skip-computer-use]"
             echo
             echo "  --channel       stable (default): the latest published release, then release"
-            echo "                  to release. main: every commit. Also HERMES_INSTALL_CHANNEL;"
-            echo "                  an explicit choice is saved like 'hermes update --set-channel'."
+            echo "                  to release. main: every commit. Also BEYOND_INSTALL_CHANNEL;"
+            echo "                  an explicit choice is saved like 'beyond update --set-channel'."
             echo "  --skip-browser  Do not install the browser (Chromium). Alias: --no-playwright."
-            echo "                  Remembered by later installs and 'hermes update';"
-            echo "                  undo with 'hermes pm install chromium'."
+            echo "                  Remembered by later installs and 'beyond update';"
+            echo "                  undo with 'beyond pm install chromium'."
             echo "  --skip-computer-use"
             echo "                  Do not install the computer-use driver (cua-driver). Remembered"
-            echo "                  the same way; undo with 'hermes pm install cua-driver'."
+            echo "                  the same way; undo with 'beyond pm install cua-driver'."
             exit 0 ;;
         *) echo "unknown option: $1" >&2; exit 1 ;;
     esac
@@ -94,13 +94,13 @@ case "$CHANNEL" in
     *) printf -- '--channel must be stable or main, not %s\n' "$CHANNEL" >&2; exit 2 ;;
 esac
 
-INSTALL_DIR="${INSTALL_DIR:-$HERMES_HOME/hermes-agent}"
-export HERMES_HOME
+INSTALL_DIR="${INSTALL_DIR:-$BEYOND_HOME/beyond-agent}"
+export BEYOND_HOME
 
-INSTALL_LOG="$HERMES_HOME/logs/install.log"
+INSTALL_LOG="$BEYOND_HOME/logs/install.log"
 
 # Same glyphs as the pre-pm installer. Colour only on a terminal, so CI
-# transcripts and the Hermes-Setup driver read plain text.
+# transcripts and the Beyond-Setup driver read plain text.
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
     C_RED=$'\033[0;31m' C_GREEN=$'\033[0;32m' C_YELLOW=$'\033[0;33m'
     C_CYAN=$'\033[0;36m' C_MAGENTA=$'\033[0;35m' C_BOLD=$'\033[1m'
@@ -116,7 +116,7 @@ log_error() { printf '%s✗%s %s\n' "$C_RED" "$C_NC" "$1" >&2; }
 # $2: closed failure class for the local install receipt (write_install_receipt).
 fail() { STAGE_REASON="$1"; FAILURE_CLASS="${2:-other}"; log_error "$1"; exit 1; }
 # The last failed run_logged command's own error line (git's "fatal: ..."), so a
-# failure reason -- which Hermes-Setup shows as-is -- names the cause, not just the step.
+# failure reason -- which Beyond-Setup shows as-is -- names the cause, not just the step.
 RUN_LOGGED_ERROR=""
 native_detail() { [ -z "$RUN_LOGGED_ERROR" ] || printf ': %s' "$RUN_LOGGED_ERROR"; }
 # Pick the error line from a command's output on stdin: the first fatal:/error:
@@ -135,14 +135,14 @@ error_line() {
 
 # One local receipt per full-ladder run, under the profile's shared-metrics dir.
 # Only closed tokens and two timestamps (never STAGE_REASON, paths or URLs); the
-# installer never sends anything. Hermes reports it as hermes.install.run on a
+# installer never sends anything. Beyond reports it as beyond.install.run on a
 # later start only while shared metrics collection is on, and deletes it
 # unreported when collection is off. Best effort: never fails the install.
 write_install_receipt() {
     # $1 outcome, $2 failed stage, $3 failure class. One file per run: the first writer wins.
     # A failed write (full disk) removes its partial temp file: the reader never sees dotfiles.
     {
-        local dir="$HERMES_HOME/telemetry/shared_metrics/pending_installs" id="$INSTALL_RUN_ID"
+        local dir="$BEYOND_HOME/telemetry/shared_metrics/pending_installs" id="$INSTALL_RUN_ID"
         [ -n "$id" ] && [ ! -e "$dir/$id.json" ] && mkdir -p "$dir" && {
             printf '{"id":"%s","installer":"install_sh","outcome":"%s","failed_stage":"%s","failure_class":"%s","started_at":%s,"finished_at":%s}\n' \
                 "$id" "$1" "$2" "$3" "$INSTALL_STARTED" "$(date +%s)" > "$dir/.$id.tmp" \
@@ -191,20 +191,20 @@ stage_signal() {
 print_banner() {
     printf '\n%s%s' "$C_MAGENTA" "$C_BOLD"
     printf '%s\n' "┌─────────────────────────────────────────────────────────┐"
-    printf '%s\n' "│             ☤ Hermes Agent Installer                    │"
+    printf '%s\n' "│             ☤ Beyond Agent Installer                    │"
     printf '%s\n' "├─────────────────────────────────────────────────────────┤"
-    printf '%s\n' "│  An open source AI agent by Nous Research.              │"
+    printf '%s\n' "│  An open source AI agent by Beyond.              │"
     printf '%s\n' "└─────────────────────────────────────────────────────────┘"
     printf '%s\n' "$C_NC"
 }
 
 # Interactive runs collapse child-process output (git, uv, pm, the builds)
 # into one status line. CI, --verbose and a non-terminal stdout -- the
-# Hermes-Setup --json driver, E2E transcripts -- keep the full stream those
+# Beyond-Setup --json driver, E2E transcripts -- keep the full stream those
 # readers parse.
 quiet_output() {
     [ "$VERBOSE" = true ] && return 1
-    if [ -n "${CI:-}" ] || [ -n "${GITHUB_ACTIONS:-}" ] || [ -n "${HERMES_INSTALL_VERBOSE:-}" ]; then
+    if [ -n "${CI:-}" ] || [ -n "${GITHUB_ACTIONS:-}" ] || [ -n "${BEYOND_INSTALL_VERBOSE:-}" ]; then
         return 1
     fi
     [ -t 1 ]
@@ -230,7 +230,7 @@ run_logged() {
         log "$label"
         local err rc
         err="$(mktemp 2>/dev/null)" || { "$@"; return; }
-        # stderr still streams (Hermes-Setup logs it); a copy names the failure.
+        # stderr still streams (Beyond-Setup logs it); a copy names the failure.
         { "$@" 2>&1 1>&3 | tee "$err" >&2; } 3>&1
         rc=${PIPESTATUS[0]}
         [ "$rc" -eq 0 ] || RUN_LOGGED_ERROR="$(error_line < "$err")"
@@ -275,32 +275,32 @@ uv_bootstrap_pin() {
     case "$1" in
         linux-x64)
             UV_PIN_URL="https://github.com/astral-sh/uv/releases/download/0.13.5/uv-x86_64-unknown-linux-gnu.tar.gz"
-            UV_PIN_MIRROR="https://hermes-assets.nousresearch.com/upstream/sha256/f68d291c75783122dad58ab77def0e13f3233f358731db5d6d7e8715603b928f"
+            UV_PIN_MIRROR="https://assets.beyond.app/upstream/sha256/f68d291c75783122dad58ab77def0e13f3233f358731db5d6d7e8715603b928f"
             UV_PIN_SHA256="f68d291c75783122dad58ab77def0e13f3233f358731db5d6d7e8715603b928f"
             ;;
         linux-arm64)
             UV_PIN_URL="https://github.com/astral-sh/uv/releases/download/0.13.5/uv-aarch64-unknown-linux-gnu.tar.gz"
-            UV_PIN_MIRROR="https://hermes-assets.nousresearch.com/upstream/sha256/4bb69cf95ed13f23713bb7bc09f241896ea0c75b7c557e615a20604b82f9c403"
+            UV_PIN_MIRROR="https://assets.beyond.app/upstream/sha256/4bb69cf95ed13f23713bb7bc09f241896ea0c75b7c557e615a20604b82f9c403"
             UV_PIN_SHA256="4bb69cf95ed13f23713bb7bc09f241896ea0c75b7c557e615a20604b82f9c403"
             ;;
         linux-x64-musl)
             UV_PIN_URL="https://github.com/astral-sh/uv/releases/download/0.13.5/uv-x86_64-unknown-linux-musl.tar.gz"
-            UV_PIN_MIRROR="https://hermes-assets.nousresearch.com/upstream/sha256/57ef9d9ccb01fb1bd998df995b0dd221b52f7d7841fbea93f2d4463bf61fb7a9"
+            UV_PIN_MIRROR="https://assets.beyond.app/upstream/sha256/57ef9d9ccb01fb1bd998df995b0dd221b52f7d7841fbea93f2d4463bf61fb7a9"
             UV_PIN_SHA256="57ef9d9ccb01fb1bd998df995b0dd221b52f7d7841fbea93f2d4463bf61fb7a9"
             ;;
         linux-arm64-musl)
             UV_PIN_URL="https://github.com/astral-sh/uv/releases/download/0.13.5/uv-aarch64-unknown-linux-musl.tar.gz"
-            UV_PIN_MIRROR="https://hermes-assets.nousresearch.com/upstream/sha256/7906c79adb21c81abd559841ba76bb1d9af9d791acac7a041b2972e03ae16538"
+            UV_PIN_MIRROR="https://assets.beyond.app/upstream/sha256/7906c79adb21c81abd559841ba76bb1d9af9d791acac7a041b2972e03ae16538"
             UV_PIN_SHA256="7906c79adb21c81abd559841ba76bb1d9af9d791acac7a041b2972e03ae16538"
             ;;
         darwin-x64)
             UV_PIN_URL="https://github.com/astral-sh/uv/releases/download/0.13.5/uv-x86_64-apple-darwin.tar.gz"
-            UV_PIN_MIRROR="https://hermes-assets.nousresearch.com/upstream/sha256/b0f52b0e3945b4107d89024ea38e625683011fbfc05a0d98f9fa2d6dcee28c66"
+            UV_PIN_MIRROR="https://assets.beyond.app/upstream/sha256/b0f52b0e3945b4107d89024ea38e625683011fbfc05a0d98f9fa2d6dcee28c66"
             UV_PIN_SHA256="b0f52b0e3945b4107d89024ea38e625683011fbfc05a0d98f9fa2d6dcee28c66"
             ;;
         darwin-arm64)
             UV_PIN_URL="https://github.com/astral-sh/uv/releases/download/0.13.5/uv-aarch64-apple-darwin.tar.gz"
-            UV_PIN_MIRROR="https://hermes-assets.nousresearch.com/upstream/sha256/743f85035a1996ecb350659e01cd9faea9709829be09b1b4b03c73eaf3c9cd73"
+            UV_PIN_MIRROR="https://assets.beyond.app/upstream/sha256/743f85035a1996ecb350659e01cd9faea9709829be09b1b4b03c73eaf3c9cd73"
             UV_PIN_SHA256="743f85035a1996ecb350659e01cd9faea9709829be09b1b4b03c73eaf3c9cd73"
             ;;
         *)
@@ -362,23 +362,23 @@ uv_bootstrap_target() {
 UV_CMD=""
 ensure_uv() {
     [ -n "$UV_CMD" ] && return 0
-    # Always the pinned artifact, never a uv already on PATH: Hermes runs only
+    # Always the pinned artifact, never a uv already on PATH: Beyond runs only
     # its own packaged toolchain.
     local _target
     if ! _target="$(uv_bootstrap_target)"; then
-        fail "no pinned uv build for this platform ($(uname -s) $(uname -m)); Hermes does not support this host" unsupported_platform
+        fail "no pinned uv build for this platform ($(uname -s) $(uname -m)); Beyond does not support this host" unsupported_platform
     fi
     if ! uv_bootstrap_pin "$_target"; then
-        fail "no pinned uv artifact for $_target; Hermes does not support this host" unsupported_platform
+        fail "no pinned uv artifact for $_target; Beyond does not support this host" unsupported_platform
     fi
-    local _store="${HERMES_RUNTIME_DIR:-$HERMES_HOME/tools}"
+    local _store="${BEYOND_RUNTIME_DIR:-$BEYOND_HOME/tools}"
     local _entry="$_store/uv-$UV_PIN_VERSION-$_target"
     UV_CMD="$_entry/uv"
     if [ ! -x "$UV_CMD" ]; then
         log "Downloading uv $UV_PIN_VERSION ($_target)"
         local _tmp
         # no-tmp: ok — last-resort fallback when mktemp itself is missing
-        _tmp="$(mktemp -d 2>/dev/null || echo "/tmp/hermes-uv-bootstrap.$$")"
+        _tmp="$(mktemp -d 2>/dev/null || echo "/tmp/beyond-uv-bootstrap.$$")"
         mkdir -p "$_tmp"
         local _fetched_from="$UV_PIN_URL"
         # Only network availability failures permit trying identical mirrored bytes.
@@ -436,7 +436,7 @@ check_platform() {
     # install the phone cannot run (no Android wheels in the lock). The
     # signed APT package is the only supported shape there.
     if [ -n "${TERMUX_VERSION:-}" ] || case "${PREFIX:-}" in *com.termux/files/usr*) true ;; *) false ;; esac; then
-        fail "Termux is installed from its APT repository, not install.sh: pkg install hermes-agent (setup: https://hermes-agent.nousresearch.com/docs/getting-started/termux)" unsupported_platform
+        fail "Termux is installed from its APT repository, not install.sh: pkg install beyond-agent (setup: https://beyond.app/docs/getting-started/termux)" unsupported_platform
     fi
     case "$(uname -s 2>/dev/null)" in
         Linux*) : ;;
@@ -480,7 +480,7 @@ stage_result() {
     if [ "$ok" = false ] && [ "${INSTALL_LADDER:-false}" = true ]; then
         local class="${FAILURE_CLASS:-other}"
         # A user abort beats the stage's own class: a child that caught Ctrl-C and exited 1
-        # (pm, source_completion, `hermes setup`) still reaches the stage's `|| fail ... <class>`.
+        # (pm, source_completion, `beyond setup`) still reaches the stage's `|| fail ... <class>`.
         case "$code" in 129|130|143) class=interrupted ;; esac
         [ "${STAGE_INTERRUPTED:-false}" = false ] || class=interrupted
         write_install_receipt failed "${STAGE//-/_}" "$class"
@@ -489,7 +489,7 @@ stage_result() {
 
 # The single authoritative stage list: emit_manifest prints it AND the
 # no-flag ladder runs it. `products` is the shared completion tail -- the same
-# call `hermes update` makes -- so the manifest and the run cannot disagree.
+# call `beyond update` makes -- so the manifest and the run cannot disagree.
 # `desktop` stays directly dispatchable via --stage for external callers, but
 # is never listed: --include-desktop selects the desktop product inside
 # `products` instead of adding a second build stage.
@@ -510,7 +510,7 @@ products_record() {
 stage_record() {
     case "$1" in
         prerequisites) echo "System prerequisites|runtime|false" ;;
-        repository)    echo "Download Hermes Agent|runtime|false" ;;
+        repository)    echo "Download Beyond Agent|runtime|false" ;;
         venv)          echo "Create Python environment|runtime|false" ;;
         python-deps)   echo "Install Python dependencies|runtime|false" ;;
         config)        echo "Prepare config and skills|configuration|false" ;;
@@ -565,7 +565,7 @@ install_macos_git() {
         log_warn "xcode-select --install: $(printf '%s\n' "$_xs" | error_line)"
     fi
     local _remedy="Install Apple's Command Line Tools (run: xcode-select --install), then re-run this installer."
-    # Hermes-Setup drives stages with --json: no stage timeout, a Cancel
+    # Beyond-Setup drives stages with --json: no stage timeout, a Cancel
     # button, and these log lines show as progress, so it waits too.
     if [ "$JSON" != true ] && { [ "$NON_INTERACTIVE" = true ] || ! has_terminal; }; then
         fail "git needs Apple's Command Line Tools. $_remedy" git_missing
@@ -616,11 +616,11 @@ stage_prerequisites() {
 }
 
 # The update channel this install chose (config.yaml update.installs.<id>.channel,
-# id = sha16 of the canonical install path, as hermes_cli.update_channel keys it).
-# Pre-Python reader of the block YAML Hermes writes; anything it cannot read prints
+# id = sha16 of the canonical install path, as beyond_cli.update_channel keys it).
+# Pre-Python reader of the block YAML Beyond writes; anything it cannot read prints
 # nothing, which keeps the plain branch behaviour.
 chosen_channel() {
-    local config="$HERMES_HOME/config.yaml" root id
+    local config="$BEYOND_HOME/config.yaml" root id
     [ -f "$config" ] || return 0
     root="$(cd "$INSTALL_DIR" 2>/dev/null && pwd -P)" || return 0
     if command -v sha256sum >/dev/null 2>&1; then id="$(printf '%s' "$root" | sha256sum)"
@@ -645,24 +645,24 @@ chosen_channel() {
 }
 
 # Forks and mirrors publish no official releases; they keep following their branch, as
-# hermes_cli.update_channel.default_channel decides.
+# beyond_cli.update_channel.default_channel decides.
 is_official_repo() {
     printf '%s' "$1" | tr '[:upper:]' '[:lower:]' \
-        | grep -Eq '^(https://github\.com/|git@github\.com:|ssh://git@github\.com/)nousresearch/hermes-agent(\.git)?/?$'
+        | grep -Eq '^(https://github\.com/|git@github\.com:|ssh://git@github\.com/)beyond-app/beyond-agent(\.git)?/?$'
 }
 
-# The latest published stable release (vX.Y.Z), the release `hermes update` resolves for the
+# The latest published stable release (vX.Y.Z), the release `beyond update` resolves for the
 # stable channel. github.com's /releases/latest redirect answers when the API quota is spent, and
 # origin's highest vX.Y.Z tag (final tags are pushed by the publication run) when github.com's web
 # endpoints are unreachable but git is not. $1 is the origin URL. Prints nothing when none answers.
 latest_stable_release() {
     local tag
     tag="$(curl -fsSL --connect-timeout 5 --max-time 20 -H 'Accept: application/vnd.github+json' \
-        https://api.github.com/repos/NousResearch/hermes-agent/releases/latest 2>/dev/null \
+        https://api.github.com/repos/beyond-app/beyond/releases/latest 2>/dev/null \
         | sed -n 's/^[[:space:]]*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
     if ! valid_stable_tag "$tag"; then
         tag="$(curl -fsSI --connect-timeout 5 --max-time 20 \
-            https://github.com/NousResearch/hermes-agent/releases/latest 2>/dev/null \
+            https://github.com/beyond-app/beyond/releases/latest 2>/dev/null \
             | tr -d '\r' | sed -n 's#^[Ll]ocation:.*/releases/tag/\([^/]*\)$#\1#p' | tail -n 1)"
     fi
     if ! valid_stable_tag "$tag"; then
@@ -671,7 +671,7 @@ latest_stable_release() {
     fi
     if valid_stable_tag "$tag"; then printf '%s' "$tag"; fi
 }
-# Same shape as hermes_cli.update_channel.STABLE_TAG_RE.
+# Same shape as beyond_cli.update_channel.STABLE_TAG_RE.
 valid_stable_tag() {
     printf '%s' "$1" | grep -Eq '^v(0|[1-9][0-9]{0,2})\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
 }
@@ -697,7 +697,7 @@ fetch_release() {
 }
 
 # Stable applies but cannot be reached. A fresh install stops (installing main instead would be
-# a channel nobody chose); a rerun keeps its checkout for `hermes update`, unless stable was
+# a channel nobody chose); a rerun keeps its checkout for `beyond update`, unless stable was
 # asked for by name. $1 says what failed.
 stable_unreachable() {
     if [ -d "$INSTALL_DIR/.git" ] && [ "$CHANNEL" != stable ]; then
@@ -713,7 +713,7 @@ stage_repository() {
     # initial commit, where stash/checkout abort ("You do not have the
     # initial commit yet", #40998); a killed update or a sync tool can leave
     # one git rejects outright (empty HEAD, a gitdir: file pointing nowhere),
-    # where `hermes update` cannot fetch. Move it aside -- never delete it, it
+    # where `beyond update` cannot fetch. Move it aside -- never delete it, it
     # may hold something the user wants -- and clone fresh below.
     if [ -e "$INSTALL_DIR/.git" ] && ! git -C "$INSTALL_DIR" rev-parse --verify HEAD >/dev/null 2>&1; then
         local broken
@@ -722,20 +722,20 @@ stage_repository() {
         mv "$INSTALL_DIR" "$broken" || fail "cannot move $INSTALL_DIR aside" filesystem_error
     fi
     if [ -d "$INSTALL_DIR/.git" ]; then
-        # A chosen channel (stable, a preview) owns where this checkout sits: `hermes update`
+        # A chosen channel (stable, a preview) owns where this checkout sits: `beyond update`
         # moves it. Switching it to the installer's branch would leave it on main while its
         # channel still says otherwise, and the next check would offer the release as an update.
         # Only an explicit --commit pin outranks the choice.
         # An explicit --channel is a new choice and replaces the recorded one.
         [ -n "$INSTALL_COMMIT" ] || [ -n "$CHANNEL" ] || channel="$(chosen_channel)"
-        # An explicit HERMES_REPO_URL names the source for reruns too, not
+        # An explicit BEYOND_REPO_URL names the source for reruns too, not
         # just the first clone.
-        if [ -n "${HERMES_REPO_URL:-}" ]; then
+        if [ -n "${BEYOND_REPO_URL:-}" ]; then
             git -C "$INSTALL_DIR" remote set-url origin "$REPO_URL" || fail "cannot point origin at $REPO_URL" git_fetch_failed
         fi
-        # No recorded choice: an official checkout tracks stable, as `hermes update` does.
+        # No recorded choice: an official checkout tracks stable, as `beyond update` does.
         if [ -z "$channel" ]; then
-            # The configured URL, as hermes_cli.update_channel reads it (`remote get-url`
+            # The configured URL, as beyond_cli.update_channel reads it (`remote get-url`
             # applies insteadOf rewrites).
             origin="$(git -C "$INSTALL_DIR" config --get remote.origin.url 2>/dev/null)" || origin=""
             release="$(stable_target "$origin")"
@@ -773,7 +773,7 @@ stage_repository() {
                 || log_warn "could not disable fetch.writeCommitGraph in $INSTALL_DIR"
             # A treeless (tree:0) checkout from a late-September installer downloads whole
             # directory snapshots again on every history walk (#129514). Fetch its trees once; the
-            # new filter is recorded only after that succeeds, so `hermes update` retries otherwise.
+            # new filter is recorded only after that succeeds, so `beyond update` retries otherwise.
             if [ "$(git -C "$INSTALL_DIR" config --get remote.origin.partialclonefilter)" = tree:0 ]; then
                 if run_logged --may-fail "Fetching directory history once (treeless checkout)" \
                     git -C "$INSTALL_DIR" -c gc.auto=0 -c maintenance.auto=false fetch --refetch \
@@ -781,12 +781,12 @@ stage_repository() {
                     git -C "$INSTALL_DIR" config remote.origin.partialclonefilter blob:none \
                         || log_warn "could not record the blobless filter in $INSTALL_DIR"
                 else
-                    log_warn "could not fetch the directory history; the next hermes update retries it"
+                    log_warn "could not fetch the directory history; the next beyond update retries it"
                 fi
             fi
         fi
         if [ -n "$channel" ]; then
-            log "Keeping its checkout: \`hermes update\` moves it (\`hermes update --set-channel main\` follows main)"
+            log "Keeping its checkout: \`beyond update\` moves it (\`beyond update --set-channel main\` follows main)"
             return 0
         fi
         if [ -n "$release" ] && ! fetch_release "$INSTALL_DIR"; then
@@ -796,14 +796,14 @@ stage_repository() {
         if [ -n "$release" ]; then
             # A rerun only moves a checkout forward onto the release. Any other move (a main
             # checkout diverged from a release cut on release/*, one already past it, a shallow
-            # one that cannot tell) is `hermes update`'s: it refuses a release that predates the
+            # one that cannot tell) is `beyond update`'s: it refuses a release that predates the
             # session stores this checkout wrote (update_downgrade_guard).
             if git -C "$INSTALL_DIR" merge-base --is-ancestor "$release" HEAD 2>/dev/null; then
-                log "Keeping its checkout: it already has $release (\`hermes update\` moves it to the next release)"
+                log "Keeping its checkout: it already has $release (\`beyond update\` moves it to the next release)"
                 return 0
             fi
             if ! git -C "$INSTALL_DIR" merge-base --is-ancestor HEAD "$release" 2>/dev/null; then
-                log "Keeping its checkout: $release does not descend from it (\`hermes update\` decides that move)"
+                log "Keeping its checkout: $release does not descend from it (\`beyond update\` decides that move)"
                 return 0
             fi
         else
@@ -825,12 +825,12 @@ stage_repository() {
                 git -C "$INSTALL_DIR" reset -q || fail "cannot clear the unmerged index in $INSTALL_DIR" local_changes_blocked
             fi
             run_logged "Stashing local changes" \
-                git -C "$INSTALL_DIR" stash push --include-untracked -m "hermes-install-autostash-$stamp" \
+                git -C "$INSTALL_DIR" stash push --include-untracked -m "beyond-install-autostash-$stamp" \
                 || fail "could not stash local changes in $INSTALL_DIR; commit or move them aside, then rerun" local_changes_blocked
-            log_warn "local changes stashed as hermes-install-autostash-$stamp"
+            log_warn "local changes stashed as beyond-install-autostash-$stamp"
         fi
         if [ -n "$release" ]; then
-            # Detached at the release commit, the way `hermes update` places a stable checkout;
+            # Detached at the release commit, the way `beyond update` places a stable checkout;
             # branches (and any commits on them) stay where they are.
             run_logged "Checking out $release" git -C "$INSTALL_DIR" checkout --detach "$release" \
                 || fail "git checkout failed$(native_detail)" git_checkout_failed
@@ -850,10 +850,10 @@ stage_repository() {
             # A release cut off the main line, a force-pushed remote, or the
             # user's own commits cannot fast-forward. Every stage below reads
             # files only the new tree has (pm/), so an install left on the old
-            # tree cannot finish -- match the remote the way `hermes update`
+            # tree cannot finish -- match the remote the way `beyond update`
             # does, after parking the old tip.
             # Only commits absent from origin need a rescue ref. Keep the same
-            # namespace as `hermes update` so its pruning and recovery work.
+            # namespace as `beyond update` so its pruning and recovery work.
             local dropped rescue_kind rescue_ref prior
             dropped="$(git -C "$INSTALL_DIR" rev-list --count "origin/$BRANCH..HEAD")" \
                 || fail "cannot count commits before reset" git_reset_failed
@@ -863,7 +863,7 @@ stage_repository() {
                     || rescue_kind="orphan"
                 prior="$(git -C "$INSTALL_DIR" rev-parse --short=12 HEAD)" \
                     || fail "cannot identify commits before reset" git_reset_failed
-                rescue_ref="refs/hermes-update-backups/$rescue_kind-$BRANCH-$stamp-$prior"
+                rescue_ref="refs/beyond-update-backups/$rescue_kind-$BRANCH-$stamp-$prior"
                 git -C "$INSTALL_DIR" update-ref "$rescue_ref" HEAD \
                     || fail "cannot back up $dropped local commit(s); refusing to reset" git_reset_failed
                 log_warn "$dropped commit(s) not on origin/$BRANCH backed up to $rescue_ref"
@@ -881,7 +881,7 @@ stage_repository() {
             if [ -d "$INSTALL_DIR" ] && [ ! -L "$INSTALL_DIR" ] && [ -z "$(ls -A "$INSTALL_DIR")" ]; then
                 rmdir "$INSTALL_DIR" || fail "cannot replace empty $INSTALL_DIR" filesystem_error
             else
-                fail "$INSTALL_DIR exists and is not a Hermes git checkout. Move it aside, or install elsewhere with --dir <path>." dir_not_checkout
+                fail "$INSTALL_DIR exists and is not a Beyond git checkout. Move it aside, or install elsewhere with --dir <path>." dir_not_checkout
             fi
         fi
         mkdir -p "$(dirname "$INSTALL_DIR")"
@@ -893,7 +893,7 @@ stage_repository() {
         # Phase lines ("Receiving objects: 42%") feed the status line; git
         # prints none to a pipe unless asked.
         if quiet_output; then progress=(--progress); fi
-        staged="$(mktemp -d "$(dirname "$INSTALL_DIR")/.hermes-clone-XXXXXX")" || fail "cannot stage clone" filesystem_error
+        staged="$(mktemp -d "$(dirname "$INSTALL_DIR")/.beyond-clone-XXXXXX")" || fail "cannot stage clone" filesystem_error
         for attempt in 1 2 3; do
             # Blobless: every commit, tree and release tag (runtime identity is
             # the nearest reachable release; --commit pins and branch switches
@@ -961,7 +961,7 @@ stage_repository() {
         rmdir "$staged"
         # A treeless checkout must never write a commit-graph: over a graph with
         # changed-path data that lazy-fetches the trees of every unseen commit, in a
-        # loop (#127711). gc.auto stays on: `hermes update` folds lazy-fetch packs with
+        # loop (#127711). gc.auto stays on: `beyond update` folds lazy-fetch packs with
         # `gc --auto`.
         git -C "$INSTALL_DIR" config maintenance.commit-graph.enabled false \
             || log_warn "could not disable maintenance.commit-graph.enabled in $INSTALL_DIR"
@@ -969,7 +969,7 @@ stage_repository() {
             || log_warn "could not disable gc.writeCommitGraph in $INSTALL_DIR"
         git -C "$INSTALL_DIR" config fetch.writeCommitGraph false \
             || log_warn "could not disable fetch.writeCommitGraph in $INSTALL_DIR"
-        log_success "Hermes Agent cloned"
+        log_success "Beyond Agent cloned"
     fi
     if [ -n "$INSTALL_COMMIT" ] && [ "$pinned" = false ]; then
         # A rerun over an existing checkout pins here (a fresh clone pinned
@@ -996,7 +996,7 @@ bootstrap_python() {
     ensure_uv
     local _py
     # Read packages.python.version by following object names and braces, not
-    # indentation — same pre-Python reader contract as setup-hermes.sh's pin().
+    # indentation — same pre-Python reader contract as setup-beyond.sh's pin().
     _py="$(awk -F '"' '
         /^[[:space:]]*("[^"]+"[[:space:]]*:[[:space:]]*)?\{/ { path[++depth] = $2; next }
         /^[[:space:]]*\}[[:space:]]*,?[[:space:]]*$/ { delete path[depth--]; next }
@@ -1022,8 +1022,8 @@ bootstrap_python() {
 bootstrap_pm() {
     local boot_py
     local pm_args=(install)
-    # PM records the opt-outs, so later installs and `hermes update` keep the
-    # tools off until `hermes pm install <name>` opts back in.
+    # PM records the opt-outs, so later installs and `beyond update` keep the
+    # tools off until `beyond pm install <name>` opts back in.
     # Legacy spelling on purpose: the stable PM this script installs by default
     # rejects `chromium`, and newer PMs read `agent-browser` as `chromium`.
     [ "$SKIP_BROWSER" = true ] && pm_args+=(--without agent-browser)
@@ -1071,7 +1071,7 @@ append_shell_path() {
         return 0
     fi
     mkdir -p "$(dirname "$rc")"
-    printf '\n# Hermes Agent command\n%s\n' "$line" >> "$rc" || fail "cannot update PATH in $rc" filesystem_error
+    printf '\n# Beyond Agent command\n%s\n' "$line" >> "$rc" || fail "cannot update PATH in $rc" filesystem_error
     log_success "added ~/.local/bin to PATH in $rc"
 }
 
@@ -1116,11 +1116,11 @@ stage_products() {
     if [ "$INCLUDE_DESKTOP" = true ] || desktop_product_present; then
         args+=(--desktop)
     fi
-    (cd "$INSTALL_DIR" && run_logged "Building the hermes command and apps" \
-        "$boot_py" -I -B -X utf8 hermes_cli/source_completion.py "${args[@]}") \
+    (cd "$INSTALL_DIR" && run_logged "Building the beyond command and apps" \
+        "$boot_py" -I -B -X utf8 beyond_cli/source_completion.py "${args[@]}") \
         || fail "app products or command publication failed" products_build_failed
     wire_shell_path
-    log_success "app products and hermes command ready"
+    log_success "app products and beyond command ready"
 }
 
 stage_desktop() {
@@ -1132,17 +1132,17 @@ stage_desktop() {
 }
 
 stage_config() {
-    mkdir -p "$HERMES_HOME"/cron "$HERMES_HOME"/sessions "$HERMES_HOME"/logs \
-        "$HERMES_HOME"/pairing "$HERMES_HOME"/hooks "$HERMES_HOME"/image_cache \
-        "$HERMES_HOME"/audio_cache "$HERMES_HOME"/memories "$HERMES_HOME"/skills
-    if [ ! -f "$HERMES_HOME/.env" ]; then
-        cp "$INSTALL_DIR/.env.example" "$HERMES_HOME/.env" 2>/dev/null || touch "$HERMES_HOME/.env"
+    mkdir -p "$BEYOND_HOME"/cron "$BEYOND_HOME"/sessions "$BEYOND_HOME"/logs \
+        "$BEYOND_HOME"/pairing "$BEYOND_HOME"/hooks "$BEYOND_HOME"/image_cache \
+        "$BEYOND_HOME"/audio_cache "$BEYOND_HOME"/memories "$BEYOND_HOME"/skills
+    if [ ! -f "$BEYOND_HOME/.env" ]; then
+        cp "$INSTALL_DIR/.env.example" "$BEYOND_HOME/.env" 2>/dev/null || touch "$BEYOND_HOME/.env"
     fi
-    chmod 600 "$HERMES_HOME/.env"
-    if [ ! -f "$HERMES_HOME/config.yaml" ] && [ -f "$INSTALL_DIR/cli-config.yaml.example" ]; then
-        cp "$INSTALL_DIR/cli-config.yaml.example" "$HERMES_HOME/config.yaml"
+    chmod 600 "$BEYOND_HOME/.env"
+    if [ ! -f "$BEYOND_HOME/config.yaml" ] && [ -f "$INSTALL_DIR/cli-config.yaml.example" ]; then
+        cp "$INSTALL_DIR/cli-config.yaml.example" "$BEYOND_HOME/config.yaml"
     fi
-    log_success "config prepared in $HERMES_HOME"
+    log_success "config prepared in $BEYOND_HOME"
 }
 
 # Interactive stages read the terminal, not stdin: under `curl | bash` stdin
@@ -1153,20 +1153,20 @@ has_terminal() { (: </dev/tty) 2>/dev/null; }
 stage_setup() {
     if [ "$NON_INTERACTIVE" = true ]; then return 0; fi
     if ! has_terminal; then
-        log "setup skipped (no terminal); run 'hermes setup' after install"
+        log "setup skipped (no terminal); run 'beyond setup' after install"
         return 0
     fi
-    "$INSTALL_DIR/.hermes/bin/hermes" setup </dev/tty || fail "setup failed" setup_failed
+    "$INSTALL_DIR/.beyond/bin/beyond" setup </dev/tty || fail "setup failed" setup_failed
 }
 
 stage_gateway() {
     if [ "$NON_INTERACTIVE" = true ]; then return 0; fi
     if ! has_terminal; then
-        log "gateway setup skipped (no terminal); run 'hermes gateway install' after install"
+        log "gateway setup skipped (no terminal); run 'beyond gateway install' after install"
         return 0
     fi
     # Setup installs the service when it handles the gateway; ask only if it did not.
-    "$INSTALL_DIR/.hermes/bin/hermes" gateway install --if-missing </dev/tty || fail "gateway installation failed" gateway_failed
+    "$INSTALL_DIR/.beyond/bin/beyond" gateway install --if-missing </dev/tty || fail "gateway installation failed" gateway_failed
 }
 
 stage_complete() {
@@ -1175,21 +1175,21 @@ stage_complete() {
     [ -n "$commit" ] || commit=$(git -C "$INSTALL_DIR" rev-parse HEAD 2>/dev/null) || commit=""
     if [ -n "$commit" ]; then
         printf '{\n  "schemaVersion": 1,\n  "pinnedCommit": "%s",\n  "pinnedBranch": "%s",\n  "completedAt": "%s"\n}\n' \
-            "$commit" "$BRANCH" "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" > "$INSTALL_DIR/.hermes-bootstrap-complete.tmp"
-        mv -f "$INSTALL_DIR/.hermes-bootstrap-complete.tmp" "$INSTALL_DIR/.hermes-bootstrap-complete"
+            "$commit" "$BRANCH" "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" > "$INSTALL_DIR/.beyond-bootstrap-complete.tmp"
+        mv -f "$INSTALL_DIR/.beyond-bootstrap-complete.tmp" "$INSTALL_DIR/.beyond-bootstrap-complete"
     fi
     if [ -n "$CHANNEL" ]; then
-        "$INSTALL_DIR/.hermes/bin/hermes" update --set-channel "$CHANNEL" \
+        "$INSTALL_DIR/.beyond/bin/beyond" update --set-channel "$CHANNEL" \
             || fail "could not save the $CHANNEL update channel" other
     fi
-    log_success "Hermes Agent install complete. Run: hermes"
+    log_success "Beyond Agent install complete. Run: beyond"
 }
 
 print_path_reload_hint() {
     # The rc files only reach shells started later, and this installer is
     # always a child (`curl | bash`, `bash install.sh`) that cannot change its
     # parent's PATH. The inherited PATH is the parent's, so it says whether
-    # the user can run `hermes` right away.
+    # the user can run `beyond` right away.
     case ":$PATH:" in *":$HOME/.local/bin:"*|*":$HOME/.local/bin/:"*) return 0 ;; esac
     local rc
     local login_shell="${SHELL:-}"
@@ -1199,7 +1199,7 @@ print_path_reload_hint() {
         bash|"") rc="source ~/.bashrc" ;;
         *) rc=". ~/.profile" ;;
     esac
-    log "Reload your shell to use hermes: open a new terminal, or run: $rc"
+    log "Reload your shell to use beyond: open a new terminal, or run: $rc"
 }
 
 run_stage() (

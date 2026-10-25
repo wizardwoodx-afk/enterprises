@@ -33,7 +33,7 @@ export function createMinimizeToTray(options: Options) {
   const broadcast = () => {
     for (const win of BrowserWindow.getAllWindows()) {
       if (!win.isDestroyed()) {
-        win.webContents.send('hermes:minimize-to-tray:changed', status())
+        win.webContents.send('beyond:minimize-to-tray:changed', status())
       }
     }
   }
@@ -183,13 +183,13 @@ export function createMinimizeToTray(options: Options) {
             height: process.platform === 'darwin' ? 18 : 24
           })
         )
-        tray.setToolTip('Hermes')
+        tray.setToolTip('Beyond')
         tray.setContextMenu(
           Menu.buildFromTemplate([
-            { label: 'Show Hermes', click: restore },
+            { label: 'Show Beyond', click: restore },
             { type: 'separator' },
             // Do not bypass the ordinary active-work confirmation or teardown.
-            { label: 'Quit Hermes', click: () => app.quit() }
+            { label: 'Quit Beyond', click: () => app.quit() }
           ])
         )
 
@@ -241,11 +241,11 @@ export function createMinimizeToTray(options: Options) {
     }
 
     // Hide past the native minimize dispatch, not inside it: hiding
-    // synchronously here re-enters window-state changes mid-flight and on
+    // synchrobeyondly here re-enters window-state changes mid-flight and on
     // Windows wedges isMinimized(), so the later restore takes the
     // restore-on-hidden path back to a painted-but-dead window (#119252).
     // Guards are re-evaluated at fire time inside hide(); the close handler
-    // below keeps its synchronous hide so preventDefault still works.
+    // below keeps its synchrobeyond hide so preventDefault still works.
     win.on('minimize', () => {
       setImmediate(() => {
         // The user may have restored the window in the meantime (taskbar or
@@ -334,8 +334,8 @@ export function createMinimizeToTray(options: Options) {
     return operation
   }
 
-  ipcMain.handle('hermes:minimize-to-tray:get', status)
-  ipcMain.handle('hermes:minimize-to-tray:set', (_event, on) => setEnabled(on === true))
+  ipcMain.handle('beyond:minimize-to-tray:get', status)
+  ipcMain.handle('beyond:minimize-to-tray:set', (_event, on) => setEnabled(on === true))
   app.on('will-quit', () => {
     quitting = true
     destroyTray()

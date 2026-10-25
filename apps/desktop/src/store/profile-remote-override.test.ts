@@ -12,7 +12,7 @@ import {
 const getConnectionConfig = vi.fn()
 
 beforeEach(() => {
-  Object.defineProperty(window, 'hermesDesktop', {
+  Object.defineProperty(window, 'beyondDesktop', {
     configurable: true,
     value: { getConnectionConfig }
   })
@@ -27,9 +27,9 @@ afterEach(() => {
 
 describe('remoteHostLabel', () => {
   it('keeps a non-default port and drops default ones', () => {
-    expect(remoteHostLabel('https://hermes.example.com:8443/x')).toBe('hermes.example.com:8443')
-    expect(remoteHostLabel('https://hermes.example.com:443')).toBe('hermes.example.com')
-    expect(remoteHostLabel('http://hermes.example.com:80')).toBe('hermes.example.com')
+    expect(remoteHostLabel('https://beyond.example.com:8443/x')).toBe('beyond.example.com:8443')
+    expect(remoteHostLabel('https://beyond.example.com:443')).toBe('beyond.example.com')
+    expect(remoteHostLabel('http://beyond.example.com:80')).toBe('beyond.example.com')
   })
 
   it('returns empty for unparseable input', () => {

@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
  * primitive (extracted from gateway-connecting-overlay.tsx; same mechanics):
  *
  *  - Even-weight mono ascii charset so cycling glyphs never jump width
- *    (matches the nousnet-web download-button decode effect).
+ *    (matches the beyondnet-web download-button decode effect).
  *  - Decode resolves half a character per 45ms tick; when fully resolved it
  *    holds for 16 ticks, then (in loop mode) replays.
  *  - The first `prefix` characters NEVER scramble — split at render level so
@@ -40,7 +40,7 @@ export interface DecodeTextProps extends Omit<ComponentProps<'span'>, 'prefix'> 
   /** Replay after the hold (a progress surface such as the boot overlay), or
    *  resolve once and stop. Off by default: a quiet placeholder that replays
    *  forever is a 22 Hz setState ticker for as long as it is on screen — the
-   *  empty-zone "HERMES" mark alone held the idle renderer at ~16 commits/s
+   *  empty-zone "BEYOND" mark alone held the idle renderer at ~16 commits/s
    *  (#98394). */
   loop?: boolean
   /** Blinking dither-cursor square after the text. */

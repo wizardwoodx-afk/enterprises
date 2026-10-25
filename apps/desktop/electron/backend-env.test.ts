@@ -8,7 +8,7 @@ import { test } from 'vitest'
 import {
   appendUniquePathEntries,
   buildDesktopBackendEnv,
-  normalizeHermesHomeRoot,
+  normalizeBeyondHomeRoot,
   pathEnvKey,
   POSIX_SANE_PATH_ENTRIES,
   profileBackendParentEnv
@@ -45,16 +45,16 @@ test('POSIX backend PATH keeps the inherited PATH first and appends missing sane
 })
 
 test('backend runs the store toolchain even after the login-shell PATH is merged in front of it', async () => {
-  // `hermes desktop` hands Electron a PATH with the PM store first; the
+  // `beyond desktop` hands Electron a PATH with the PM store first; the
   // login-shell merge then puts nvm/Homebrew ahead of it in process.env.
   const env: Record<string, string> = {
-    PATH: '/Users/u/.hermes/tools/node-26.7.0-darwin-arm64/bin:/Users/u/.hermes/tools/uv-0.12.3-darwin-arm64:/usr/bin:/bin'
+    PATH: '/Users/u/.beyond/tools/node-26.7.0-darwin-arm64/bin:/Users/u/.beyond/tools/uv-0.12.3-darwin-arm64:/usr/bin:/bin'
   }
 
   const loginPath = '/Users/u/.nvm/versions/node/v20.0.0/bin:/opt/homebrew/bin:/usr/bin'
 
   const execFileFn = (_file, _args, _options, callback) => {
-    queueMicrotask(() => callback(null, `__HERMES_LOGIN_PATH_START__${loginPath}__HERMES_LOGIN_PATH_END__`, ''))
+    queueMicrotask(() => callback(null, `__BEYOND_LOGIN_PATH_START__${loginPath}__BEYOND_LOGIN_PATH_END__`, ''))
 
     return { stdin: { end() {} } }
   }
@@ -65,21 +65,21 @@ test('backend runs the store toolchain even after the login-shell PATH is merged
   const backend = buildDesktopBackendEnv({ currentEnv: env, platform: 'darwin', homedir: '/Users/u' })
 
   assert.deepEqual(backend.PATH.split(':').slice(0, 5), [
-    '/Users/u/.hermes/tools/node-26.7.0-darwin-arm64/bin',
-    '/Users/u/.hermes/tools/uv-0.12.3-darwin-arm64',
+    '/Users/u/.beyond/tools/node-26.7.0-darwin-arm64/bin',
+    '/Users/u/.beyond/tools/uv-0.12.3-darwin-arm64',
     '/Users/u/.nvm/versions/node/v20.0.0/bin',
     '/opt/homebrew/bin',
     '/usr/bin'
   ])
 })
 
-test('HERMES_RUNTIME_DIR names the store; look-alike prefixes are not Hermes-owned', () => {
-  const store = '/Applications/Hermes.app/Contents/Resources/agent-payload/tools'
+test('BEYOND_RUNTIME_DIR names the store; look-alike prefixes are not Beyond-owned', () => {
+  const store = '/Applications/Beyond.app/Contents/Resources/agent-payload/tools'
 
   const backend = buildDesktopBackendEnv({
     currentEnv: {
-      HERMES_RUNTIME_DIR: store,
-      PATH: `/opt/homebrew/bin:/Users/u/.hermes/tools-old/bin:${store}/npm-12.0.2-darwin-arm64/bin:/usr/bin`
+      BEYOND_RUNTIME_DIR: store,
+      PATH: `/opt/homebrew/bin:/Users/u/.beyond/tools-old/bin:${store}/npm-12.0.2-darwin-arm64/bin:/usr/bin`
     },
     platform: 'darwin',
     homedir: '/Users/u'
@@ -88,7 +88,7 @@ test('HERMES_RUNTIME_DIR names the store; look-alike prefixes are not Hermes-own
   assert.deepEqual(backend.PATH.split(':').slice(0, 4), [
     `${store}/npm-12.0.2-darwin-arm64/bin`,
     '/opt/homebrew/bin',
-    '/Users/u/.hermes/tools-old/bin',
+    '/Users/u/.beyond/tools-old/bin',
     '/usr/bin'
   ])
 })
@@ -119,32 +119,32 @@ test('buildDesktopBackendEnv forces PYTHONUTF8 unless the user set it explicitly
   assert.equal(optedOut.PYTHONUTF8, '0')
 })
 
-test('normalizeHermesHomeRoot expands a literal leading ~ against the home directory, not cwd', () => {
+test('normalizeBeyondHomeRoot expands a literal leading ~ against the home directory, not cwd', () => {
   assert.equal(
-    normalizeHermesHomeRoot('~/.hermes', { pathModule: path.posix, homedir: '/Users/test' }),
-    '/Users/test/.hermes'
+    normalizeBeyondHomeRoot('~/.beyond', { pathModule: path.posix, homedir: '/Users/test' }),
+    '/Users/test/.beyond'
   )
   assert.equal(
-    normalizeHermesHomeRoot('~/.hermes/profiles/oracle', { pathModule: path.posix, homedir: '/Users/test' }),
-    '/Users/test/.hermes'
+    normalizeBeyondHomeRoot('~/.beyond/profiles/oracle', { pathModule: path.posix, homedir: '/Users/test' }),
+    '/Users/test/.beyond'
   )
   assert.equal(
-    normalizeHermesHomeRoot('~\\.hermes', { pathModule: path.win32, homedir: 'C:\\Users\\test' }),
-    'C:\\Users\\test\\.hermes'
+    normalizeBeyondHomeRoot('~\\.beyond', { pathModule: path.win32, homedir: 'C:\\Users\\test' }),
+    'C:\\Users\\test\\.beyond'
   )
-  assert.equal(normalizeHermesHomeRoot('~', { pathModule: path.posix, homedir: '/Users/test' }), '/Users/test')
+  assert.equal(normalizeBeyondHomeRoot('~', { pathModule: path.posix, homedir: '/Users/test' }), '/Users/test')
 })
 
-test('normalizeHermesHomeRoot maps profile homes back to the global Hermes root', () => {
+test('normalizeBeyondHomeRoot maps profile homes back to the global Beyond root', () => {
   assert.equal(
-    normalizeHermesHomeRoot('/Users/test/.hermes/profiles/oracle', { pathModule: path.posix }),
-    '/Users/test/.hermes'
+    normalizeBeyondHomeRoot('/Users/test/.beyond/profiles/oracle', { pathModule: path.posix }),
+    '/Users/test/.beyond'
   )
   assert.equal(
-    normalizeHermesHomeRoot('C:\\Users\\test\\AppData\\Local\\hermes\\profiles\\oracle', { pathModule: path.win32 }),
-    'C:\\Users\\test\\AppData\\Local\\hermes'
+    normalizeBeyondHomeRoot('C:\\Users\\test\\AppData\\Local\\beyond\\profiles\\oracle', { pathModule: path.win32 }),
+    'C:\\Users\\test\\AppData\\Local\\beyond'
   )
-  assert.equal(normalizeHermesHomeRoot('/Users/test/.hermes', { pathModule: path.posix }), '/Users/test/.hermes')
+  assert.equal(normalizeBeyondHomeRoot('/Users/test/.beyond', { pathModule: path.posix }), '/Users/test/.beyond')
 })
 
 test('pathEnvKey finds the platform-cased PATH key', () => {
@@ -158,10 +158,10 @@ test('appendUniquePathEntries flattens, dedupes, and preserves first occurrence'
   assert.equal(appendUniquePathEntries(['/a:/b', ['/b', '/c'], '', null], { delimiter: ':' }), '/a:/b:/c')
 })
 
-// `hermes desktop` loads its launch profile's .env/.op.env into os.environ and
+// `beyond desktop` loads its launch profile's .env/.op.env into os.environ and
 // hands that env to Electron; these cover what a profile backend inherits (#68367).
-function withHermesRoot(files: Record<string, string>, run: (root: string) => void) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'hermes-profile-env-'))
+function withBeyondRoot(files: Record<string, string>, run: (root: string) => void) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'beyond-profile-env-'))
 
   try {
     for (const [rel, contents] of Object.entries(files)) {
@@ -191,9 +191,9 @@ const ROOT_LAUNCHED_ENV = {
 }
 
 test('a named profile backend does not inherit secrets the root .env/.op.env loaded into Desktop', () => {
-  withHermesRoot(ROOT_SCOPE_FILES, root => {
+  withBeyondRoot(ROOT_SCOPE_FILES, root => {
     const env = profileBackendParentEnv({
-      hermesHome: root,
+      beyondHome: root,
       profile: 'urbot',
       currentEnv: ROOT_LAUNCHED_ENV,
       platform: 'linux'
@@ -205,10 +205,10 @@ test('a named profile backend does not inherit secrets the root .env/.op.env loa
 })
 
 test('the launch profile backend inherits the Desktop env unchanged', () => {
-  withHermesRoot(ROOT_SCOPE_FILES, root => {
+  withBeyondRoot(ROOT_SCOPE_FILES, root => {
     for (const profile of ['default', null, undefined]) {
       assert.deepEqual(
-        profileBackendParentEnv({ hermesHome: root, profile, currentEnv: ROOT_LAUNCHED_ENV, platform: 'linux' }),
+        profileBackendParentEnv({ beyondHome: root, profile, currentEnv: ROOT_LAUNCHED_ENV, platform: 'linux' }),
         ROOT_LAUNCHED_ENV
       )
     }
@@ -216,8 +216,8 @@ test('the launch profile backend inherits the Desktop env unchanged', () => {
 })
 
 test('a primary backend without an explicit profile follows the sticky active_profile', () => {
-  withHermesRoot({ ...ROOT_SCOPE_FILES, active_profile: 'urbot\n' }, root => {
-    const env = profileBackendParentEnv({ hermesHome: root, profile: null, currentEnv: ROOT_LAUNCHED_ENV })
+  withBeyondRoot({ ...ROOT_SCOPE_FILES, active_profile: 'urbot\n' }, root => {
+    const env = profileBackendParentEnv({ beyondHome: root, profile: null, currentEnv: ROOT_LAUNCHED_ENV })
 
     assert.equal(env.TLON_SHIP_CODE, undefined)
     assert.equal(env.OP_SERVICE_ACCOUNT_TOKEN, undefined)
@@ -226,30 +226,30 @@ test('a primary backend without an explicit profile follows the sticky active_pr
 })
 
 test('Desktop launched from a named profile keeps that profile out of the default backend', () => {
-  withHermesRoot(
+  withBeyondRoot(
     {
       '.env': 'OPENAI_API_KEY=root-key\n',
       'profiles/work/.env': 'TLON_SHIP_CODE=work-code\nOP_SERVICE_ACCOUNT_TOKEN=work-op\n'
     },
     root => {
       const currentEnv = {
-        HERMES_HOME: path.join(root, 'profiles', 'work'),
+        BEYOND_HOME: path.join(root, 'profiles', 'work'),
         TLON_SHIP_CODE: 'work-code',
         OP_SERVICE_ACCOUNT_TOKEN: 'work-op',
         OPENAI_API_KEY: 'shell-key'
       }
 
-      assert.deepEqual(profileBackendParentEnv({ hermesHome: root, profile: 'default', currentEnv }), {
-        HERMES_HOME: currentEnv.HERMES_HOME,
+      assert.deepEqual(profileBackendParentEnv({ beyondHome: root, profile: 'default', currentEnv }), {
+        BEYOND_HOME: currentEnv.BEYOND_HOME,
         OPENAI_API_KEY: 'shell-key'
       })
-      assert.deepEqual(profileBackendParentEnv({ hermesHome: root, profile: 'work', currentEnv }), currentEnv)
+      assert.deepEqual(profileBackendParentEnv({ beyondHome: root, profile: 'work', currentEnv }), currentEnv)
     }
   )
 })
 
 test('Windows matches profile homes and dotenv names case-insensitively', () => {
-  const root = 'C:\\Users\\test\\AppData\\Local\\hermes'
+  const root = 'C:\\Users\\test\\AppData\\Local\\beyond'
   const files = { [`${root}\\.env`]: 'TELEGRAM_BOT_TOKEN=root-token\r\n' }
 
   const fsModule = {
@@ -263,14 +263,14 @@ test('Windows matches profile homes and dotenv names case-insensitively', () => 
   }
 
   const currentEnv = {
-    HERMES_HOME: 'c:\\users\\test\\appdata\\local\\HERMES',
+    BEYOND_HOME: 'c:\\users\\test\\appdata\\local\\BEYOND',
     Path: 'C:\\Windows',
     Telegram_Bot_Token: 'root-token'
   }
 
   const scoped = (profile: string) =>
-    profileBackendParentEnv({ hermesHome: root, profile, currentEnv, platform: 'win32', fsModule })
+    profileBackendParentEnv({ beyondHome: root, profile, currentEnv, platform: 'win32', fsModule })
 
   assert.deepEqual(scoped('default'), currentEnv)
-  assert.deepEqual(scoped('urbot'), { HERMES_HOME: currentEnv.HERMES_HOME, Path: 'C:\\Windows' })
+  assert.deepEqual(scoped('urbot'), { BEYOND_HOME: currentEnv.BEYOND_HOME, Path: 'C:\\Windows' })
 })

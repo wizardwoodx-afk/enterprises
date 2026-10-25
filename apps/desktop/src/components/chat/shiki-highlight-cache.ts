@@ -4,7 +4,7 @@
 // × full tokenization on the renderer main thread, on every switch, even
 // though the code had not changed. The fix is a module-level LRU cache keyed
 // by (scope, language, code) holding the final highlighted HTML, so a remount
-// of an unchanged block paints the cached markup synchronously and never
+// of an unchanged block paints the cached markup synchrobeyondly and never
 // touches the highlighter.
 //
 // Bounds: shiki's tokenized HTML is ~5-10x the source size, so an unbounded

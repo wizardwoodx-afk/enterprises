@@ -88,7 +88,7 @@ describe('BackendDialClaims (#90812)', () => {
     expect(recovered).toHaveBeenCalledTimes(1)
   })
 
-  it('a synchronously-throwing dial rejects the claim instead of escaping the coalescing seam', async () => {
+  it('a synchrobeyondly-throwing dial rejects the claim instead of escaping the coalescing seam', async () => {
     const claims = new BackendDialClaims()
 
     await expect(

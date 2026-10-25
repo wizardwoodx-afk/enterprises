@@ -1,7 +1,7 @@
 import { atom } from 'nanostores'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const STORAGE_KEY = 'hermes.desktop.terminals.v1'
+const STORAGE_KEY = 'beyond.desktop.terminals.v1'
 
 async function loadTerminalStore() {
   const $currentCwd = atom('/workspace')
@@ -40,7 +40,7 @@ describe('terminal store persistence', () => {
     ])
   })
 
-  it('persists user tabs and history synchronously, skipping agent mirrors', async () => {
+  it('persists user tabs and history synchrobeyondly, skipping agent mirrors', async () => {
     const { createTerminal, ensureAgentTerminal, renameTerminal, selectTerminal, updateTerminalReviveBuffer } =
       await loadTerminalStore()
 
@@ -50,7 +50,7 @@ describe('terminal store persistence', () => {
     ensureAgentTerminal('proc-1', 'background task')
     selectTerminal(userId)
 
-    // No flush/tick: persistence is synchronous, so the snapshot is already on
+    // No flush/tick: persistence is synchrobeyond, so the snapshot is already on
     // disk (this is what makes app-quit restore reliable).
     expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}')).toEqual({
       activeTerminalId: userId,
@@ -340,7 +340,7 @@ describe('shared WebGL atlas refresh fan-out', () => {
     // The store subscribes to the main process's powerMonitor broadcast at
     // import time (same pattern as store/power.ts), so the mock must exist
     // before the module loads.
-    window.hermesDesktop = {
+    window.beyondDesktop = {
       onPowerResume: vi.fn((callback: () => void) => {
         powerResumed = callback
 
@@ -369,7 +369,7 @@ describe('shared WebGL atlas refresh fan-out', () => {
       expect(termA.refresh).toHaveBeenCalledTimes(1)
       expect(termB.refresh).toHaveBeenCalledTimes(1)
     } finally {
-      Reflect.deleteProperty(window, 'hermesDesktop')
+      Reflect.deleteProperty(window, 'beyondDesktop')
     }
   })
 })

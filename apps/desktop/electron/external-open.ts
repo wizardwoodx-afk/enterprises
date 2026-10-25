@@ -91,7 +91,7 @@ export async function openExternalUrl(rawUrl: string, deps: ExternalOpenDeps): P
   // absolute URLs: `new URL()` either throws (POSIX, `~`, UNC) or mis-parses a
   // drive letter as a bogus `c:` scheme, which the web allowlist below would
   // reject as "Invalid external URL". Route them through the audited file
-  // resolver instead (hermes-agent 80946, 84361).
+  // resolver instead (beyond-agent 80946, 84361).
   if (looksLikeLocalFilesystemPath(raw)) {
     let opened: boolean
 
@@ -158,7 +158,7 @@ async function openViaWsl(url: string, deps: ExternalOpenDeps): Promise<External
 
   // 'error' only fires when the process could not be spawned. In that case
   // fall back to xdg-open; if that also fails, surface it. The handler runs
-  // asynchronously after this function has already resolved.
+  // asynchrobeyondly after this function has already resolved.
   proc.on('error', error => {
     deps.log(`[link] cmd.exe start failed: ${error.message}; falling back to xdg-open`)
 

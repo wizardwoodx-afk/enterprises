@@ -50,7 +50,7 @@ describe('interpretRuntimeReadiness', () => {
     })
   })
 
-  const NOT_CONNECTED = 'Hermes is not connected to any AI provider yet. Run `hermes model` to pick one.'
+  const NOT_CONNECTED = 'Beyond is not connected to any AI provider yet. Run `beyond model` to pick one.'
 
   it.each([
     ['runtime_check', { runtime: { error: NOT_CONNECTED, ok: false }, runtimeError: null }],
@@ -69,13 +69,13 @@ describe('interpretRuntimeReadiness', () => {
       {
         setup: { provider_configured: false },
         setupError: null,
-        runtime: { error: 'No usable credentials found for nous.', ok: false },
+        runtime: { error: 'No usable credentials found for beyond.', ok: false },
         runtimeError: null
       },
-      { requestedProvider: 'nous' }
+      { requestedProvider: 'beyond' }
     )
 
-    expect(result.reason).toBe('No usable credentials found for nous.')
+    expect(result.reason).toBe('No usable credentials found for beyond.')
   })
 
   it('uses explicit fallback when both checks are missing', () => {
@@ -110,9 +110,9 @@ describe('fetchRuntimeReadinessSignals', () => {
       throw new Error(`unexpected method: ${method}`)
     }
 
-    await fetchRuntimeReadinessSignals(requestGateway, 'nous')
+    await fetchRuntimeReadinessSignals(requestGateway, 'beyond')
 
-    expect(calls).toEqual([{ method: 'setup.status' }, { method: 'setup.runtime_check', params: { provider: 'nous' } }])
+    expect(calls).toEqual([{ method: 'setup.status' }, { method: 'setup.runtime_check', params: { provider: 'beyond' } }])
   })
 })
 

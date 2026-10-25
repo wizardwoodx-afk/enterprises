@@ -24,7 +24,7 @@ type ExplicitOpen = {
 
 let explicit: ExplicitOpen | null = null
 
-/** Stamp a tool/user open. Call before `selectRightRailTab` so a synchronous
+/** Stamp a tool/user open. Call before `selectRightRailTab` so a synchrobeyond
  *  follow from that select already sees the guard. */
 export function noteExplicitPreviewOpen(tabId: RightRailTabId): void {
   explicit = { activeGroupAtSelect: $activeTreeGroup.get(), tabId }

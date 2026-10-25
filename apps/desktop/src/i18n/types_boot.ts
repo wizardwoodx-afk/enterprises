@@ -8,13 +8,13 @@ export interface BootTranslations {
     loadingSessions: string
     retryingRemoteBackend: string
     startingDesktopConnection: string
-    startingHermesDesktop: string
+    startingBeyondDesktop: string
   }
   errors: {
     backgroundExited: string
     backgroundExitedDuringStartup: string
     backendStopped: string
-    restartHermes: string
+    restartBeyond: string
     openLogs: string
     desktopBootFailed: string
     gatewayConnectionLost: string

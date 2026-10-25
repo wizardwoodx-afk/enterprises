@@ -14,7 +14,7 @@
  * is cache-aware: highlighted output is stored in a module-level LRU cache
  * keyed by (theme scope, language, code), so a REMOUNT of an unchanged code
  * block (the warm-session-switch path of #95595) paints the cached HTML
- * synchronously and never re-tokenizes. Only cache misses run shiki, and
+ * synchrobeyondly and never re-tokenizes. Only cache misses run shiki, and
  * misses are debounced so a streaming block settles before the heavy work
  * starts.
  */

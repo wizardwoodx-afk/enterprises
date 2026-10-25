@@ -65,7 +65,7 @@ export const ERROR_CODE_KEYS = [
   // Raised by the desktop, never by the backend: the backend reported a turn
   // over after its events stopped, and no reply reached this window.
   'no_reply',
-  // The Nous free tier refused or could not serve the turn (agent/error_surface.py
+  // The Beyond free tier refused or could not serve the turn (agent/error_surface.py
   // `free_tier_<kind>`). The backend's sentence rides in `message` and is the card body.
   'free_tier_disabled',
   'free_tier_rate_limited',
@@ -96,7 +96,7 @@ export interface ErrorSurface {
    *  the fix is signing in again (expired/revoked grant); `api_key` means a
    *  key needs replacing. Absent from older backends. */
   authKind?: 'api_key' | 'oauth'
-  /** Auth layer only: display name of the failing provider ("Nous Portal"). */
+  /** Auth layer only: display name of the failing provider ("Beyond Portal"). */
   providerLabel?: string
   /** Auth layer, api_key only: the env var holding the rejected key
    *  (OPENAI_API_KEY). Deep-links Settings → Keys to that row. Absent from
@@ -146,7 +146,7 @@ function parseUsageLimit(value: unknown): UsageLimitSurface | undefined {
             model: s.model,
             label: typeof s.label === 'string' && s.label ? s.label : s.model,
             note: typeof s.note === 'string' ? s.note : '',
-            provider: typeof s.provider === 'string' && s.provider ? s.provider : 'nous'
+            provider: typeof s.provider === 'string' && s.provider ? s.provider : 'beyond'
           }
         ]
       : []
@@ -261,7 +261,7 @@ export function formatCountdown(remainingMs: number): string {
   return hours > 0 ? `${hours}h ${tail}` : tail.replace(/^0/, '')
 }
 
-/** True when the Nous free tier refused or could not serve the turn: the way
+/** True when the Beyond free tier refused or could not serve the turn: the way
  *  forward is the free sign-in (or another provider), never an OAuth re-login. */
 export function isFreeTierSurface(surface: ErrorSurface | null | undefined): boolean {
   return typeof surface?.code === 'string' && surface.code.startsWith('free_tier_')
@@ -313,8 +313,8 @@ export interface ErrorRecoveryPlan {
   startNewSession: boolean
   /** Open the preceding user message in the edit composer (safety refusal). */
   editMessage: boolean
-  /** Reveal the Hermes data folder so the user can free space (disk_full). */
-  openHermesFolder: boolean
+  /** Reveal the Beyond data folder so the user can free space (disk_full). */
+  openBeyondFolder: boolean
   /** Settings → Keys deep link (auth, api_key). */
   updateApiKey: boolean
   /** Re-run the provider's OAuth sign-in (auth, oauth). */
@@ -354,7 +354,7 @@ const CODE_PLANS: Partial<Record<ErrorCodeKey, Partial<ErrorRecoveryPlan>>> = {
   launch_credentials_unavailable: { retry: false, startNewSession: true },
   content_policy_blocked: { editMessage: true, retry: false },
   context_overflow: { compress: true, retry: false, startNewSession: true },
-  disk_full: { openHermesFolder: true, retry: true },
+  disk_full: { openBeyondFolder: true, retry: true },
   loop_error: { startNewSession: true },
   model_not_found: { chooseModel: true, retry: false },
   payload_too_large: { compress: true, retry: false, startNewSession: true },
@@ -373,7 +373,7 @@ export function errorRecoveryPlan(surface: ErrorSurface | null | undefined): Err
     chooseModel: false,
     compress: false,
     editMessage: false,
-    openHermesFolder: false,
+    openBeyondFolder: false,
     // Retry re-runs the failed prompt in place. Suppressed when the classifier
     // says the failure is deterministic — except for a credential rejection,
     // where fixing the credential changes the outcome and Retry is the
@@ -422,7 +422,7 @@ export function formatErrorDiagnostics(input: {
   const model = input.surface?.model || input.model
 
   const lines = [
-    '── Hermes error details ──',
+    '── Beyond error details ──',
     input.failedAt ? `time: ${new Date(input.failedAt * 1000).toISOString()}` : null,
     input.surface ? `layer: ${input.surface.layer}` : null,
     input.surface ? `code: ${input.surface.code}` : null,

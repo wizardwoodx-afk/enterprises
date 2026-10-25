@@ -1,8 +1,8 @@
-import { mergeUsage } from '@hermes/shared'
+import { mergeUsage } from '@beyond/shared'
 
 import { resolveSessionRpcOwner } from '@/app/contrib/wiring-routing'
 import { textWithoutReferenceLines } from '@/components/assistant-ui/reference-kinds'
-import { getSession } from '@/hermes'
+import { getSession } from '@/beyond'
 import { sameAttachmentTurn, spliceOlderPreservedRows } from '@/lib/chat-messages'
 import {
   assistantTextPart,
@@ -66,7 +66,7 @@ import { runtimeSessionOwner, sessionTileOwnerRoute } from '@/store/session-stat
 export { sessionMatchesStoredId }
 import { sessionOwnerRouteFromRow, type SessionOwnerScope } from '@/store/session-request-router'
 import { reportBackendContract, reportInstallMethodWarning } from '@/store/updates'
-import type { SessionCreateResponse, SessionInfo, SessionResumeResult, SessionRuntimeInfo } from '@/types/hermes'
+import type { SessionCreateResponse, SessionInfo, SessionResumeResult, SessionRuntimeInfo } from '@/types/beyond'
 
 import type { ClientSessionState } from '../../../types'
 

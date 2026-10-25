@@ -2,52 +2,52 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import {
-  HERMES_HUB_FALLBACK_ORIGIN,
-  HERMES_HUB_ORIGIN,
-  isHermesHubClipboardWrite,
-  isHermesHubExternalUrl,
-  isHermesHubOrigin
+  BEYOND_HUB_FALLBACK_ORIGIN,
+  BEYOND_HUB_ORIGIN,
+  isBeyondHubClipboardWrite,
+  isBeyondHubExternalUrl,
+  isBeyondHubOrigin
 } from './hub-iframe-policy'
 import { createWindowOpenHandler, describeDeniedUrl } from './window-open-policy'
 
 describe('hub-iframe-policy predicates', () => {
   it('admits exactly the two hub origins and nothing else', () => {
-    expect(isHermesHubOrigin(HERMES_HUB_ORIGIN)).toBe(true)
-    expect(isHermesHubOrigin(HERMES_HUB_FALLBACK_ORIGIN)).toBe(true)
+    expect(isBeyondHubOrigin(BEYOND_HUB_ORIGIN)).toBe(true)
+    expect(isBeyondHubOrigin(BEYOND_HUB_FALLBACK_ORIGIN)).toBe(true)
 
     // Opaque sandboxed frames, data URLs, look-alikes, and absent origins
     // never qualify.
-    expect(isHermesHubOrigin('null')).toBe(false)
-    expect(isHermesHubOrigin('')).toBe(false)
-    expect(isHermesHubOrigin(null)).toBe(false)
-    expect(isHermesHubOrigin(undefined)).toBe(false)
-    expect(isHermesHubOrigin('https://hermes-agent.nousresearch.com.evil.example')).toBe(false)
-    expect(isHermesHubOrigin('https://evil.example')).toBe(false)
-    expect(isHermesHubOrigin('file://')).toBe(false)
+    expect(isBeyondHubOrigin('null')).toBe(false)
+    expect(isBeyondHubOrigin('')).toBe(false)
+    expect(isBeyondHubOrigin(null)).toBe(false)
+    expect(isBeyondHubOrigin(undefined)).toBe(false)
+    expect(isBeyondHubOrigin('https://beyond.app.evil.example')).toBe(false)
+    expect(isBeyondHubOrigin('https://evil.example')).toBe(false)
+    expect(isBeyondHubOrigin('file://')).toBe(false)
   })
 
   it('delegates only http/https/mailto external URLs', () => {
-    expect(isHermesHubExternalUrl('https://github.com/NousResearch/hermes-agent')).toBe(true)
-    expect(isHermesHubExternalUrl('http://example.com/docs')).toBe(true)
-    expect(isHermesHubExternalUrl('mailto:support@example.com')).toBe(true)
+    expect(isBeyondHubExternalUrl('https://github.com/beyond-app/beyond')).toBe(true)
+    expect(isBeyondHubExternalUrl('http://example.com/docs')).toBe(true)
+    expect(isBeyondHubExternalUrl('mailto:support@example.com')).toBe(true)
 
-    expect(isHermesHubExternalUrl('file:///etc/passwd')).toBe(false)
-    expect(isHermesHubExternalUrl('javascript:alert(1)')).toBe(false)
-    expect(isHermesHubExternalUrl('hermes://internal')).toBe(false)
-    expect(isHermesHubExternalUrl('not a url')).toBe(false)
+    expect(isBeyondHubExternalUrl('file:///etc/passwd')).toBe(false)
+    expect(isBeyondHubExternalUrl('javascript:alert(1)')).toBe(false)
+    expect(isBeyondHubExternalUrl('beyond://internal')).toBe(false)
+    expect(isBeyondHubExternalUrl('not a url')).toBe(false)
   })
 
   it('grants clipboard-write to hub origins only', () => {
-    expect(isHermesHubClipboardWrite(HERMES_HUB_ORIGIN)).toBe(true)
-    expect(isHermesHubClipboardWrite(HERMES_HUB_FALLBACK_ORIGIN)).toBe(true)
-    expect(isHermesHubClipboardWrite('null')).toBe(false)
-    expect(isHermesHubClipboardWrite('https://artifact-preview.invalid')).toBe(false)
-    expect(isHermesHubClipboardWrite(null)).toBe(false)
+    expect(isBeyondHubClipboardWrite(BEYOND_HUB_ORIGIN)).toBe(true)
+    expect(isBeyondHubClipboardWrite(BEYOND_HUB_FALLBACK_ORIGIN)).toBe(true)
+    expect(isBeyondHubClipboardWrite('null')).toBe(false)
+    expect(isBeyondHubClipboardWrite('https://artifact-preview.invalid')).toBe(false)
+    expect(isBeyondHubClipboardWrite(null)).toBe(false)
   })
 })
 
 describe('createWindowOpenHandler trusted-hub delegation', () => {
-  const baseDetails = { url: 'https://github.com/NousResearch/hermes-agent' }
+  const baseDetails = { url: 'https://github.com/beyond-app/beyond' }
 
   it('still denies artifact frames (opaque origin) with NO external open', () => {
     const openExternalUrl = vi.fn()
@@ -65,19 +65,19 @@ describe('createWindowOpenHandler trusted-hub delegation', () => {
     const openExternalUrl = vi.fn()
 
     const handler = createWindowOpenHandler(undefined, {
-      getOpenerOrigin: () => HERMES_HUB_ORIGIN,
+      getOpenerOrigin: () => BEYOND_HUB_ORIGIN,
       openExternalUrl
     })
 
     expect(handler(baseDetails)).toEqual({ action: 'deny' })
-    expect(openExternalUrl).toHaveBeenCalledExactlyOnceWith('https://github.com/NousResearch/hermes-agent')
+    expect(openExternalUrl).toHaveBeenCalledExactlyOnceWith('https://github.com/beyond-app/beyond')
   })
 
   it('delegates from the fallback (GitHub Pages) hub origin too', () => {
     const openExternalUrl = vi.fn()
 
     const handler = createWindowOpenHandler(undefined, {
-      getOpenerOrigin: () => HERMES_HUB_FALLBACK_ORIGIN,
+      getOpenerOrigin: () => BEYOND_HUB_FALLBACK_ORIGIN,
       openExternalUrl
     })
 
@@ -89,7 +89,7 @@ describe('createWindowOpenHandler trusted-hub delegation', () => {
     const openExternalUrl = vi.fn()
 
     const handler = createWindowOpenHandler(undefined, {
-      getOpenerOrigin: () => HERMES_HUB_ORIGIN,
+      getOpenerOrigin: () => BEYOND_HUB_ORIGIN,
       openExternalUrl
     })
 
@@ -103,7 +103,7 @@ describe('createWindowOpenHandler trusted-hub delegation', () => {
     const openExternalUrl = vi.fn()
 
     const handler = createWindowOpenHandler(undefined, {
-      getOpenerOrigin: () => 'https://hermes-agent.nousresearch.com.evil.example',
+      getOpenerOrigin: () => 'https://beyond.app.evil.example',
       openExternalUrl
     })
 
@@ -127,7 +127,7 @@ describe('createWindowOpenHandler trusted-hub delegation', () => {
     expect(openExternalUrl).not.toHaveBeenCalled()
 
     const throwingOpen = createWindowOpenHandler(undefined, {
-      getOpenerOrigin: () => HERMES_HUB_ORIGIN,
+      getOpenerOrigin: () => BEYOND_HUB_ORIGIN,
       openExternalUrl
     })
 
@@ -141,7 +141,7 @@ describe('createWindowOpenHandler trusted-hub delegation', () => {
       () => {
         throw new Error('log failed')
       },
-      { getOpenerOrigin: () => HERMES_HUB_ORIGIN, openExternalUrl }
+      { getOpenerOrigin: () => BEYOND_HUB_ORIGIN, openExternalUrl }
     )
 
     expect(handler(baseDetails)).toEqual({ action: 'deny' })

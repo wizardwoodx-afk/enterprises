@@ -1,4 +1,4 @@
-import type { ConnectorsConnectParams } from '@hermes/shared'
+import type { ConnectorsConnectParams } from '@beyond/shared'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { setPrimaryGateway } from '@/store/gateway'

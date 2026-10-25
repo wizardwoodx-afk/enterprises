@@ -13,7 +13,7 @@
  * so "exactly once" is a count over rendered text, independent of how the
  * renderer groups bubbles (live vs hydrated grouping legitimately differs).
  *
- * Final-state checks converge with a deadline (hydration is asynchronous);
+ * Final-state checks converge with a deadline (hydration is asynchrobeyond);
  * transient faults are caught separately by an in-page MutationObserver
  * sampler that is never allowed to see a marker twice, a reply above its own
  * prompt, or two messages swap places between frames.

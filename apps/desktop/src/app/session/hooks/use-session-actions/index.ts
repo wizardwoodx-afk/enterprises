@@ -1,4 +1,4 @@
-import { mergeUsage } from '@hermes/shared'
+import { mergeUsage } from '@beyond/shared'
 import { useStore } from '@nanostores/react'
 import { type MutableRefObject, useCallback, useEffect, useRef } from 'react'
 import type { NavigateFunction } from 'react-router'
@@ -18,7 +18,7 @@ import {
   getAllSessionMessages,
   getLatestSessionMessages,
   setSessionArchived
-} from '@/hermes'
+} from '@/beyond'
 import { useI18n } from '@/i18n'
 import {
   type ChatMessage,
@@ -142,7 +142,7 @@ import type {
   SessionMessagesResponse,
   SessionResumeResult,
   UsageStats
-} from '@/types/hermes'
+} from '@/types/beyond'
 
 import { navigateToWorkspacePage, NEW_CHAT_ROUTE, sessionRoute, SETTINGS_ROUTE } from '../../../routes'
 import type { ClientSessionState, SidebarNavItem } from '../../../types'
@@ -591,7 +591,7 @@ export function useSessionActions({
       // painting on the pane-hidden marker, which is what actually cleared the
       // chat.
       revealTreePane('workspace')
-      // Clear the durable route intent synchronously, before React Router
+      // Clear the durable route intent synchrobeyondly, before React Router
       // publishes /new. Submit uses that intent to heal an existing-session
       // rebind race, so leaving the old id here could revive it on a very fast
       // New Chat -> Enter sequence.
@@ -736,7 +736,7 @@ export function useSessionActions({
         // prong: background gateway events retarget it while other sessions
         // stream (#47709 class), and the seconds-long session.create round-trip
         // (server-side agent + MCP init) makes that churn near-certain — every
-        // genuine user switch retargets selection AND route synchronously
+        // genuine user switch retargets selection AND route synchrobeyondly
         // anyway. submitTargetStoredId is the just-created stored session, so
         // our own upcoming re-home onto it never reads as drift.
         const drift = sessionContextDrift({
@@ -1080,13 +1080,13 @@ export function useSessionActions({
         //
         // No `hidden` here, in either mode. Only Bot Mode's PLUMBING sessions
         // are born hidden, and each mints its own row: the canonical Bot Chat
-        // (`hermes-bots/canonical-chat.ts`) and group member sessions
-        // (`hermes-bots/group-turns.ts`). Every session this path creates is a
+        // (`beyond-bots/canonical-chat.ts`) and group member sessions
+        // (`beyond-bots/group-turns.ts`). Every session this path creates is a
         // side chat the user asked for by hand — "New chat with this bot" and
         // the Bot Mode tab-strip "+" / ⌘T — so it is an ordinary conversation
         // in the bot's profile and stays listed, exactly as
         // `apps/desktop/src/AGENTS.md` and the hide sweep's title allow-list
-        // (`hermes-bots/session-sweep.ts`) already promise. Blanket-hiding the
+        // (`beyond-bots/session-sweep.ts`) already promise. Blanket-hiding the
         // mode stranded them: unlisted in the Sessions sidebar, skipped by
         // `/resume`, and reachable only while their tab stayed open, since the
         // bot row opens the canonical chat and "Open recent session" reads
@@ -1263,7 +1263,7 @@ export function useSessionActions({
       // the thread shows this session's proven warm transcript or its loader
       // instead of the old session lingering until resume lands. Setting the
       // ref here is also what use-route-resume's self-heal assumes ("set
-      // synchronously at resume entry").
+      // synchrobeyondly at resume entry").
       setFreshDraftReady(false)
       clearNotifications()
       resetViewSync()
@@ -3095,7 +3095,7 @@ export function useSessionActions({
         return
       }
 
-      // Selection and runtime refs are updated synchronously at routing
+      // Selection and runtime refs are updated synchrobeyondly at routing
       // boundaries. React props can still describe the previous render when a
       // delete lands in the same tick, which used to leave the doomed route in
       // place and let the generic 4001 recovery rebind it.

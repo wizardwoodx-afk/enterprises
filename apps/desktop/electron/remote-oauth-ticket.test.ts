@@ -38,7 +38,7 @@ describe('resolveRemoteOauthTicket', () => {
   })
 
   it('classifies only confirmed auth rejection as reauth and retains the pre-mint session copy', async () => {
-    for (const baseUrl of ['https://gateway.example.com', 'https://lab.agents.nousresearch.com']) {
+    for (const baseUrl of ['https://gateway.example.com', 'https://lab.agents.beyond.app']) {
       for (const hadNativeSession of [false, true]) {
         for (const statusCode of [401, 403, 500, 502, 503, 504, undefined]) {
           let nativeSession = hadNativeSession
@@ -67,7 +67,7 @@ describe('resolveRemoteOauthTicket', () => {
           const authRejected = statusCode === 401 || statusCode === 403
           expect(isReauthRequiredError(error)).toBe(authRejected)
           expect(error.isCloudBackendDown === true).toBe(
-            baseUrl.includes('.agents.nousresearch.com') && [502, 503, 504].includes(statusCode ?? 0)
+            baseUrl.includes('.agents.beyond.app') && [502, 503, 504].includes(statusCode ?? 0)
           )
 
           if (authRejected) {
@@ -128,10 +128,10 @@ describe('resolveRemoteOauthTicket', () => {
     expect(refused.message).not.toContain('timed out')
     // Ambiguous / unknown transport keeps the legacy one-liner.
     expect(ambiguous.message).toBe(
-      'Could not reach the remote Hermes gateway while refreshing its WebSocket ticket. Try reconnecting.'
+      'Could not reach the remote Beyond gateway while refreshing its WebSocket ticket. Try reconnecting.'
     )
     expect(http500.message).toBe(
-      'Could not reach the remote Hermes gateway while refreshing its WebSocket ticket. Try reconnecting.'
+      'Could not reach the remote Beyond gateway while refreshing its WebSocket ticket. Try reconnecting.'
     )
 
     // None of the transport classes may ever read as an auth failure.

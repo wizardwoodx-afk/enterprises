@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { ResolvedOwner } from '@/hermes'
+import type { ResolvedOwner } from '@/beyond'
 
 const setSttLease = vi.fn(async (_lease: string, _active: boolean, _owner: ResolvedOwner) => ({ ok: true }))
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/beyond', () => ({
   setSttLease: (lease: string, active: boolean, owner: ResolvedOwner) => setSttLease(lease, active, owner)
 }))
 

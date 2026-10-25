@@ -112,11 +112,11 @@ function Harness({
 
 // jsdom does not implement disabled-button event suppression (a disabled
 // <button> still fires click in jsdom), so the race is asserted at the two
-// seams that produce it in Chromium: (1) the gate opens synchronously inside
+// seams that produce it in Chromium: (1) the gate opens synchrobeyondly inside
 // pointerdown-capture — before any mousedown/click dispatch — and (2) the
 // submit that then fires carries the live editor text, not the stale state.
 describe('composer Send button — pointerdown syncs the live draft (#52950)', () => {
-  it('opens the send gate synchronously on pointerdown when the DOM has text state has not synced', async () => {
+  it('opens the send gate synchrobeyondly on pointerdown when the DOM has text state has not synced', async () => {
     const onSync = vi.fn()
     const onSubmit = vi.fn()
 

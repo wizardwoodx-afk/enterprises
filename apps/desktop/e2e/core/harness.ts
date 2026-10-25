@@ -33,24 +33,24 @@ export interface CoreSandbox {
   /** Prepended to PATH: external-platform fakes (see createCoreSandbox). */
   bin: string
   home: string
-  hermesHome: string
+  beyondHome: string
   userDataDir: string
   cleanup: () => void
 }
 
 /**
- * HOME is faked too, not just HERMES_HOME: profile roots are anchored to
- * `Path.home()/.hermes`, so a sandbox HERMES_HOME under the real ~/.hermes
+ * HOME is faked too, not just BEYOND_HOME: profile roots are anchored to
+ * `Path.home()/.beyond`, so a sandbox BEYOND_HOME under the real ~/.beyond
  * would read and write the real install's profiles/.
  */
 export function createCoreSandbox(label: string): CoreSandbox {
-  const parent = process.env.HERMES_E2E_CORE_ROOT || os.tmpdir()
+  const parent = process.env.BEYOND_E2E_CORE_ROOT || os.tmpdir()
   fs.mkdirSync(parent, { recursive: true })
   const root = fs.mkdtempSync(path.join(parent, `core-${label}-`))
   const home = path.join(root, 'home')
-  const hermesHome = path.join(home, '.hermes')
+  const beyondHome = path.join(home, '.beyond')
   const userDataDir = path.join(root, 'user-data')
-  fs.mkdirSync(hermesHome, { recursive: true })
+  fs.mkdirSync(beyondHome, { recursive: true })
   fs.mkdirSync(userDataDir, { recursive: true })
   fs.writeFileSync(
     path.join(userDataDir, 'window-state.json'),
@@ -61,7 +61,7 @@ export function createCoreSandbox(label: string): CoreSandbox {
   // token` for GitHub credentials; with a sandbox HOME a real gh can block on
   // the desktop keyring for ~60 s, and a probe in flight at quit outlives the
   // backend (reported as a finding) — which would make the orphan census
-  // depend on the runner's keyring rather than on Hermes.
+  // depend on the runner's keyring rather than on Beyond.
   const bin = path.join(root, 'bin')
   fs.mkdirSync(bin, { recursive: true })
   fs.writeFileSync(path.join(bin, 'gh'), '#!/bin/sh\necho "no oauth token found for github.com" >&2\nexit 1\n', {
@@ -72,14 +72,14 @@ export function createCoreSandbox(label: string): CoreSandbox {
     root,
     bin,
     home,
-    hermesHome,
+    beyondHome,
     userDataDir,
     cleanup: () => {
       // Attach-mode Desktop never stops the gateway it dialled, so without this
       // every spec left its sandbox `gateway run` behind (~20 per suite run).
-      stopSandboxGatewayDaemons(root, hermesHome)
+      stopSandboxGatewayDaemons(root, beyondHome)
 
-      if (!process.env.HERMES_E2E_CORE_KEEP) {
+      if (!process.env.BEYOND_E2E_CORE_KEEP) {
         fs.rmSync(root, { recursive: true, force: true })
       }
     }
@@ -90,14 +90,14 @@ function sleepSync(ms: number): void {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
 }
 
-function processHomeUnder(pid: number, root: string, hermesHome: string): boolean {
+function processHomeUnder(pid: number, root: string, beyondHome: string): boolean {
   if (!procfsCensus) {
-    return isSandboxProcess(pid, hermesHome)
+    return isSandboxProcess(pid, beyondHome)
   }
 
   const info = readProc(pid)
 
-  return Boolean(info?.cmdline) && info!.environ.split('\0').some(entry => entry.startsWith(`HERMES_HOME=${root}`))
+  return Boolean(info?.cmdline) && info!.environ.split('\0').some(entry => entry.startsWith(`BEYOND_HOME=${root}`))
 }
 
 /**
@@ -106,11 +106,11 @@ function processHomeUnder(pid: number, root: string, hermesHome: string): boolea
  * signalled while its environment still names this sandbox, so a recycled pid
  * is never touched.
  */
-function stopSandboxGatewayDaemons(root: string, hermesHome: string): void {
-  const profilesDir = path.join(hermesHome, 'profiles')
+function stopSandboxGatewayDaemons(root: string, beyondHome: string): void {
+  const profilesDir = path.join(beyondHome, 'profiles')
 
   const homes = [
-    hermesHome,
+    beyondHome,
     ...(fs.existsSync(profilesDir) ? fs.readdirSync(profilesDir).map(name => path.join(profilesDir, name)) : [])
   ]
 
@@ -120,7 +120,7 @@ function stopSandboxGatewayDaemons(root: string, hermesHome: string): void {
     try {
       const pid = Number(JSON.parse(fs.readFileSync(path.join(home, 'gateway.lock'), 'utf8'))?.pid)
 
-      if (Number.isInteger(pid) && pid > 0 && processHomeUnder(pid, root, hermesHome)) {
+      if (Number.isInteger(pid) && pid > 0 && processHomeUnder(pid, root, beyondHome)) {
         pids.add(pid)
       }
     } catch {
@@ -144,7 +144,7 @@ function stopSandboxGatewayDaemons(root: string, hermesHome: string): void {
     sleepSync(100)
 
     for (const pid of [...pids]) {
-      if (!processHomeUnder(pid, root, hermesHome)) {
+      if (!processHomeUnder(pid, root, beyondHome)) {
         pids.delete(pid)
       }
     }
@@ -155,7 +155,7 @@ function stopSandboxGatewayDaemons(root: string, hermesHome: string): void {
 
 /**
  * Sandbox config: only the scripted provider. The approval prompts under test
- * come from Hermes's own detector.
+ * come from Beyond's own detector.
  */
 export function providerConfigYaml(providerUrl: string, extra = '', approvals: 'manual' | 'off' = 'off'): string {
   return `model:
@@ -192,15 +192,15 @@ export function writeProviderHome(
 const CREDENTIAL_RE = /(_API_KEY|_TOKEN|_SECRET|_PASSWORD|_CREDENTIALS|_ACCESS_KEY|_PRIVATE_KEY|_BASE_URL)$/
 
 /**
- * The runner's own env minus credentials and every HERMES_* knob: an agent
- * shell exports HERMES_YOLO_MODE / _HERMES_GATEWAY, which the spawned backend
+ * The runner's own env minus credentials and every BEYOND_* knob: an agent
+ * shell exports BEYOND_YOLO_MODE / _BEYOND_GATEWAY, which the spawned backend
  * would inherit (auto-approving every command, changing the run under test).
  */
 export function coreAppEnv(sandbox: CoreSandbox, extra: Record<string, string> = {}): Record<string, string> {
   const env: Record<string, string> = {}
 
   for (const [key, value] of Object.entries(process.env)) {
-    if (!value || CREDENTIAL_RE.test(key) || /^_?HERMES_/.test(key) || key === 'VIRTUAL_ENV') {
+    if (!value || CREDENTIAL_RE.test(key) || /^_?BEYOND_/.test(key) || key === 'VIRTUAL_ENV') {
       continue
     }
 
@@ -211,18 +211,18 @@ export function coreAppEnv(sandbox: CoreSandbox, extra: Record<string, string> =
     ...env,
     PATH: `${sandbox.bin}${path.delimiter}${env.PATH ?? ''}`,
     HOME: sandbox.home,
-    HERMES_HOME: sandbox.hermesHome,
-    HERMES_DESKTOP_USER_DATA_DIR: sandbox.userDataDir,
-    HERMES_DESKTOP_IGNORE_EXISTING: '1',
-    HERMES_DESKTOP_HERMES_ROOT: REPO_ROOT,
+    BEYOND_HOME: sandbox.beyondHome,
+    BEYOND_DESKTOP_USER_DATA_DIR: sandbox.userDataDir,
+    BEYOND_DESKTOP_IGNORE_EXISTING: '1',
+    BEYOND_DESKTOP_RUNTIME_ROOT: REPO_ROOT,
     // setup-pm exports an install-scoped interpreter, not a checkout .venv.
-    // The Desktop override must be explicit because the sandbox strips HERMES_*.
-    ...(process.env.HERMES_E2E_PYTHON ? { HERMES_DESKTOP_PYTHON: process.env.HERMES_E2E_PYTHON } : {}),
-    HERMES_DESKTOP_APP_NAME: `HermesCoreE2E-${path.basename(sandbox.root)}`,
-    HERMES_DESKTOP_SKIP_QUIT_CONFIRM: '1',
-    // Never repoint the user's OS hermes:// handler (HKCU on Windows) at a test checkout.
-    HERMES_DESKTOP_SKIP_PROTOCOL_REGISTRATION: '1',
-    HERMES_DESKTOP_CDP_PORT: 'off',
+    // The Desktop override must be explicit because the sandbox strips BEYOND_*.
+    ...(process.env.BEYOND_E2E_PYTHON ? { BEYOND_DESKTOP_PYTHON: process.env.BEYOND_E2E_PYTHON } : {}),
+    BEYOND_DESKTOP_APP_NAME: `BeyondCoreE2E-${path.basename(sandbox.root)}`,
+    BEYOND_DESKTOP_SKIP_QUIT_CONFIRM: '1',
+    // Never repoint the user's OS beyond:// handler (HKCU on Windows) at a test checkout.
+    BEYOND_DESKTOP_SKIP_PROTOCOL_REGISTRATION: '1',
+    BEYOND_DESKTOP_CDP_PORT: 'off',
     // A partial-clone (blob:none) dev checkout turns some backend git read into
     // a lazy `git fetch origin` over the network, which outlived quit by >60 s
     // (reported as a finding). CI checkouts are not partial; keep dev runs
@@ -271,13 +271,13 @@ export function appLogTail(app: ElectronApplication, n = 60): string {
 
 // ─── Process census ─────────────────────────────────────────────────────
 
-/** Every live process carrying this sandbox's HERMES_HOME (orphans included); see process-census.ts. */
+/** Every live process carrying this sandbox's BEYOND_HOME (orphans included); see process-census.ts. */
 export function sandboxProcesses(sandbox: CoreSandbox): ProcInfo[] {
-  return sandboxProcessesOf(sandbox.hermesHome)
+  return sandboxProcessesOf(sandbox.beyondHome)
 }
 
 /**
- * The `hermes serve` backend(s) spawned for this sandbox.
+ * The `beyond serve` backend(s) spawned for this sandbox.
  *
  * A child of the backend still shows the backend's argv and environ between
  * fork and exec, and the backend forks ~40 probes per boot (git, ps,
@@ -288,8 +288,8 @@ export function sandboxProcesses(sandbox: CoreSandbox): ProcInfo[] {
  * dead backend is reparented away and still counted.
  */
 export function backendProcesses(sandbox: CoreSandbox): ProcInfo[] {
-  // The local backend is the gateway `hermes gateway ensure` attached to or started
-  // (`hermes_cli.main [--profile X] gateway run --quiet`); `serve` covers a pool backend.
+  // The local backend is the gateway `beyond gateway ensure` attached to or started
+  // (`beyond_cli.main [--profile X] gateway run --quiet`); `serve` covers a pool backend.
   const serve = sandboxProcesses(sandbox).filter(
     proc => (/ serve( |$)/.test(proc.cmdline) || / gateway run( |$)/.test(proc.cmdline))
       && !/electron/i.test(proc.cmdline.split(' ')[0])
@@ -302,7 +302,7 @@ export function backendProcesses(sandbox: CoreSandbox): ProcInfo[] {
 
 
 /**
- * `hermes gateway stop` for the sandbox profile, run with the backend's own
+ * `beyond gateway stop` for the sandbox profile, run with the backend's own
  * interpreter (argv[0] of the live `gateway run`). Attach-mode Desktop never
  * owns the gateway, so this is how a test proves teardown works when asked.
  * `interrupt` passes `--yes`: stop refuses while a turn is live unless told to
@@ -316,7 +316,7 @@ export function stopSandboxGateway(
   // argv[0], unquoted (a Windows command line quotes a path with spaces).
   const python = /^"([^"]+)"|^(\S+)/.exec(backend?.cmdline ?? '')?.slice(1).find(Boolean) || 'python3'
 
-  const args = ['-m', 'hermes_cli.main', 'gateway', 'stop', ...(interrupt ? ['--yes'] : [])]
+  const args = ['-m', 'beyond_cli.main', 'gateway', 'stop', ...(interrupt ? ['--yes'] : [])]
 
   const result = spawnSync(python, args, {
     cwd: REPO_ROOT,
@@ -509,7 +509,7 @@ export async function routePrimaryWebSocket(app: ElectronApplication, backendPor
         return value
       }
 
-      for (const channel of ['hermes:connection', 'hermes:gateway:ws-url']) {
+      for (const channel of ['beyond:connection', 'beyond:gateway:ws-url']) {
         const original = handlers.get(channel)
 
         if (!original) {
@@ -538,14 +538,14 @@ export async function routePrimaryWebSocket(app: ElectronApplication, backendPor
 export async function splitProfileRoute(app: ElectronApplication, profile: string): Promise<void> {
   await app.evaluate(({ ipcMain }, profile) => {
     const handlers = (ipcMain as any)._invokeHandlers as Map<string, (...args: any[]) => Promise<any>>
-    const original = handlers.get('hermes:connection:for')
+    const original = handlers.get('beyond:connection:for')
 
     if (!original) {
-      throw new Error('no ipc handler hermes:connection:for')
+      throw new Error('no ipc handler beyond:connection:for')
     }
 
-    ipcMain.removeHandler('hermes:connection:for')
-    ipcMain.handle('hermes:connection:for', async (event: unknown, payload: any) => {
+    ipcMain.removeHandler('beyond:connection:for')
+    ipcMain.handle('beyond:connection:for', async (event: unknown, payload: any) => {
       const result = await original(event, payload)
 
       if (payload?.profile === profile && result && typeof result === 'object') {
@@ -692,8 +692,8 @@ export interface PersistedMessage {
 export function storedSessionForMarker(sandbox: CoreSandbox, profile: string, marker: string): null | string {
   const dbPath =
     profile === 'default'
-      ? path.join(sandbox.hermesHome, 'state.db')
-      : path.join(sandbox.hermesHome, 'profiles', profile, 'state.db')
+      ? path.join(sandbox.beyondHome, 'state.db')
+      : path.join(sandbox.beyondHome, 'profiles', profile, 'state.db')
 
   if (!fs.existsSync(dbPath)) {
     return null
@@ -725,7 +725,7 @@ export async function persistedTranscript(
 
   const result = await page.evaluate(
     async ({ sessionId, query }) =>
-      (window as any).hermesDesktop.api({ path: `/api/sessions/${sessionId}/messages?order=oldest&limit=500${query}` }),
+      (window as any).beyondDesktop.api({ path: `/api/sessions/${sessionId}/messages?order=oldest&limit=500${query}` }),
     { sessionId, query }
   )
 

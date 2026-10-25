@@ -47,7 +47,7 @@ describe('describeCrashReason', () => {
 })
 
 describe('installCrashForensics', () => {
-  it('records and synchronously flushes an uncaught exception', () => {
+  it('records and synchrobeyondly flushes an uncaught exception', () => {
     const { flush, listeners, log } = harness()
     const error = new Error('renderer gone')
     error.stack = 'Error: renderer gone\n    at main'
@@ -58,7 +58,7 @@ describe('installCrashForensics', () => {
     expect(flush).toHaveBeenCalledTimes(1)
   })
 
-  it('records and synchronously flushes an unhandled rejection', () => {
+  it('records and synchrobeyondly flushes an unhandled rejection', () => {
     const { flush, listeners, log } = harness()
 
     listeners.get('unhandledRejection')?.('gateway ticket mint failed')
@@ -72,16 +72,16 @@ describe('installCrashForensics', () => {
 
     // The exact shape an intentional quit leaves behind: the AbortController
     // reason from local-backend-lifecycle rejecting an in-flight start.
-    const sentinel = markExpectedTransition(new Error('Hermes Desktop is quitting.'))
+    const sentinel = markExpectedTransition(new Error('Beyond Desktop is quitting.'))
     sentinel.stack =
-      'Error: Hermes Desktop is quitting.\n    at Object.run [as shutdown] (file:///app.asar/dist/electron-main.mjs:1374:40)'
+      'Error: Beyond Desktop is quitting.\n    at Object.run [as shutdown] (file:///app.asar/dist/electron-main.mjs:1374:40)'
 
     listeners.get('unhandledRejection')?.(sentinel)
 
     expect(log).toHaveBeenCalledTimes(1)
     const message = log.mock.calls[0]?.[0] as string
     expect(message).toContain('expected shutdown transition')
-    expect(message).toContain('Hermes Desktop is quitting.')
+    expect(message).toContain('Beyond Desktop is quitting.')
     // No stack frames: the line must not read as a crash in desktop.log.
     expect(message).not.toContain('electron-main.mjs')
     expect(flush).toHaveBeenCalledTimes(1)
@@ -90,8 +90,8 @@ describe('installCrashForensics', () => {
   it('marks only stamped errors — a same-message unmarked error still renders its stack', () => {
     const { listeners, log } = harness()
 
-    const lookalike = new Error('Hermes Desktop is quitting.')
-    lookalike.stack = 'Error: Hermes Desktop is quitting.\n    at main'
+    const lookalike = new Error('Beyond Desktop is quitting.')
+    lookalike.stack = 'Error: Beyond Desktop is quitting.\n    at main'
 
     listeners.get('unhandledRejection')?.(lookalike)
 

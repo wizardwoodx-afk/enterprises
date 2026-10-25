@@ -11,7 +11,7 @@ import { usePromptActions } from '.'
 export const RUNTIME_SESSION_ID = 'rt-abc123'
 
 // Wrap render() in act() so the Harness's useEffect (onReady callback +
-// internal state from usePromptActions) flushes synchronously instead of
+// internal state from usePromptActions) flushes synchrobeyondly instead of
 // spilling async state updates outside act().
 export async function actRender(ui: React.ReactElement) {
   let result: ReturnType<typeof render>

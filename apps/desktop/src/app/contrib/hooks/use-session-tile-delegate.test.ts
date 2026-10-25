@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { reasoningEffortPending } from '@/app/chat/session-view'
 import type { ClientSessionState } from '@/app/types'
-import type * as HermesModule from '@/hermes'
+import type * as BeyondModule from '@/beyond'
 import { textPart } from '@/lib/chat-messages'
 import { createClientSessionState } from '@/lib/chat-runtime'
 import { clearSessionDraft, stashSessionDraft, takeSessionDraft } from '@/store/composer'
@@ -11,7 +11,7 @@ import { $notifications } from '@/store/notifications'
 import { $cronRunReadOnlyVerdicts, recordCronRunVerdict } from '@/store/read-only-transcript'
 import { $activeSessionId, setSessionOwnerHint, setSessions } from '@/store/session'
 import { $sessionTiles, sessionTileDelegate } from '@/store/session-states'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/beyond'
 
 import {
   clearSingleFlightSessionResumeState
@@ -19,8 +19,8 @@ import {
 
 import { useSessionTileDelegate } from './use-session-tile-delegate'
 
-vi.mock('@/hermes', async importActual => ({
-  ...(await importActual<typeof HermesModule>()),
+vi.mock('@/beyond', async importActual => ({
+  ...(await importActual<typeof BeyondModule>()),
   getLatestSessionMessages: vi.fn(async () => ({ messages: [], session_id: '' })),
   getSession: vi.fn()
 }))
@@ -31,7 +31,7 @@ vi.mock('@/store/gateway', async importActual => ({
   requestGatewayForProfile: vi.fn()
 }))
 
-const { getLatestSessionMessages, getSession, PROMPT_SUBMIT_REQUEST_TIMEOUT_MS } = await import('@/hermes')
+const { getLatestSessionMessages, getSession, PROMPT_SUBMIT_REQUEST_TIMEOUT_MS } = await import('@/beyond')
 const { requestGatewayForAgent, requestGatewayForProfile } = await import('@/store/gateway')
 const { confirm } = await import('@/store/confirm')
 
@@ -689,7 +689,7 @@ describe('useSessionTileDelegate resumeTile', () => {
 
 describe('useSessionTileDelegate switchSessionModel', () => {
   it('answers applied only after a guarded target is confirmed, and never on "keep current model"', async () => {
-    const asked = { key: 'model', session_id: 'rt-1', value: 'example/model-a --provider nous --session' }
+    const asked = { key: 'model', session_id: 'rt-1', value: 'example/model-a --provider beyond --session' }
 
     const requestGateway = vi.fn(async (_method: string, params: Record<string, unknown>) =>
       params.confirm_expensive_model ? {} : { confirm_message: 'Large model', confirm_required: true }
@@ -699,12 +699,12 @@ describe('useSessionTileDelegate switchSessionModel', () => {
     const switchSessionModel = sessionTileDelegate()!.switchSessionModel!
 
     vi.mocked(confirm).mockResolvedValueOnce(false)
-    await expect(switchSessionModel('rt-1', 'example/model-a', 'nous')).resolves.toBe(false)
+    await expect(switchSessionModel('rt-1', 'example/model-a', 'beyond')).resolves.toBe(false)
     expect(requestGateway).toHaveBeenCalledTimes(1)
     expect(requestGateway).toHaveBeenCalledWith('config.set', asked)
 
     vi.mocked(confirm).mockResolvedValueOnce(true)
-    await expect(switchSessionModel('rt-1', 'example/model-a', 'nous')).resolves.toBe(true)
+    await expect(switchSessionModel('rt-1', 'example/model-a', 'beyond')).resolves.toBe(true)
     expect(requestGateway).toHaveBeenLastCalledWith('config.set', { ...asked, confirm_expensive_model: true })
   })
 })

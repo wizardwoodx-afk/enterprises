@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ErrorIcon } from '@/components/ui/error-state'
 import { Input } from '@/components/ui/input'
 import { Loader } from '@/components/ui/loader'
-import { getGlobalModelOptions, profileScopeKey } from '@/hermes'
+import { getGlobalModelOptions, profileScopeKey } from '@/beyond'
 import { useI18n } from '@/i18n'
 import { ExternalLink, Loader2 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
@@ -188,7 +188,7 @@ export function DeviceCode({ code, copied, onCopy }: { code: string; copied: boo
               'flex size-10 items-center justify-center rounded-md border font-mono text-xl font-semibold uppercase transition-colors',
               copied
                 ? 'border-primary/50 text-primary'
-                : 'border-(--stroke-nous) text-foreground group-hover:border-(--ui-stroke-secondary)'
+                : 'border-(--stroke-beyond) text-foreground group-hover:border-(--ui-stroke-secondary)'
             )}
             key={i}
           >
@@ -204,7 +204,7 @@ function CodeBlock({ copied, onCopy, text }: { copied: boolean; onCopy: () => vo
   const { t } = useI18n()
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-md border border-(--stroke-nous) px-3 py-2">
+    <div className="flex items-center justify-between gap-3 rounded-md border border-(--stroke-beyond) px-3 py-2">
       <code className="min-w-0 flex-1 truncate font-mono text-sm">
         <span className="mr-2 select-none text-muted-foreground">$</span>
         {text}

@@ -52,7 +52,7 @@ function makeCerts(dir: string): { key: Buffer; cert: Buffer; caPem: string } {
       '-days',
       '2',
       '-subj',
-      '/CN=hermes-update-e2e-root',
+      '/CN=beyond-update-e2e-root',
       '-addext',
       'basicConstraints=critical,CA:TRUE',
       '-addext',

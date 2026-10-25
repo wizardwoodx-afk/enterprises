@@ -13,7 +13,7 @@ const { requestGateway } = vi.hoisted(() => ({
 vi.mock('@/app/gateway/hooks/use-gateway-request', () => ({
   useGatewayRequest: () => ({ requestGateway })
 }))
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/beyond', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   getProfiles: async () => ({ profiles: [] })
 }))
@@ -37,7 +37,7 @@ const installDesktopPlugin = vi.fn()
 
 const BLENDER = {
   catalogName: 'blender',
-  repo: 'https://github.com/NousResearch/hermes-official-plugins#blender',
+  repo: 'https://github.com/beyond-app/beyond-official-plugins#blender',
   sha: 'abec9e822a23089943dd1d476a104bf746f19f86',
   summary: 'Build and render 3D scenes in your Blender.',
   title: 'Blender'
@@ -96,7 +96,7 @@ beforeEach(() => {
   ])
   requestGateway.mockImplementation(async () => ({ plugins: [] }))
   probePluginRepo.mockResolvedValue({ ok: true, agent: true, agentName: 'blender', desktop: false, warnings: [] })
-  vi.stubGlobal('hermesDesktop', { probePluginRepo, installDesktopPlugin })
+  vi.stubGlobal('beyondDesktop', { probePluginRepo, installDesktopPlugin })
 })
 afterEach(() => {
   cleanup()
@@ -112,7 +112,7 @@ describe('A reviewed catalog pick', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Blender' })
     expect(within(dialog).getByText('Verified')).toBeTruthy()
     expect(within(dialog).getByText(BLENDER.summary)).toBeTruthy()
-    expect(within(dialog).getByText('Reviewed by Nous. Installs for default and turns on right away.')).toBeTruthy()
+    expect(within(dialog).getByText('Reviewed by Beyond. Installs for default and turns on right away.')).toBeTruthy()
     expect(within(dialog).queryByText(BLENDER.repo)).toBeNull()
     expect(within(dialog).queryByRole('combobox')).toBeNull()
     expect(within(dialog).queryByRole('checkbox')).toBeNull()
@@ -184,7 +184,7 @@ describe('A reviewed catalog pick', () => {
     fireEvent.click(screen.getByRole('combobox', { name: 'Install for profile' }))
     fireEvent.click(await screen.findByRole('option', { name: 'Research Bot' }))
 
-    expect(screen.getByText('Reviewed by Nous. Installs for Research Bot and turns on right away.')).toBeTruthy()
+    expect(screen.getByText('Reviewed by Beyond. Installs for Research Bot and turns on right away.')).toBeTruthy()
     fireEvent.click(installButton())
 
     await waitFor(() => expect(installCalls()[0]?.[1]).toMatchObject({ catalog_name: 'blender', profile: 'research' }))
@@ -314,7 +314,7 @@ describe('Unified package desktop half on a local backend', () => {
         : { plugins: [] }
     )
     installDesktopPlugin.mockResolvedValue({ ok: true, pluginName: 'pkg' })
-    vi.stubGlobal('hermesDesktop', { installDesktopPlugin, probePluginRepo, reconcileDesktopPlugins })
+    vi.stubGlobal('beyondDesktop', { installDesktopPlugin, probePluginRepo, reconcileDesktopPlugins })
     renderFlow()
     act(() => openPluginInstallRequest({ repo: 'https://github.com/example/pkg' }))
     expect(await screen.findByText('This package includes')).toBeTruthy()
@@ -360,7 +360,7 @@ describe('Unified package desktop half on a local backend', () => {
 
       return ['/app/desktop-plugins/pkg']
     })
-    vi.stubGlobal('hermesDesktop', { installDesktopPlugin, probePluginRepo, reconcileDesktopPlugins })
+    vi.stubGlobal('beyondDesktop', { installDesktopPlugin, probePluginRepo, reconcileDesktopPlugins })
     renderFlow()
     act(() => openPluginInstallRequest({ repo: 'https://github.com/example/pkg' }))
     expect(await screen.findByText('This package includes')).toBeTruthy()

@@ -4,7 +4,7 @@ import type { SessionOwnerScope } from '@/store/session-request-router'
 import type { SubmissionDestination } from './submission-destination'
 import type { SubmitTextOptions } from './utils'
 
-const STORAGE_KEY = 'hermes.desktop.preparedSubmissions.v1'
+const STORAGE_KEY = 'beyond.desktop.preparedSubmissions.v1'
 
 export interface PreparedSubmission {
   id: string
@@ -26,9 +26,9 @@ export interface PreparedSubmission {
 // last-writer-wins per KEY, so a single blob let one window's read-modify-write drop the tombstone
 // another window had just written for a different entry (and a reload then re-adopted that
 // admitted input). Each retirement now writes only the record it owns.
-const SPENT_PREFIX = 'hermes.desktop.preparedSubmissions.spent.v2:'
+const SPENT_PREFIX = 'beyond.desktop.preparedSubmissions.spent.v2:'
 // The pre-v2 single blob: still honored, drained entry by entry as each tombstone clears.
-const LEGACY_SPENT_KEY = 'hermes.desktop.preparedSubmissions.spent.v1'
+const LEGACY_SPENT_KEY = 'beyond.desktop.preparedSubmissions.spent.v1'
 const retired = new Map<string, string>()
 
 function readLegacySpent(): Record<string, string> {
@@ -71,7 +71,7 @@ function writeSpent(key: string, id: string | undefined): void {
 // A journal, not an automatic outbox. Only an explicit retry may reuse an
 // uncertain admission. Read storage each time so a remount cannot lose it.
 async function readJournal(): Promise<Record<string, PreparedSubmission>> {
-  const native = window.hermesDesktop?.preparedSubmissions
+  const native = window.beyondDesktop?.preparedSubmissions
 
   const parsed: unknown = JSON.parse(native
     ? await native.read()
@@ -103,7 +103,7 @@ function clearSpent(key: string): void {
 }
 
 async function retireJournalEntry(key: string): Promise<void> {
-  const native = window.hermesDesktop?.preparedSubmissions
+  const native = window.beyondDesktop?.preparedSubmissions
 
   if (native) {
     await native.update(key, null)
@@ -227,7 +227,7 @@ export async function preparedSubmissionSlot(intent: string): Promise<string> {
 }
 
 export async function writePreparedSubmission(key: string, entry: PreparedSubmission): Promise<void> {
-  const native = window.hermesDesktop?.preparedSubmissions
+  const native = window.beyondDesktop?.preparedSubmissions
 
   if (native) {
     await native.update(key, JSON.stringify(entry))

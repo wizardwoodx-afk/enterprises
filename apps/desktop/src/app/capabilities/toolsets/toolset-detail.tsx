@@ -1,10 +1,10 @@
-import { compactNumber } from '@hermes/shared'
+import { compactNumber } from '@beyond/shared'
 import { useNavigate } from 'react-router'
 
 import { Button } from '@/components/ui/button'
-import { type ProfileScope, profileScopeKey } from '@/hermes'
+import { type ProfileScope, profileScopeKey } from '@/beyond'
 import { useI18n } from '@/i18n'
-import type { ToolsetInfo } from '@/types/hermes'
+import type { ToolsetInfo } from '@/types/beyond'
 
 import { ToolChip } from '../../master-detail'
 import { PanelPill } from '../../overlays/panel'

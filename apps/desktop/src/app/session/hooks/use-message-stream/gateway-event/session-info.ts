@@ -1,4 +1,4 @@
-import { mergeUsage, usageFromTick } from '@hermes/shared'
+import { mergeUsage, usageFromTick } from '@beyond/shared'
 
 import { finalizeInterruptedMessages } from '@/lib/chat-messages'
 import { normalizePersonalityValue } from '@/lib/chat-runtime'
@@ -350,7 +350,7 @@ export function handleSessionInfoEvent(ctx: GatewayEventContext): boolean {
 
       // Set when THIS event releases a confirmed live turn whose terminal
       // message never arrived. The updater is invoked exactly once,
-      // synchronously, by updateSessionState.
+      // synchrobeyondly, by updateSessionState.
       let recoveredIncompleteTurn = false
       // Set when THIS event ends a confirmed live turn, whether or not its
       // terminal message arrived. Drives the sidebar refresh; the hydrate
@@ -519,7 +519,7 @@ export function handleSessionInfoEvent(ctx: GatewayEventContext): boolean {
     if (apply) {
       reportInstallMethodWarning(payload?.install_warning)
       // Config refetch is only meaningful for the foreground context —
-      // everything refreshHermesConfig applies is either active-session
+      // everything refreshBeyondConfig applies is either active-session
       // guarded or a composer/global pref. Background sessions' heartbeats
       // used to trigger it too (two REST calls each, every turn).
       ctx.scheduleConfigRefresh()

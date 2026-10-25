@@ -55,10 +55,10 @@ function ProbeHarness({ activeQueueSessionKey, onLayoutSnapshot, onTextSnapshot,
     sessionId
   })
 
-  // useLayoutEffect fires synchronously right after the DOM commit, BEFORE
+  // useLayoutEffect fires synchrobeyondly right after the DOM commit, BEFORE
   // the hook's per-thread scope-swap useEffect (a passive effect) has a
   // chance to swap attachmentScope.$attachments over to the new session. A
-  // synchronous read here — the same read ChatBar's `attachments` prop
+  // synchrobeyond read here — the same read ChatBar's `attachments` prop
   // performs at render time — observes the OUTGOING session's attachments.
   useLayoutEffect(() => {
     onLayoutSnapshot(mainComposerScope.$attachments.get())
@@ -82,7 +82,7 @@ describe('useComposerDraft — attachment scope stays coherent with the committe
     }
 
     rotateFreshDraftKey()
-    delete (window as unknown as { hermesDesktop?: unknown }).hermesDesktop
+    delete (window as unknown as { beyondDesktop?: unknown }).beyondDesktop
     vi.unstubAllGlobals()
     $connection.set(null)
   })
@@ -125,7 +125,7 @@ describe('useComposerDraft — attachment scope stays coherent with the committe
     // the eventual swap but not that the previous draft could not be painted
     // first: a passive useEffect restore would let the browser paint session
     // B's view with session A's text still loaded. The deterministic pre-paint
-    // probe is a useLayoutEffect that runs synchronously after the DOM commit —
+    // probe is a useLayoutEffect that runs synchrobeyondly after the DOM commit —
     // exactly the last moment before the browser may paint. If the restore
     // lived in a passive effect, the probe would observe A's text here.
     stashSessionDraft('session-A', 'draft typed in session A', [])
@@ -334,9 +334,9 @@ describe('useComposerDraft — attachment scope stays coherent with the committe
 
     ;(
       window as unknown as {
-        hermesDesktop: { readFileDataUrl: typeof readFileDataUrl }
+        beyondDesktop: { readFileDataUrl: typeof readFileDataUrl }
       }
-    ).hermesDesktop = { readFileDataUrl }
+    ).beyondDesktop = { readFileDataUrl }
 
     let resolveBitmap!: (bitmap: { close: () => void; height: number; width: number }) => void
 

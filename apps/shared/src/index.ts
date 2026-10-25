@@ -131,7 +131,7 @@ export {
 } from './reconnect-backoff'
 export { skillInvocationText } from './skill-scaffold'
 export {
-  type HermesSkin,
+  type BeyondSkin,
   SKIN_BRANDING_TOKENS,
   SKIN_COLOR_TOKENS,
   type SkinBranding,
@@ -195,12 +195,12 @@ export {
 export { type UpdateDebt, updateDebt, type UpdateDebtReceipt, type UpdateDebtStep } from './update-debt'
 export { mergeUsage, usageFromTick, type UsageTickPayload } from './usage-tick'
 export {
-  buildHermesWebSocketUrl,
+  buildBeyondWebSocketUrl,
   type GatewayAuthMode,
   GatewayReauthRequiredError,
   type GatewayWsConnection,
   type GatewayWsUrlResult,
-  type HermesWebSocketUrlOptions,
+  type BeyondWebSocketUrlOptions,
   isGatewayReauthRequired,
   resolveGatewayWsUrl,
   type ResolveGatewayWsUrlDeps,

@@ -14,7 +14,7 @@ export function usePluginProbe(unavailableMessage: string) {
   const start = useCallback(
     (repo: string) => {
       const mine = ++token.current
-      const probeFn = window.hermesDesktop?.probePluginRepo
+      const probeFn = window.beyondDesktop?.probePluginRepo
 
       const run: Promise<ProbeResult> = probeFn
         ? probeFn({ identifier: repo })

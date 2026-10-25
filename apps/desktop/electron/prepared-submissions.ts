@@ -54,7 +54,7 @@ export function preparedJournal(userData: string, origin: string) {
       write(read(), key, entry)
     },
     /** Replace `key` only while it still holds exactly `expected` (null = absent): create-if-absent
-     *  and compare-and-delete in one synchronous main-process step, so windows sharing the origin's
+     *  and compare-and-delete in one synchrobeyond main-process step, so windows sharing the origin's
      *  journal cannot interleave between the check and the write. Returns the record now stored. */
     compareAndSet(key: string, expected: unknown | null, entry: unknown | null): { applied: boolean; current: unknown | null } {
       const journal = read()
@@ -72,15 +72,15 @@ export function registerPreparedSubmissions() {
   const store = (event: Electron.IpcMainInvokeEvent) =>
     preparedJournal(app.getPath('userData'), new URL(event.senderFrame!.url).origin)
 
-  ipcMain.handle('hermes:prepared-submissions:read', event => JSON.stringify(store(event).read()))
-  ipcMain.handle('hermes:prepared-submissions:update', (event, key: string, entry: string | null) => {
+  ipcMain.handle('beyond:prepared-submissions:read', event => JSON.stringify(store(event).read()))
+  ipcMain.handle('beyond:prepared-submissions:update', (event, key: string, entry: string | null) => {
     if (typeof key !== 'string' || (entry !== null && typeof entry !== 'string')) {
       throw new Error('Invalid prepared submission')
     }
 
     store(event).update(key, entry === null ? null : JSON.parse(entry))
   })
-  ipcMain.handle('hermes:prepared-submissions:compare-and-set', (event, key: string, expected: string | null, entry: string | null) => {
+  ipcMain.handle('beyond:prepared-submissions:compare-and-set', (event, key: string, expected: string | null, entry: string | null) => {
     if (typeof key !== 'string' || [expected, entry].some(value => value !== null && typeof value !== 'string')) {
       throw new Error('Invalid prepared submission comparison')
     }

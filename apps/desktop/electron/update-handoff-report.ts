@@ -7,7 +7,7 @@ import type { Dialog, Shell } from 'electron'
 import { readAndConsumeHandoffResult } from './handoff-result'
 
 export interface HandoffReportHost {
-  hermesHome: string
+  beyondHome: string
   /** Marker line 2 of the run this boot parked on (C2 started_at match), else null. */
   expectedStartedAt: number | null
   /** Stable run id of that marker (survives heartbeat refreshes), else null. */
@@ -53,7 +53,7 @@ export function parkedRunReport() {
  */
 export function reportHandoffResult(host: HandoffReportHost): void {
   try {
-    const result = readAndConsumeHandoffResult(host.hermesHome, {
+    const result = readAndConsumeHandoffResult(host.beyondHome, {
       expectedStartedAt: host.expectedStartedAt,
       expectedRunId: host.expectedRunId,
       log: host.log
@@ -65,9 +65,9 @@ export function reportHandoffResult(host: HandoffReportHost): void {
       host.log(`[updates] detached update finished with warnings: ${result.warnings.join(' | ')}`)
       void host.dialog.showMessageBox({
         type: 'info',
-        title: 'Hermes update',
-        message: 'Hermes updated, but some follow-up steps need another try',
-        detail: `${result.warnings.join('\n')}\n\nHermes retries them on the next launch or the next update.`
+        title: 'Beyond update',
+        message: 'Beyond updated, but some follow-up steps need another try',
+        detail: `${result.warnings.join('\n')}\n\nBeyond retries them on the next launch or the next update.`
       })
     } else if (result && result.ok && result.manual) {
       // Update landed but the user must act (reopen/reinstall/sandbox). On
@@ -76,7 +76,7 @@ export function reportHandoffResult(host: HandoffReportHost): void {
       host.log(`[updates] detached update finished with manual action (branch ${result.branch}): ${result.message}`)
       host.dialog.showMessageBox({
         type: 'warning',
-        title: 'Hermes update',
+        title: 'Beyond update',
         message: 'The update finished, but needs one more step',
         detail: result.message
       })
@@ -84,16 +84,16 @@ export function reportHandoffResult(host: HandoffReportHost): void {
       host.log(`[updates] detached update finished OK (branch ${result.branch})`)
     } else if (result) {
       host.log(`[updates] detached update FAILED (exit ${result.exitCode}): ${result.message}`)
-      const handoffLogPath = path.join(host.hermesHome, 'logs', 'desktop-update-handoff.log')
+      const handoffLogPath = path.join(host.beyondHome, 'logs', 'desktop-update-handoff.log')
 
       // Async so boot is not blocked behind the dialog; the response handlers
       // reuse the menu's open-updates path (queued until the renderer is ready)
-      // and the same reveal primitive as 'hermes:logs:reveal'.
+      // and the same reveal primitive as 'beyond:logs:reveal'.
       void host.dialog
         .showMessageBox({
           type: 'error',
-          title: 'Hermes update',
-          message: "Hermes couldn't finish updating",
+          title: 'Beyond update',
+          message: "Beyond couldn't finish updating",
           detail:
             "You're still on the previous version and can keep using it. Try the update again, or open the update log to report the problem.\n\n" +
             `Details: ${result.message}`,

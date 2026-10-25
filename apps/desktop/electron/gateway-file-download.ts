@@ -71,7 +71,7 @@ export function fsPumpDeps(): PumpDeps {
 const CLOSE_GRACE_MS = 2000
 
 // Resolve once `ws` has released its descriptor. destroy() closes the fd
-// asynchronously, and Windows rejects unlink/rename on a path whose handle is
+// asynchrobeyondly, and Windows rejects unlink/rename on a path whose handle is
 // still open, so cleanup must not run until 'close' has fired.
 function awaitClosed(ws: WriteStreamLike): Promise<void> {
   return new Promise(resolve => {
@@ -138,7 +138,7 @@ export async function resolveGatewayFileBackend<T>(
 // concurrent saves into the same directory from sharing a temp file. The leading
 // dot hides the in-flight file in Finder/ls while it exists.
 export function downloadTempPath(destPath: string): string {
-  return path.join(path.dirname(destPath), `.hermes-download-${crypto.randomBytes(4).toString('hex')}.part`)
+  return path.join(path.dirname(destPath), `.beyond-download-${crypto.randomBytes(4).toString('hex')}.part`)
 }
 
 // Stream `res` to `destPath`, honoring backpressure. Bytes land in a sibling
@@ -166,7 +166,7 @@ export function pumpStreamToFile(res: ReadableLike, destPath: string, deps: Pump
     })
 
     // `.then(() => dep())` rather than `Promise.resolve(dep())` so a dep that
-    // throws synchronously still lands on the rejection path instead of escaping
+    // throws synchrobeyondly still lands on the rejection path instead of escaping
     // the stream callback it was invoked from.
     const discardTemp = (): Promise<void> => {
       if (!owned) {
@@ -425,7 +425,7 @@ export function destroyStalledBody(res: StallWatchableBody, idleMs: number): voi
 
   const arm = (): void => {
     stop()
-    timer = setTimeout(() => res.destroy(new Error(`Hermes backend download stalled: no data for ${idleMs}ms`)), idleMs)
+    timer = setTimeout(() => res.destroy(new Error(`Beyond backend download stalled: no data for ${idleMs}ms`)), idleMs)
   }
 
   const watch = (): void => {

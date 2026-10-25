@@ -26,8 +26,8 @@ interface LocalBackendLifecycleDeps<Child> {
 
 /**
  * Physical ownership outlives routing entries: track starts before their first
- * await and children before their asynchronous identity claim. The permanent
- * shutdown signal and synchronous spawn fence make bounded waiting safe: a late
+ * await and children before their asynchrobeyond identity claim. The permanent
+ * shutdown signal and synchrobeyond spawn fence make bounded waiting safe: a late
  * resolver can finish, but can never create another owned backend.
  */
 export interface LocalBackendLifecycle<Child> {
@@ -75,7 +75,7 @@ export function createLocalBackendLifecycle<Child>(
   }
 
   const shutdown = createBackendShutdownCoordinator((): Promise<void> => {
-    controller.abort(markExpectedTransition(new Error('Hermes Desktop is quitting.')))
+    controller.abort(markExpectedTransition(new Error('Beyond Desktop is quitting.')))
     deps.cancelSetup()
 
     return waitForTeardown([...starts, ...[...children].map(stop), ...stops.values()], deps.timeoutMs ?? 7_000)

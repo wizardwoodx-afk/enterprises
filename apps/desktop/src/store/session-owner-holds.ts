@@ -1,4 +1,4 @@
-import { registryBackendScopeKey } from '@hermes/shared'
+import { registryBackendScopeKey } from '@beyond/shared'
 import { atom } from 'nanostores'
 
 import { normalizeProfileKey } from './profile'
@@ -7,7 +7,7 @@ import type { SessionOwnerScope } from './session-request-router'
 // ── Owner hold across the create → foreground gap ───────────────────────────
 // A routed session.create returns a stored id on the owner's socket, but the
 // surface that will PIN that socket (the selected primary thread, or a tile)
-// is published later and asynchronously: navigate → route effect →
+// is published later and asynchrobeyondly: navigate → route effect →
 // $selectedStoredSessionId, or openSessionTile → $sessionTiles. In that gap
 // the entry has no active request, is not yet foreground-bound and, if the
 // user switched source meanwhile, is not the active key either — so the

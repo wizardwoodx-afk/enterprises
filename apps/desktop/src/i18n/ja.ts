@@ -103,7 +103,7 @@ export const jaOverrides = {
 
   notifications: {
     sharedProfileWarning:
-      '別の Hermes インストールがこのプロファイルを使用しています。両方が設定とデータを共有しているため、変更が競合する可能性があります。このまま続けるか、変更する前にもう一方を終了してください。',
+      '別の Beyond インストールがこのプロファイルを使用しています。両方が設定とデータを共有しているため、変更が競合する可能性があります。このまま続けるか、変更する前にもう一方を終了してください。',
     region: '通知',
     hide: '非表示',
     show: '表示',
@@ -115,13 +115,13 @@ export const jaOverrides = {
     copyDetailFailed: '通知の詳細をコピーできませんでした',
     backendOutOfDateTitle: 'バックエンドが古いです',
     backendOutOfDateMessage:
-      'Hermes バックエンドがこのデスクトップビルドより古く、正常に動作しない場合があります。更新して揃えてください。',
+      'Beyond バックエンドがこのデスクトップビルドより古く、正常に動作しない場合があります。更新して揃えてください。',
     desktopOutOfDateTitle: 'アプリが古いです',
     desktopOutOfDateMessage:
-      'この Hermes アプリは接続先のバックエンドより古く、正常に動作しない場合があります。アプリを更新して揃えてください。',
+      'この Beyond アプリは接続先のバックエンドより古く、正常に動作しない場合があります。アプリを更新して揃えてください。',
     updateDesktopApp: 'アプリを更新',
     installMethodUnsupportedTitle: 'サポート対象外のインストール方法',
-    updateHermes: 'Hermes を更新',
+    updateBeyond: 'Beyond を更新',
     updateReadyTitle: '更新の準備ができました',
     updateReadyMessage: count => `${count} 件の新しい変更が利用可能です。`,
     updateReadyMessageUnknown: '新しい更新が利用可能です。',
@@ -143,7 +143,7 @@ export const jaOverrides = {
       diskFull: 'ディスク容量不足です — 空きを作ってからもう一度お試しください。',
       gatewayAuthFailed: 'ゲートウェイ認証に失敗しました — API_SERVER_KEY を確認してください。',
       methodNotAllowed:
-        'デスクトップバックエンドがそのリクエストを拒否しました (405 Method Not Allowed)。Hermes Desktop を再起動してください。',
+        'デスクトップバックエンドがそのリクエストを拒否しました (405 Method Not Allowed)。Beyond Desktop を再起動してください。',
       microphonePermission: 'マイクのアクセス許可が拒否されました。',
       openaiRejectedApiKey: 'OpenAI が API キーを拒否しました。',
       openaiTtsNeedsKey: 'OpenAI TTS には VOICE_TOOLS_OPENAI_KEY または OPENAI_API_KEY が必要です。',
@@ -177,8 +177,8 @@ export const jaOverrides = {
       rejectAction: '拒否',
       inputTitle: '入力が必要です',
       inputTitleNamed: session => `入力が必要です — ${session}`,
-      inputBody: 'Hermes が応答を待っています。',
-      turnDoneTitle: 'Hermes が完了しました',
+      inputBody: 'Beyond が応答を待っています。',
+      turnDoneTitle: 'Beyond が完了しました',
       turnDoneBody: 'メッセージが完了しました。',
       turnErrorTitle: 'ターンが失敗しました',
       backgroundDoneTitle: 'バックグラウンドタスクが完了しました',
@@ -190,9 +190,9 @@ export const jaOverrides = {
   ...jaNotices,
 
   sendDiagnostics: {
-    title: 'Nous に診断情報を送信',
+    title: 'Beyond に診断情報を送信',
     privacyNotice:
-      'デバッグバンドルを Nous 内部ストレージにアップロードします（公開ペーストではありません）。システム情報（OS、バージョン、プロバイダー、設定済み API キーの種類 — キー自体は含まれません）と、エージェント/ゲートウェイ/デスクトップの完全なログ（各最大 512 KB。会話内容、ツール出力、ファイルパスを含む可能性が高い）が含まれます。シークレットはアップロード前にマスクされます。閲覧できるのは Nous スタッフと許可された Discord モデレーターのみで、14 日後に自動削除されます。',
+      'デバッグバンドルを Beyond 内部ストレージにアップロードします（公開ペーストではありません）。システム情報（OS、バージョン、プロバイダー、設定済み API キーの種類 — キー自体は含まれません）と、エージェント/ゲートウェイ/デスクトップの完全なログ（各最大 512 KB。会話内容、ツール出力、ファイルパスを含む可能性が高い）が含まれます。シークレットはアップロード前にマスクされます。閲覧できるのは Beyond スタッフと許可された Discord モデレーターのみで、14 日後に自動削除されます。',
     upload: 'アップロード',
     uploading: 'アップロード中…',
     cancel: 'キャンセル',
@@ -204,11 +204,11 @@ export const jaOverrides = {
       'バンドルは非公開でアップロードされました。サポートスレッドで以下のリンクを共有すると、チームがログを確認できます。',
     failedTitle: 'アップロードに失敗しました',
     failedHint:
-      'ターミナルから `hermes debug share --nous` を実行するか、`hermes debug share --local` でアップロードせずにレポートを表示することもできます。',
+      'ターミナルから `beyond debug share --beyond` を実行するか、`beyond debug share --local` でアップロードせずにレポートを表示することもできます。',
     handoffLead: '続きは次の場所で:',
     links: {
       github: 'GitHub Issues',
-      portal: 'Nous Portal サポート',
+      portal: 'Beyond Portal サポート',
       discord: 'Discord'
     }
   },
@@ -240,11 +240,11 @@ export const jaOverrides = {
   },
 
   settings: {
-    // Window plans (Nous subscription with included usage). Other billing strings: overlay-gaps.json.
+    // Window plans (Beyond subscription with included usage). Other billing strings: overlay-gaps.json.
     billing: {
       keepGoingOnCredits: {
         title: 'クレジットで続行',
-        description: '含まれる利用量を使い切ったらクレジットを使います。オフ: Hermes はリセットを待ちます。',
+        description: '含まれる利用量を使い切ったらクレジットを使います。オフ: Beyond はリセットを待ちます。',
         approveInBrowser: '変更するにはブラウザでリモート支出を承認してください。承認するとすぐに適用されます。',
         openAgain: 'もう一度開く',
         cancel: 'キャンセル',
@@ -273,7 +273,7 @@ export const jaOverrides = {
     uninstallSection: {
       dangerZone: '危険ゾーン',
       checkingInstalled: 'インストール内容を確認中…',
-      uninstallHermes: 'Hermes をアンインストール',
+      uninstallBeyond: 'Beyond をアンインストール',
       chooseHowMuch:
         '削除する範囲を選択してください。完了するためにアプリが閉じます。インストーラーを開き直せばいつでも戻れます。',
       confirmUninstall: 'アンインストールの確認',
@@ -285,20 +285,20 @@ export const jaOverrides = {
       options: {
         gui: {
           title: 'Chat GUI のみアンインストール',
-          description: 'このデスクトップアプリを削除します。Hermes エージェント、設定、チャットはすべて残ります。',
+          description: 'このデスクトップアプリを削除します。Beyond エージェント、設定、チャットはすべて残ります。',
           consequence: 'デスクトップ Chat GUI（このアプリとそのデータ）'
         },
         lite: {
           title: 'GUI とエージェントをアンインストール、データは保持',
           description:
-            'アプリと Hermes エージェントを削除しますが、将来の再インストールに備えて設定・チャット・シークレットは保持します。',
-          consequence: 'Chat GUI と Hermes エージェント（設定・チャット・シークレットは保持）'
+            'アプリと Beyond エージェントを削除しますが、将来の再インストールに備えて設定・チャット・シークレットは保持します。',
+          consequence: 'Chat GUI と Beyond エージェント（設定・チャット・シークレットは保持）'
         },
         full: {
           title: 'すべてアンインストール',
           description:
             'アプリ、エージェント、すべてのユーザーデータ（設定、チャット、定期ジョブ、シークレット、ログ）を削除します。',
-          consequence: 'すべて——Chat GUI、Hermes エージェント、およびすべての設定・チャット・シークレット・ログ'
+          consequence: 'すべて——Chat GUI、Beyond エージェント、およびすべての設定・チャット・シークレット・ログ'
         }
       }
     },
@@ -358,7 +358,7 @@ export const jaOverrides = {
     exportConfig: '設定を書き出す',
     importConfig: '設定を読み込む',
     resetToDefaults: 'デフォルトに戻す',
-    resetConfirm: 'すべての設定を Hermes のデフォルトに戻しますか？',
+    resetConfirm: 'すべての設定を Beyond のデフォルトに戻しますか？',
     exportFailed: '書き出しに失敗しました',
     resetFailed: 'リセットに失敗しました',
     pluginPages: jaPluginSettings.pluginPages,
@@ -428,7 +428,7 @@ export const jaOverrides = {
       deleteAction: '保存済み項目を削除',
       otpField: '認証キー',
       otpPlaceholder: 'Base32 シークレットまたは otpauth:// リンク',
-      otpHint: '2FA を有効にするときにサイトが表示する「セットアップキー」。保存すると Hermes がコードを生成します。',
+      otpHint: '2FA を有効にするときにサイトが表示する「セットアップキー」。保存すると Beyond がコードを生成します。',
       twoFactorBadge: '2FA 自動',
       deleteTitle: 'この項目を削除しますか？',
       deleteDescription: label => `「${label}」は暗号化ボールトから削除されます。元に戻せません。`,
@@ -439,11 +439,11 @@ export const jaOverrides = {
           'インストール済みのパスワードマネージャーは自動的に検出されます。エージェントがそこからログイン情報を初めて必要とするときにロック解除を求めます（セッションごとに一度）。メモリに残るのはセッショントークンのみで、エージェントはマスターパスワードやログイン情報を一切見ません。',
         toggleFailed: 'パスワードマネージャーの設定を更新できませんでした',
         notInstalled: name =>
-          `未検出です。${name} のコマンドラインツールをインストールしてサインインすると、Hermes が自動的に検出します。`,
-        disabledDesc: '検出済みですが、Hermes では無効になっています。',
+          `未検出です。${name} のコマンドラインツールをインストールしてサインインすると、Beyond が自動的に検出します。`,
+        disabledDesc: '検出済みですが、Beyond では無効になっています。',
         lockedDesc:
           '検出済み。エージェントがログイン情報を必要とするときにロック解除を求めます。今すぐ解除することもできます。',
-        unlockedDesc: 'このセッションでロック解除済み。30分間操作がないか Hermes を閉じると自動的にロックされます。',
+        unlockedDesc: 'このセッションでロック解除済み。30分間操作がないか Beyond を閉じると自動的にロックされます。',
         statusLocked: 'ロック中',
         statusNotDetected: '未検出',
         statusOff: 'オフ',
@@ -470,7 +470,7 @@ export const jaOverrides = {
       advanced: '詳細'
     },
     searchPlaceholder: {
-      about: 'Hermes Desktop について',
+      about: 'Beyond Desktop について',
       config: '設定を検索…',
       gateway: 'ゲートウェイ接続…',
       keys: 'API キーを検索…',
@@ -490,7 +490,7 @@ export const jaOverrides = {
       intro:
         'デスクトップ専用の表示設定です。モードは明るさ、テーマはアクセントカラーとチャット面のスタイルを制御します。',
       colorMode: 'カラーモード',
-      colorModeDesc: '固定モードを選ぶか、Hermes をシステム設定に合わせます。',
+      colorModeDesc: '固定モードを選ぶか、Beyond をシステム設定に合わせます。',
       toolViewTitle: 'ツール呼び出しの表示',
       toolViewDesc: 'プロダクト表示は生のツールペイロードを隠し、テクニカル表示は入出力をすべて表示します。',
       hideCodeDiffsTitle: 'コードの差分を非表示',
@@ -564,14 +564,14 @@ export const jaOverrides = {
       modelPricingDesc: 'モデル選択で、100万トークンあたりの入力・出力・キャッシュ読み取り料金を表示します。',
       reactionsTitle: 'メッセージリアクション',
       reactionsDesc:
-        'iMessage風の絵文字タップバック — メッセージにリアクションでき、Hermesもあなたのメッセージにリアクションします。',
+        'iMessage風の絵文字タップバック — メッセージにリアクションでき、Beyondもあなたのメッセージにリアクションします。',
       tipsTitle: 'アプリ内ヒント',
       tipsDesc:
-        'アプリや Hermes からのヒントをときどき表示します。各ヒントは一度だけ表示されます。利用開始から30日後に自動でオフになりますが、再びオンにできます。',
+        'アプリや Beyond からのヒントをときどき表示します。各ヒントは一度だけ表示されます。利用開始から30日後に自動でオフになりますが、再びオンにできます。',
       tipsReset: (count: number) => `${count}件のヒントをもう一度表示`,
       toursTitle: 'ガイドツアー',
       toursDesc:
-        '各ステップを強調しながら、Hermes がアプリを案内します。利用開始から30日後に自動でオフになりますが、再びオンにできます。',
+        '各ステップを強調しながら、Beyond がアプリを案内します。利用開始から30日後に自動でオフになりますが、再びオンにできます。',
       composerPopoutTitle: 'フローティング入力欄',
       composerPopoutDesc:
         '入力欄をドックからドラッグして外せるようにします。オフの間は画面下部にドッキングされたままです。',
@@ -612,9 +612,9 @@ export const jaOverrides = {
       pet: {
         title: 'ペット',
         intro:
-          'アプリ上に浮かぶ petdex のアニメーションマスコットを採用しましょう。ツール実行中は走り、成功すると喜び、エラーでしょんぼりと、Hermes の状態に反応します。',
+          'アプリ上に浮かぶ petdex のアニメーションマスコットを採用しましょう。ツール実行中は走り、成功すると喜び、エラーでしょんぼりと、Beyond の状態に反応します。',
         restartHint:
-          'ペット機能には再起動が必要です。この機能が追加される前に起動したアプリが動作中です。Hermes を終了して再度開き、このページに戻ってください。',
+          'ペット機能には再起動が必要です。この機能が追加される前に起動したアプリが動作中です。Beyond を終了して再度開き、このページに戻ってください。',
         scaleTitle: 'サイズ',
         scaleDesc: '浮遊マスコットの大きさを変更します。すべての画面に即時反映されます。',
         roamTitle: '散歩',
@@ -829,10 +829,10 @@ export const jaOverrides = {
         repoScanExcludePaths: 'リポジトリ検出時に除外するフォルダとその配下です。'
       },
       timezone:
-        'Hermes がローカル時刻のコンテキストを必要とするときに使用します。空欄ならシステムのタイムゾーンを使います。',
+        'Beyond がローカル時刻のコンテキストを必要とするときに使用します。空欄ならシステムのタイムゾーンを使います。',
       agent: {
         imageInputMode: '画像添付をモデルへ送る方法を制御します。',
-        maxTurns: 'Hermes が 1 回の実行を停止するまでのツール呼び出しターン上限です。'
+        maxTurns: 'Beyond が 1 回の実行を停止するまでのツール呼び出しターン上限です。'
       },
       terminal: {
         cwd: 'ツールとターミナル作業のデフォルトプロジェクトフォルダーです。',
@@ -842,9 +842,9 @@ export const jaOverrides = {
       codeExecution: {
         mode: 'コード実行を現在のプロジェクトにどれだけ厳密に制限するかを設定します。'
       },
-      fileReadMaxChars: 'Hermes が 1 回のファイル読み取りで取得できる最大文字数です。',
+      fileReadMaxChars: 'Beyond が 1 回のファイル読み取りで取得できる最大文字数です。',
       approvals: {
-        mode: '明示的な承認が必要なコマンドを Hermes がどう扱うかを設定します。',
+        mode: '明示的な承認が必要なコマンドを Beyond がどう扱うかを設定します。',
         timeout: '承認プロンプトがタイムアウトするまで待つ時間です。'
       },
       security: {
@@ -880,14 +880,14 @@ export const jaOverrides = {
       },
       updates: {
         nonInteractiveLocalChanges:
-          'アプリから Hermes 自身を更新するとき、ローカルのソース変更を保持するか破棄するかを選びます。ターミナル更新では常に確認されます。'
+          'アプリから Beyond 自身を更新するとき、ローカルのソース変更を保持するか破棄するかを選びます。ターミナル更新では常に確認されます。'
       }
     }),
     about: { updates: '更新', channel: jaUpdateChannel },
     config: {
       minimizeToTrayTitle: 'トレイに最小化',
       minimizeToTrayDesc:
-        'ウィンドウの最小化やメインウィンドウを閉じる操作でシステムトレイ（macOS ではメニューバー）に隠し、Hermes を実行し続けます。終了するにはトレイメニューの「Hermes を終了」または Cmd+Q を使います。初期設定はオフで、このデバイスにのみ適用されます。',
+        'ウィンドウの最小化やメインウィンドウを閉じる操作でシステムトレイ（macOS ではメニューバー）に隠し、Beyond を実行し続けます。終了するにはトレイメニューの「Beyond を終了」または Cmd+Q を使います。初期設定はオフで、このデバイスにのみ適用されます。',
       minimizeToTrayUnavailable:
         'システムトレイを利用できないため、通常どおり最小化・終了します。再試行するには一度オフにしてからオンにしてください。',
       none: 'なし',
@@ -898,7 +898,7 @@ export const jaOverrides = {
       searchPlaceholder: '検索…',
       noResults: '結果が見つかりません',
       systemDefault: 'システムのデフォルト',
-      loading: 'Hermes の設定を読み込み中...',
+      loading: 'Beyond の設定を読み込み中...',
       emptyTitle: '設定項目がありません',
       emptyDesc: 'このセクションには調整できる設定がありません。',
       failedLoad: '設定の読み込みに失敗しました',
@@ -920,27 +920,27 @@ export const jaOverrides = {
       description:
         'Mac では ⌘ + Option、Windows/Linux では Ctrl + Alt を押して離すと、どのアプリからでも HUD を前面に表示できます。初期設定はオフで、このデバイスにのみ適用されます。',
       permission:
-        'システム設定 → プライバシーとセキュリティ → 入力監視で Hermes を許可し、再試行してください。このジェスチャーはキー入力の記録や画面の撮影を行いません。',
+        'システム設定 → プライバシーとセキュリティ → 入力監視で Beyond を許可し、再試行してください。このジェスチャーはキー入力の記録や画面の撮影を行いません。',
       unavailable:
-        'HUD ジェスチャーヘルパーを起動できなかったか、予期せず停止しました。再試行するか Hermes を再起動してください。Hermes 内の既存の HUD ショートカットは引き続き使用できます。',
+        'HUD ジェスチャーヘルパーを起動できなかったか、予期せず停止しました。再試行するか Beyond を再起動してください。Beyond 内の既存の HUD ショートカットは引き続き使用できます。',
       missingHelper:
-        'この Hermes には HUD ジェスチャーヘルパーが含まれていません。Hermes を更新または再インストールしてから再試行してください。',
+        'この Beyond には HUD ジェスチャーヘルパーが含まれていません。Beyond を更新または再インストールしてから再試行してください。',
       unsupportedSession:
         'このデスクトップセッションはグローバルな修飾キータップに対応していません。Linux では X11 が必要です。Wayland には対応していません。'
     },
     screenshot: {
       enabledTitle: 'スクリーンショットのショートカット',
       enabledDesc:
-        'どのアプリからでも左右の Command キーを同時に押すと、最前面のウインドウを撮影し、Hermes の現在の下書きに添付します。自動送信はしません。初期設定はオフで、この Mac にのみ適用されます。機密情報が写る可能性があるため、送信前に添付画像を確認してください。',
+        'どのアプリからでも左右の Command キーを同時に押すと、最前面のウインドウを撮影し、Beyond の現在の下書きに添付します。自動送信はしません。初期設定はオフで、この Mac にのみ適用されます。機密情報が写る可能性があるため、送信前に添付画像を確認してください。',
       statusTitle: 'スクリーンショットのショートカットの状態',
       checking: 'スクリーンショットのショートカットを確認中…',
       disabled: 'スクリーンショットのショートカットはオフです。',
       starting: 'ショートカットの検出を開始しています。まだ使用できません。',
       ready: 'ショートカットを使用できます。撮影した画像は現在の下書きに添付され、送信はされません。',
       inputPermission:
-        '入力監視の許可により、他のアプリがアクティブな間も両方の Command キーを検出できます。システム設定 → プライバシーとセキュリティ → 入力監視で Hermes を許可し、ここに戻って再試行してください。',
+        '入力監視の許可により、他のアプリがアクティブな間も両方の Command キーを検出できます。システム設定 → プライバシーとセキュリティ → 入力監視で Beyond を許可し、ここに戻って再試行してください。',
       screenPermission:
-        '画面収録の許可により、このショートカットを使ったときに最前面のアプリのウインドウを撮影できます。システム設定 → プライバシーとセキュリティ → 画面収録で Hermes を許可し、ここに戻って再試行してください。macOS に求められた場合は Hermes を再起動してください。',
+        '画面収録の許可により、このショートカットを使ったときに最前面のアプリのウインドウを撮影できます。システム設定 → プライバシーとセキュリティ → 画面収録で Beyond を許可し、ここに戻って再試行してください。macOS に求められた場合は Beyond を再起動してください。',
       openSettings: 'システム設定を開く',
       retry: '再試行',
       unavailable: 'スクリーンショットのショートカットは使用できません。再試行するか、オフにしてください。',
@@ -954,7 +954,7 @@ export const jaOverrides = {
     quickEntry: {
       enabledTitle: 'クイック入力',
       enabledDesc:
-        'グローバルショートカットで小さな入力欄をどこからでも呼び出し、Hermes を開かずにプロンプトを送信します。',
+        'グローバルショートカットで小さな入力欄をどこからでも呼び出し、Beyond を開かずにプロンプトを送信します。',
       shortcutTitle: 'クイック入力のショートカット',
       shortcutDesc: '修飾キーが 1 つ以上必要です（例: CommandOrControl+Shift+Space）。',
       active: 'ショートカットは有効です。',
@@ -989,19 +989,19 @@ export const jaOverrides = {
       title: 'ゲートウェイ接続',
       envOverride: 'env オーバーライド',
       intro:
-        'Hermes Desktop はデフォルトで独自のローカルゲートウェイを起動します。別のマシンや信頼できるプロキシの背後で既に動作している Hermes バックエンドをこのアプリで制御する場合は、リモートゲートウェイを使用してください。ゲートウェイ接続はマシン単位の設定で、プロファイルは接続したゲートウェイから検出されます。',
+        'Beyond Desktop はデフォルトで独自のローカルゲートウェイを起動します。別のマシンや信頼できるプロキシの背後で既に動作している Beyond バックエンドをこのアプリで制御する場合は、リモートゲートウェイを使用してください。ゲートウェイ接続はマシン単位の設定で、プロファイルは接続したゲートウェイから検出されます。',
       envOverrideTitle: '環境変数がこのデスクトップセッションを制御しています。',
       envOverrideDesc:
-        '保存された設定を使用するには HERMES_DESKTOP_REMOTE_URL と HERMES_DESKTOP_REMOTE_TOKEN の設定を解除してください。',
+        '保存された設定を使用するには BEYOND_DESKTOP_REMOTE_URL と BEYOND_DESKTOP_REMOTE_TOKEN の設定を解除してください。',
       localTitle: 'ローカルゲートウェイ',
       localDesc:
-        'ローカルホストでプライベートな Hermes バックエンドを起動します。これがデフォルトで、オフラインでも動作します。',
+        'ローカルホストでプライベートな Beyond バックエンドを起動します。これがデフォルトで、オフラインでも動作します。',
       remoteTitle: 'リモートゲートウェイ',
       remoteDesc:
-        'このデスクトップシェルをリモートの Hermes バックエンドに接続します。ホスト型ゲートウェイは OAuth またはユーザー名とパスワードを使用します。自己ホスト型はセッショントークンを使用する場合があります。',
+        'このデスクトップシェルをリモートの Beyond バックエンドに接続します。ホスト型ゲートウェイは OAuth またはユーザー名とパスワードを使用します。自己ホスト型はセッショントークンを使用する場合があります。',
       remoteUrlTitle: 'リモート URL',
       remoteUrlDesc:
-        'リモートダッシュボードバックエンドのベース URL。/hermes などのパスプレフィックスもサポートしています。',
+        'リモートダッシュボードバックエンドのベース URL。/beyond などのパスプレフィックスもサポートしています。',
       probing: 'このゲートウェイの認証方法を確認中…',
       probeError: 'このゲートウェイにまだ到達できません。URL を確認してください。応答後に認証方法が表示されます。',
       signedIn: 'サインイン済み',
@@ -1048,9 +1048,9 @@ export const jaOverrides = {
       enterUrlFirst: '最初にリモート URL を入力してください。',
       restartingTitle: 'ゲートウェイ接続を再起動中',
       savedTitle: 'ゲートウェイ設定を保存しました',
-      restartingMessage: 'Hermes Desktop は保存された設定を使用して再接続します。',
+      restartingMessage: 'Beyond Desktop は保存された設定を使用して再接続します。',
       savedMessage: '次回起動時に保存されます。',
-      connectedTo: (baseUrl, version) => `${baseUrl}${version ? ` · Hermes ${version}` : ''} に接続しました`,
+      connectedTo: (baseUrl, version) => `${baseUrl}${version ? ` · Beyond ${version}` : ''} に接続しました`,
       reachableTitle: 'リモートゲートウェイに到達可能',
       signedOutTitle: 'サインアウトしました',
       signedOutMessage: 'リモートゲートウェイセッションをクリアしました。',
@@ -1062,7 +1062,7 @@ export const jaOverrides = {
       saveFailed: 'ゲートウェイ設定を保存できませんでした',
       sshTitle: 'SSH で接続',
       sshDesc:
-        'Hermes は SSH 経由でリモート上に起動され、このアプリにトンネルされます。リモート側で何かを起動・公開する必要はありません。ホストへの鍵ベースの SSH アクセスが前提です。',
+        'Beyond は SSH 経由でリモート上に起動され、このアプリにトンネルされます。リモート側で何かを起動・公開する必要はありません。ホストへの鍵ベースの SSH アクセスが前提です。',
       sshTrustHint: '初回に提示されたホスト鍵を信頼して固定し、以後の変更は拒否します。',
       sshHostTitle: 'ホスト',
       sshHostDesc: 'user@host、または ~/.ssh/config の Host エイリアス。',
@@ -1077,27 +1077,27 @@ export const jaOverrides = {
       sshPortDesc: '空欄 = 22 または ~/.ssh/config のポート。',
       sshKeyTitle: '鍵ファイル',
       sshKeyDesc: '秘密鍵のパス。空欄 = ssh-agent または ~/.ssh/config。',
-      sshHermesPathTitle: 'Hermes パス（任意）',
-      sshHermesPathDesc: 'リモートの hermes バイナリへのフルパス。空欄 = 自動検出。',
-      sshHermesPathPlaceholder: '自動検出',
+      sshBeyondPathTitle: 'Beyond パス（任意）',
+      sshBeyondPathDesc: 'リモートの beyond バイナリへのフルパス。空欄 = 自動検出。',
+      sshBeyondPathPlaceholder: '自動検出',
       sshTestConnection: 'SSH をテスト',
       sshConnect: '接続',
       sshButtonsHint: '「保存」は次回起動時に適用され、「接続」は今すぐ再接続します。',
-      sshReachable: (host, platform) => `接続可能: ${host}（${platform}）— Hermes を検出`,
+      sshReachable: (host, platform) => `接続可能: ${host}（${platform}）— Beyond を検出`,
       sshIncompleteHost: '接続する前に SSH ホストを入力してください。',
       sshErrUnreachable: 'SSH でそのホストに到達できませんでした。ホスト、ポート、ネットワークを確認してください。',
       sshErrAuth:
-        'SSH 認証に失敗しました。鍵を ssh-agent に読み込む（ssh-add）か、~/.ssh/config に IdentityFile を設定してください。Hermes は非対話的に ssh を実行します。',
+        'SSH 認証に失敗しました。鍵を ssh-agent に読み込む（ssh-add）か、~/.ssh/config に IdentityFile を設定してください。Beyond は非対話的に ssh を実行します。',
       sshErrHostKey:
         '前回の接続以降、ホスト鍵が変更されています。想定どおりか確認し、ssh-keygen -R <host> を実行してから再接続してください。',
       sshErrNotInstalled:
-        'リモートホストに Hermes がインストールされていません。リモートでインストールする（curl -fsSL https://hermes-agent.nousresearch.com/install.sh | sh）か、Hermes パスを設定してください。',
+        'リモートホストに Beyond がインストールされていません。リモートでインストールする（curl -fsSL https://beyond.app/install.sh | sh）か、Beyond パスを設定してください。',
       sshErrPlatform:
-        'サポートされていないリモートプラットフォームです。Hermes Desktop の SSH モードは Linux、macOS、Windows のリモートホストに対応しています。',
+        'サポートされていないリモートプラットフォームです。Beyond Desktop の SSH モードは Linux、macOS、Windows のリモートホストに対応しています。',
       sshErrTimeout: 'SSH 接続がタイムアウトしました。ホストが到達不能、またはスリープ中の可能性があります。',
-      sshErrUpdateRequired: 'Desktop SSH で接続する前に、リモートホストの Hermes を更新してください。',
+      sshErrUpdateRequired: 'Desktop SSH で接続する前に、リモートホストの Beyond を更新してください。',
       sshErrInteractiveAuth:
-        'Tailscale SSH では対話的なブラウザー確認が必要です。ターミナルで `ssh <host> true` を実行して確認を完了し、再試行してください。Hermes は SSH を非対話的に実行します。',
+        'Tailscale SSH では対話的なブラウザー確認が必要です。ターミナルで `ssh <host> true` を実行して確認を完了し、再試行してください。Beyond は SSH を非対話的に実行します。',
       sshErrUnknown: 'SSH 接続に失敗しました。'
     },
     keys: {
@@ -1140,7 +1140,7 @@ export const jaOverrides = {
       noOutput: 'まだ出力がありません。',
       deepLinkTitle: 'MCP サーバーを追加しますか？',
       deepLinkDescription:
-        'リンクがこの MCP サーバーを Hermes に追加するよう要求しました。下の設定はリンク側から来たものです。内容を必ず確認してください。',
+        'リンクがこの MCP サーバーを Beyond に追加するよう要求しました。下の設定はリンク側から来たものです。内容を必ず確認してください。',
       deepLinkStdioWarning:
         'このサーバーは下記のコマンドでローカルプロセスを実行します。提供元を信頼できる場合のみ続行してください。',
       deepLinkConfirm: 'サーバーを追加',
@@ -1161,7 +1161,7 @@ export const jaOverrides = {
       connectAccount: 'アカウントを接続',
       haveApiKey: 'API キーをお持ちですか？',
       intro:
-        'サブスクリプションでサインインします。API キーのコピーは不要です。Hermes がアプリ内でブラウザーサインインを代行します。',
+        'サブスクリプションでサインインします。API キーのコピーは不要です。Beyond がアプリ内でブラウザーサインインを代行します。',
       connected: '接続済み',
       collapse: '折りたたむ',
       connectAnother: '別のプロバイダーを接続',
@@ -1238,14 +1238,14 @@ export const jaOverrides = {
       activeBackend: '使用中',
       activeBackendHint: 'これが現在アクティブなバックエンドです',
       useBackend: 'このバックエンドを使う',
-      nousIncluded: 'Nous サブスクリプションに含まれています。有効にするには Nous Portal にサインインしてください。',
-      nousAuthNeededTitle: 'Nous Portal にサインイン',
-      nousAuthNeededMessage: provider =>
-        `${provider} は保存されましたが、Nous Portal にサインインするまで有効になりません。`,
-      nousAuthSignIn: 'サインイン',
-      nousAuthDoneTitle: 'Nous Portal に接続しました',
-      nousAuthDoneMessage: 'サブスクリプションのバックエンドが有効になりました。',
-      nousAuthFailed: 'Nous Portal のサインインが完了しませんでした',
+      beyondIncluded: 'Beyond サブスクリプションに含まれています。有効にするには Beyond Portal にサインインしてください。',
+      beyondAuthNeededTitle: 'Beyond Portal にサインイン',
+      beyondAuthNeededMessage: provider =>
+        `${provider} は保存されましたが、Beyond Portal にサインインするまで有効になりません。`,
+      beyondAuthSignIn: 'サインイン',
+      beyondAuthDoneTitle: 'Beyond Portal に接続しました',
+      beyondAuthDoneMessage: 'サブスクリプションのバックエンドが有効になりました。',
+      beyondAuthFailed: 'Beyond Portal のサインインが完了しませんでした',
       noApiKeyRequired: 'API キーは不要です。',
       postSetupHint: step =>
         `このバックエンドは一度だけインストールが必要です (${step})。このマシン上で実行され、数分かかる場合があります。`,
@@ -1300,7 +1300,7 @@ export const jaOverrides = {
         failedSave: '実プロファイル設定を保存できませんでした',
         prompt: {
           title: 'サイトにログインしたまま利用',
-          body: 'Hermes が既定ブラウザプロファイルのスナップショットでブラウジングできるようにすると、サイトはログイン済みの状態で開きます。',
+          body: 'Beyond が既定ブラウザプロファイルのスナップショットでブラウジングできるようにすると、サイトはログイン済みの状態で開きます。',
           bulletSnapshot: 'Cookie とログイン情報は管理されたスナップショットにコピーされます。',
           bulletLiveProfile: '実際のブラウザプロファイルが直接開かれることはありません。',
           bulletLocal: 'データがこのコンピュータの外に出ることはありません。',
@@ -1377,7 +1377,7 @@ export const jaOverrides = {
     edit: '編集',
     archive: 'アーカイブ',
     skillArchivedTitle: 'スキルをアーカイブしました',
-    skillArchivedMessage: 'hermes curator restore で復元できます。',
+    skillArchivedMessage: 'beyond curator restore で復元できます。',
     officialCatalog: 'インストール可能',
     officialPill: '公式'
   },
@@ -1395,7 +1395,7 @@ export const jaOverrides = {
     loadFailed: 'メモリグラフを読み込めませんでした',
     loading: '読み込み中…',
     emptyTitle: 'まだ学習はありません',
-    emptyDesc: 'Hermes がスキルやメモリを蓄積すると、ここに表示されます。'
+    emptyDesc: 'Beyond がスキルやメモリを蓄積すると、ここに表示されます。'
   },
   agents: {
     extendedTranscript: '詳細な実行ログ',
@@ -1459,7 +1459,7 @@ export const jaOverrides = {
       placeholder: 'ペットを検索…',
       loading: 'petdex ギャラリーを読み込み中…',
       error: 'petdex ギャラリーに接続できません。',
-      staleBackend: 'ペット機能を使うには Hermes を再起動してください。',
+      staleBackend: 'ペット機能を使うには Beyond を再起動してください。',
       empty: '一致するペットがありません。',
       turnOff: 'オフ',
       turnOn: 'オン',
@@ -1486,8 +1486,8 @@ export const jaOverrides = {
       hatchComposing: 'まとめています…',
       hatchSaving: 'もうすぐです…',
       namePlaceholder: 'ペットに名前を付ける',
-      staleBackend: 'ペットを生成するには Hermes を更新してください。',
-      backgroundHint: 'このウィンドウは閉じても大丈夫です。完了したら Hermes が通知します。',
+      staleBackend: 'ペットを生成するには Beyond を更新してください。',
+      backgroundHint: 'このウィンドウは閉じても大丈夫です。完了したら Beyond が通知します。',
       slowProviderHint: '数分かかることがあります',
       remix: 'リミックス',
       remixConfirmTitle: 'この見た目でリミックスしますか？',
@@ -1516,7 +1516,7 @@ export const jaOverrides = {
     sections: { sessions: 'セッション', system: 'システム', usage: '使用状況' },
     nav: {
       newChat: { title: '新しいセッション', detail: '新しいセッションを開始' },
-      settings: { title: '設定', detail: 'Hermes デスクトップを設定' },
+      settings: { title: '設定', detail: 'Beyond デスクトップを設定' },
       capabilities: { title: 'スキルとツール', detail: 'スキル、ツールセット、プロバイダーを有効化' },
       messaging: { title: 'メッセージング', detail: 'Telegram、Slack、Discord などを設定' },
       artifacts: { title: 'アーティファクト', detail: '生成された出力を閲覧' }
@@ -1538,7 +1538,7 @@ export const jaOverrides = {
     noSessions: 'セッションはまだありません。',
     gatewayRunning: 'メッセージングゲートウェイが実行中',
     gatewayStopped: 'メッセージングゲートウェイが停止中',
-    hermesActiveSessions: (version, count) => `Hermes ${version} · アクティブセッション ${count}`,
+    beyondActiveSessions: (version, count) => `Beyond ${version} · アクティブセッション ${count}`,
     restartGateway: 'ゲートウェイを再起動',
     openBrowser: 'ブラウザを開く',
     gatewayRestartFailed: 'ゲートウェイの再起動に失敗しました。',
@@ -1546,7 +1546,7 @@ export const jaOverrides = {
     sharedGatewayRestartDescription: bots => `このデバイス上のすべてのボットが再接続します: ${bots}`,
     sharedGatewayRestartConfirm: 'すべて再起動',
     sharedGatewayRestarted: count => `共有ゲートウェイを再起動しました（${count} ボット）`,
-    updateHermes: 'Hermes を更新',
+    updateBeyond: 'Beyond を更新',
     reloadWindow: 'ウィンドウを再読み込み',
     actionRunning: '実行中',
     actionDone: '完了',
@@ -1608,11 +1608,11 @@ export const jaOverrides = {
     restartFailedManual: 'ゲートウェイの再起動に失敗しました。手動で再起動し、ゲートウェイのログを確認してください。',
     telegramQr: {
       title: 'Telegram ボットの接続方法を選択',
-      subtitle: 'どちらの方法でも、あなたが管理するボットを接続し、資格情報はこの Hermes にのみ保存されます。',
+      subtitle: 'どちらの方法でも、あなたが管理するボットを接続し、資格情報はこの Beyond にのみ保存されます。',
       quickSetup: 'クイックセットアップ',
       recommended: '推奨',
       quickHelp:
-        'QR コードをスキャンして Telegram で確認します。Hermes がボットを作成し、あなたの Telegram ユーザー ID を自動検出します。',
+        'QR コードをスキャンして Telegram で確認します。Beyond がボットを作成し、あなたの Telegram ユーザー ID を自動検出します。',
       createWithQr: 'QR で作成',
       starting: '開始中…',
       replaceWarning:
@@ -1735,7 +1735,7 @@ export const jaOverrides = {
       },
       MATRIX_HOMESERVER: { label: 'ホームサーバー URL', placeholder: 'https://matrix.org' },
       MATRIX_ACCESS_TOKEN: { label: 'アクセストークン' },
-      MATRIX_USER_ID: { label: 'ボットユーザー ID', placeholder: '@hermes:example.org' },
+      MATRIX_USER_ID: { label: 'ボットユーザー ID', placeholder: '@beyond:example.org' },
       MATRIX_ALLOWED_USERS: {
         label: '許可する Matrix ユーザー ID',
         help: '推奨。@user:server 形式のユーザー ID（1 欄に 1 件）。'
@@ -1785,13 +1785,13 @@ export const jaOverrides = {
     manageProfiles: 'プロファイルを管理…',
     fleet: {
       localDevice:
-        'このデバイス（ローカルバックエンド — Hermes が無ければインストールし、あれば新しいセッションを開きます）',
+        'このデバイス（ローカルバックエンド — Beyond が無ければインストールし、あれば新しいセッションを開きます）',
       switchDeviceTitle: 'このデバイスに切り替えますか？',
       switchDeviceDesc: 'このコンピュータで新しいセッションを開きます。今の会話は別のゲートウェイに残ります。',
       switchDeviceConfirm: '切り替える',
       installDeviceTitle: 'このデバイスに切り替えますか？',
       installDeviceDesc:
-        'Hermes をローカルにインストールしてから、このコンピュータで新しいセッションを開きます。確認するまでインストールは始まりません。',
+        'Beyond をローカルにインストールしてから、このコンピュータで新しいセッションを開きます。確認するまでインストールは始まりません。',
       installDeviceConfirm: 'ローカルにインストール',
       connectExistingInstead: '代わりに既存環境へ接続'
     },
@@ -1799,9 +1799,9 @@ export const jaOverrides = {
       menuItem: 'リモートホストに接続…',
       badge: (host: string) => `${host} で実行中`,
       title: (profile: string) => `${profile} をリモートホストに接続`,
-      description: 'このプロファイルのセッションは、このパソコンではなく指定したリモートの Hermes で実行されます。',
+      description: 'このプロファイルのセッションは、このパソコンではなく指定したリモートの Beyond で実行されます。',
       urlLabel: 'リモートアドレス',
-      urlPlaceholder: 'https://hermes.example.com',
+      urlPlaceholder: 'https://beyond.example.com',
       urlInvalid: 'http:// または https:// で始まる完全なアドレスを入力してください',
       tokenLabel: 'アクセストークン',
       tokenPlaceholder: 'リモートのセッショントークンを貼り付け',
@@ -1835,7 +1835,7 @@ export const jaOverrides = {
     setAsDefault: 'デフォルトに設定',
     defaultProfile: 'デフォルトのプロファイル',
     defaultSet: name => `${name} をデフォルトに設定しました`,
-    defaultDescription: 'Hermes の起動時と新しいチャットに使用します。既存のセッションのプロファイルは変わりません。',
+    defaultDescription: 'Beyond の起動時と新しいチャットに使用します。既存のセッションのプロファイルは変わりません。',
     failedSetDefault: 'デフォルトのプロファイルを設定できませんでした',
     setColor: color => `カラー ${color} に設定`,
     autoColor: '自動',
@@ -1874,7 +1874,7 @@ export const jaOverrides = {
     deleteDescMid: ' が削除され、その ',
     deleteDescSuffix: ' ディレクトリが削除されます。この操作は元に戻せません。',
     deleting: '削除中...',
-    createDesc: 'プロファイルは独立した Hermes 環境です：設定、スキル、SOUL.md が別々になります。',
+    createDesc: 'プロファイルは独立した Beyond 環境です：設定、スキル、SOUL.md が別々になります。',
     nameLabel: '名前',
     cloneFrom: '複製元',
     cloneFromNone: 'なし（空）',
@@ -1905,7 +1905,7 @@ export const jaOverrides = {
   },
 
   modelAssignment: {
-    saveFailed: 'Hermes はモデルの変更を保存しませんでした。',
+    saveFailed: 'Beyond はモデルの変更を保存しませんでした。',
     confirmTitle: 'モデル選択の警告',
     confirmDetail: 'このトレードオフを受け入れる場合のみ確認してください。',
     confirmAction: '確認',
@@ -1971,7 +1971,7 @@ export const jaOverrides = {
     everyHourAt: minute => `毎時 :${minute} に`,
     newCron: '新しい Cron',
     emptyDescNew:
-      'Cron 式でプロンプトを実行するスケジュールを設定します。Hermes が実行して、選択した宛先に結果を送信します。',
+      'Cron 式でプロンプトを実行するスケジュールを設定します。Beyond が実行して、選択した宛先に結果を送信します。',
     emptyDescSearch: '検索キーワードを広げてください。',
     emptyTitleNew: 'スケジュールされたジョブがまだありません',
     emptyTitleSearch: '一致なし',
@@ -2248,12 +2248,12 @@ export const jaOverrides = {
   composer: {
     message: 'メッセージ',
     wakingProfile: profile => `${profile} を起動中…`,
-    placeholderStarting: 'Hermes を起動中...',
-    placeholderReconnecting: 'Hermes に再接続中…',
+    placeholderStarting: 'Beyond を起動中...',
+    placeholderReconnecting: 'Beyond に再接続中…',
     placeholderFollowUp: 'フォローアップを送信',
     newSessionPlaceholders: [
       '何を作りますか？',
-      'Hermes にタスクを与える',
+      'Beyond にタスクを与える',
       '何か考えていることはありますか？',
       '必要なことを説明してください',
       '何に取り組みますか？',
@@ -2309,7 +2309,7 @@ export const jaOverrides = {
       '/resume': '以前のセッションを再開',
       '/details': 'トランスクリプトの詳細レベルを制御',
       '/copy': '選択または最後のアシスタントメッセージをコピー',
-      '/quit': 'hermes を終了',
+      '/quit': 'beyond を終了',
       '/start': '返信せずにプラットフォームの開始要求を確認',
       '/new': '新しいデスクトップチャットを開始',
       '/topic': 'Telegram の個人チャットのトピックを有効化または確認',
@@ -2338,14 +2338,14 @@ export const jaOverrides = {
       '/refine': 'この会話を見直し、学びをメモリやスキルに保存',
       '/review': '独立したサブエージェントに作業のレビューを依頼',
       '/loop': 'このセッションで一定間隔でプロンプトを繰り返す',
-      '/plan': '実行せずに .hermes/plans/ に Markdown の実装計画を作成',
+      '/plan': '実行せずに .beyond/plans/ に Markdown の実装計画を作成',
       '/moa': 'Mixture of Agents のプリセットで実行し、元のモデルに戻す',
       '/subgoal': '進行中の目標の追加条件を管理',
       '/status': '現在のセッション状態を表示',
       '/egress': 'Docker の送信プロキシの状態を表示',
       '/context': 'コンテキスト使用量、内訳、圧縮統計、処理速度を表示',
       '/whoami': 'スラッシュコマンドのアクセス権を表示',
-      '/profile': 'アクティブな Hermes プロファイルを切り替え',
+      '/profile': 'アクティブな Beyond プロファイルを切り替え',
       '/codex-runtime': 'OpenAI/Codex モデルの Codex app-server ランタイムを切り替え',
       '/personality': 'このセッションの人格を切り替え',
       '/battery': 'ステータスバーのバッテリー表示を切り替え',
@@ -2369,10 +2369,10 @@ export const jaOverrides = {
       '/browser': 'エージェントのブラウザーを管理 [connect|disconnect|status]',
       '/palette': 'コマンドパレットを開く',
       '/usage': 'このセッションのトークン使用量を表示',
-      '/subscription': 'Nous のプランを確認し、ブラウザーで変更',
-      '/topup': 'Nous の残高を表示し、請求を管理',
+      '/subscription': 'Beyond のプランを確認し、ブラウザーで変更',
+      '/topup': 'Beyond の残高を表示し、請求を管理',
       '/platform': '問題のあるゲートウェイプラットフォームを一時停止、再開、一覧表示',
-      '/version': 'Hermes Agent のバージョンを表示',
+      '/version': 'Beyond Agent のバージョンを表示',
       '/debug': 'デバッグレポートを作成',
       '/model': 'このセッションのモデルを切り替え'
     },
@@ -2387,7 +2387,7 @@ export const jaOverrides = {
       'composer.history': 'ポップオーバー / 履歴を切り替え'
     },
     attachUrlTitle: 'URL を添付',
-    attachUrlDesc: 'Hermes がページを取得し、このターンのコンテキストとして含めます。',
+    attachUrlDesc: 'Beyond がページを取得し、このターンのコンテキストとして含めます。',
     urlPlaceholder: 'https://example.com/post',
     urlHintPre: '完全な URL を入力してください。例: ',
     attach: '添付',
@@ -2614,7 +2614,7 @@ export const jaOverrides = {
       createPr: 'PR を作成',
       openPr: 'PR を開く',
       ghMissing: 'PR を開くには GitHub CLI (gh) をインストールしてサインインしてください',
-      agentShip: 'Hermes にコミットと PR を任せる',
+      agentShip: 'Beyond にコミットと PR を任せる',
       agentShipUnavailable: 'この変更を持つチャットが画面にありません。',
       agentShipPrompt:
         '現在の変更を確認し、分かりやすい Conventional Commits 形式でコミットし、ブランチをプッシュして、プルリクエストを作成してください。',
@@ -2627,23 +2627,23 @@ export const jaOverrides = {
   },
 
   updates: {
-    discontinuedTitle: 'このHermesビルドはサポートされていません',
+    discontinuedTitle: 'このBeyondビルドはサポートされていません',
     discontinuedBody:
-      'このHermesビルドはサポートが終了し、動作しなくなる可能性があります。アンインストールしてください。データはディスクに残ります。',
+      'このBeyondビルドはサポートが終了し、動作しなくなる可能性があります。アンインストールしてください。データはディスクに残ります。',
     channels: { stable: '安定版', canary: '先行版' },
     bundleSwapPending: '再起動して更新を完了',
     bundleSwapPendingDesc:
-      '更新されたアプリはすでにインストール済みです。Hermes を再起動するだけで新しいビルドが読み込まれます。チャットや設定はそのまま保持されます。',
-    bundleSwapPendingAction: 'Hermes を再起動',
+      '更新されたアプリはすでにインストール済みです。Beyond を再起動するだけで新しいビルドが読み込まれます。チャットや設定はそのまま保持されます。',
+    bundleSwapPendingAction: 'Beyond を再起動',
     stages: {
       idle: '準備中…',
       prepare: '準備中…',
       fetch: 'ダウンロード中…',
       pull: 'もうすぐ完了…',
       pydeps: '仕上げ中…',
-      update: 'Hermes を更新中…',
+      update: 'Beyond を更新中…',
       rebuild: 'デスクトップアプリを再ビルド中…',
-      restart: 'Hermes を再起動中…',
+      restart: 'Beyond を再起動中…',
       done: '更新が完了しました',
       manual: 'ターミナルから更新',
       guiSkew: 'デスクトップアプリを更新してください',
@@ -2653,7 +2653,7 @@ export const jaOverrides = {
     checkFailedTitle: '更新を確認できませんでした',
     tryAgain: '再試行',
     notAvailableTitle: '更新は利用できません',
-    unsupportedMessage: 'このバージョンの Hermes はアプリ内から自分を更新できません。',
+    unsupportedMessage: 'このバージョンの Beyond はアプリ内から自分を更新できません。',
     connectionRetry: '接続を確認してもう一度試してください。',
     gitUnusable: 'このコンピューターで Git を実行できなかったため、更新を確認できませんでした。',
     latestBody: '最新バージョンを実行しています。',
@@ -2661,9 +2661,9 @@ export const jaOverrides = {
     latestBodyBackend: 'バックエンドは最新バージョンを実行しています。',
     allSetTitle: '準備完了',
     availableTitle: '新しい更新が利用可能',
-    availableBody: '新しいバージョンの Hermes をインストールする準備ができています。',
+    availableBody: '新しいバージョンの Beyond をインストールする準備ができています。',
     availableTitleBackend: 'バックエンドの更新があります',
-    availableBodyBackend: '接続中の Hermes バックエンドの新しいバージョンをインストールできます。',
+    availableBodyBackend: '接続中の Beyond バックエンドの新しいバージョンをインストールできます。',
     availableBodyNoChangelog:
       '新しいバージョンを利用できます。このインストール形式ではリリースノートは表示できません。',
     updateNow: '今すぐ更新',
@@ -2673,31 +2673,31 @@ export const jaOverrides = {
     manualTitle: 'ターミナルから更新',
     manualUnavailableTitle: 'ここからは更新できません',
     manualBody:
-      'Hermes をコマンドラインからインストールしたため、更新もそこで実行されます。これをターミナルに貼り付けてください:',
+      'Beyond をコマンドラインからインストールしたため、更新もそこで実行されます。これをターミナルに貼り付けてください:',
     manualBodyBackend:
-      'Hermes バックエンドはこのアプリの外部で管理されています。ホストするサーバーで次のコマンドを実行してください:',
-    manualPickedUp: 'Hermes は次回起動時に新しいバージョンを読み込みます。',
+      'Beyond バックエンドはこのアプリの外部で管理されています。ホストするサーバーで次のコマンドを実行してください:',
+    manualPickedUp: 'Beyond は次回起動時に新しいバージョンを読み込みます。',
     manualPickedUpBackend: 'バックエンドは更新完了後に新しいバージョンを読み込みます。',
     guiSkewTitle: 'デスクトップアプリを更新してください',
     guiSkewBody:
-      'バックエンドは更新されましたが、このデスクトップアプリのパッケージは変更されていません。一致させるために Hermes デスクトップアプリ（AppImage / .deb / .rpm）を更新または再インストールしてください。',
+      'バックエンドは更新されましたが、このデスクトップアプリのパッケージは変更されていません。一致させるために Beyond デスクトップアプリ（AppImage / .deb / .rpm）を更新または再インストールしてください。',
     copy: 'コピー',
     copied: 'コピーしました',
     done: '完了',
     applyingBody:
-      'Hermes アップデーターが独自のウィンドウで引き継ぎ、完了後に自動的に Hermes を再度開きます。更新中はご自分で Hermes を開き直さないでください。',
-    applyingBodyBackend: 'リモートバックエンドが更新を適用して再起動します。復帰すると Hermes が自動的に再接続します。',
-    applyingClose: 'このウィンドウは更新中に閉じ、その後 Hermes が自動的に再度開きます。',
+      'Beyond アップデーターが独自のウィンドウで引き継ぎ、完了後に自動的に Beyond を再度開きます。更新中はご自分で Beyond を開き直さないでください。',
+    applyingBodyBackend: 'リモートバックエンドが更新を適用して再起動します。復帰すると Beyond が自動的に再接続します。',
+    applyingClose: 'このウィンドウは更新中に閉じ、その後 Beyond が自動的に再度開きます。',
     errorTitle: '更新が完了しませんでした',
     errorBody: 'ご安心ください。何も失われていません。今すぐ再試行できます。',
-    blockerTitle: 'Hermes を更新するためにローカルプレビューを閉じますか？',
+    blockerTitle: 'Beyond を更新するためにローカルプレビューを閉じますか？',
     blockerBody:
       '更新する前に、これらのローカルプレビューを停止する必要があります。ファイルが変更または削除されることはありません。',
-    foreignBlockerTitle: '他のプロセスを閉じて Hermes を更新',
+    foreignBlockerTitle: '他のプロセスを閉じて Beyond を更新',
     foreignBlockerBody:
-      'Hermes はこれらのプロセスを安全に自動終了できません。各プロセスを所有するアプリ、ターミナル、またはサービスを閉じてから、もう一度更新してください。',
+      'Beyond はこれらのプロセスを安全に自動終了できません。各プロセスを所有するアプリ、ターミナル、またはサービスを閉じてから、もう一度更新してください。',
     mixedBlockerBody:
-      'Hermes は以下のローカルプレビューを閉じることができます。更新を続けるには、他のプロセスを手動で閉じる必要があります。',
+      'Beyond は以下のローカルプレビューを閉じることができます。更新を続けるには、他のプロセスを手動で閉じる必要があります。',
     closePreviewsAndUpdate: 'プレビューを閉じて更新',
     closePreviewsAndCheckAgain: 'プレビューを閉じて再確認',
     localPreview: 'ローカルプレビュー',
@@ -2750,7 +2750,7 @@ export const jaOverrides = {
     justNowSuffix: ' · たった今',
     bundleOutOfSync: 'アプリのビルドが古くなっています',
     bundleOutOfSyncDesc:
-      'Hermes ランタイムは更新されましたが、デスクトップアプリ自体は古いビルドのままです。アプリを更新するまで、新しいインターフェース機能(Bot Mode など)は表示されません。下の更新を実行してアプリを再ビルドしてください。それでもこの警告が消えない場合は、最新のデスクトップインストーラーから再インストールしてください。',
+      'Beyond ランタイムは更新されましたが、デスクトップアプリ自体は古いビルドのままです。アプリを更新するまで、新しいインターフェース機能(Bot Mode など)は表示されません。下の更新を実行してアプリを再ビルドしてください。それでもこの警告が消えない場合は、最新のデスクトップインストーラーから再インストールしてください。',
     bundleOutOfSyncAction: 'インストーラーを入手',
     checkingShort: '確認中…'
   },
@@ -2763,7 +2763,7 @@ export const jaOverrides = {
       skipped: 'スキップ',
       failed: '失敗'
     },
-    oneTimeTitle: 'Hermes には一度限りのインストールが必要です',
+    oneTimeTitle: 'Beyond には一度限りのインストールが必要です',
     unsupportedDesc: platform =>
       `${platform} では自動の初回インストールはまだ利用できません。ターミナルを開いて以下のコマンドを実行し、このアプリを再起動してください。以降の起動ではこの手順はスキップされます。`,
     installCommand: 'インストールコマンド',
@@ -2771,25 +2771,25 @@ export const jaOverrides = {
     viewDocs: 'インストールドキュメントを見る',
     installTo: 'インストール先',
     retryAfterRun: '実行しました — 再試行',
-    setupChoiceTitle: 'Hermes Desktop をセットアップ',
+    setupChoiceTitle: 'Beyond Desktop をセットアップ',
     setupChoiceDesc:
-      'すでに実行している Hermes ゲートウェイに接続するか、このコンピューターに Hermes をローカルインストールします。',
-    connectExistingTitle: '既存の Hermes に接続',
+      'すでに実行している Beyond ゲートウェイに接続するか、このコンピューターに Beyond をローカルインストールします。',
+    connectExistingTitle: '既存の Beyond に接続',
     connectExistingShort: '既存環境に接続',
     connectExistingDesc:
       'セッショントークンまたはブラウザーサインインでリモートバックエンドを使用します。ローカルインストールは開始されません。',
-    installLocalTitle: 'Hermes をローカルにインストール',
-    installLocalDesc: 'Hermes をダウンロードし、Python 環境を作成して、このコンピューターでバックエンドを実行します。',
+    installLocalTitle: 'Beyond をローカルにインストール',
+    installLocalDesc: 'Beyond をダウンロードし、Python 環境を作成して、このコンピューターでバックエンドを実行します。',
     localStartUnavailable:
-      'ローカルインストールを開始できません。Hermes Desktop を再起動して、もう一度お試しください。',
-    remoteSetupTitle: '既存の Hermes に接続',
+      'ローカルインストールを開始できません。Beyond Desktop を再起動して、もう一度お試しください。',
+    remoteSetupTitle: '既存の Beyond に接続',
     remoteSetupDesc:
-      'ゲートウェイ URL を入力してください。Hermes Desktop がトークンとブラウザーサインインのどちらが必要かを検出します。',
+      'ゲートウェイ URL を入力してください。Beyond Desktop がトークンとブラウザーサインインのどちらが必要かを検出します。',
     remoteUrlTitle: 'ゲートウェイ URL',
-    remoteUrlDesc: 'Hermes ゲートウェイのベース URL を使用します。リモートの場合は https:// を含めてください。',
-    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
+    remoteUrlDesc: 'Beyond ゲートウェイのベース URL を使用します。リモートの場合は https:// を含めてください。',
+    remoteUrlPlaceholder: 'https://gateway.example.com/beyond',
     probing: 'ゲートウェイ認証方式を検出中...',
-    probeError: 'その Hermes ゲートウェイに到達できませんでした。',
+    probeError: 'その Beyond ゲートウェイに到達できませんでした。',
     identityProvider: 'ID プロバイダー',
     authTitle: '認証',
     authNeedsOauth: provider => `このゲートウェイをテストする前に ${provider} でサインインしてください。`,
@@ -2809,12 +2809,12 @@ export const jaOverrides = {
     applyRemote: '適用して再接続',
     backToSetup: '戻る',
     failedTitle: 'インストールに失敗しました',
-    settingUpTitle: 'Hermes Agent を設定中',
+    settingUpTitle: 'Beyond Agent を設定中',
     finishingTitle: '仕上げ中',
     failedDesc:
-      'インストール手順のいずれかが失敗しました。Windows では、別の Hermes CLI またはデスクトップインスタンスが実行中の場合に発生することがあります。実行中の Hermes インスタンスをすべて停止してから再試行してください。詳細は以下またはデスクトップログで確認できます。',
+      'インストール手順のいずれかが失敗しました。Windows では、別の Beyond CLI またはデスクトップインスタンスが実行中の場合に発生することがあります。実行中の Beyond インスタンスをすべて停止してから再試行してください。詳細は以下またはデスクトップログで確認できます。',
     activeDesc:
-      'これは一回限りのセットアップです。Hermes インストーラーが依存関係をダウンロードしてマシンを設定しています。以降の起動ではこの手順はスキップされます。',
+      'これは一回限りのセットアップです。Beyond インストーラーが依存関係をダウンロードしてマシンを設定しています。以降の起動ではこの手順はスキップされます。',
     progress: (completed, total) => `${total} ステップ中 ${completed} 完了`,
     currentStage: stage => ` — 現在: ${stage}`,
     fetchingManifest: 'インストーラーマニフェストを取得中...',
@@ -2845,7 +2845,7 @@ export const jaOverrides = {
     localDownloadsHeading: 'ローカル',
     noAuthenticatedProviders: '認証済みプロバイダーがありません。',
     pro: 'Pro',
-    proNeedsSubscription: 'Pro モデルには有料の Nous サブスクリプションが必要です。',
+    proNeedsSubscription: 'Pro モデルには有料の Beyond サブスクリプションが必要です。',
     free: '無料',
     freeTier: '無料プラン',
     priceTitle: '100 万トークンあたりの入力/出力価格',
@@ -2945,13 +2945,13 @@ export const jaOverrides = {
       update: '更新',
       updateInProgress: '更新中',
       commitsBehind: (count, branch) => `${branch} より ${count} コミット遅れています`,
-      desktopVersion: version => `Hermes Desktop v${version}`,
+      desktopVersion: version => `Beyond Desktop v${version}`,
       backendVersion: version => `バックエンド v${version}`,
       clientLabel: version => `クライアント v${version}`,
       connectionSsh: host => `SSH: ${host}`,
       connectionRemote: host => `リモート: ${host}`,
       connectionCloud: host => `クラウド: ${host}`,
-      connectionCloudTooltip: host => `Hermes Cloud · ${host}`,
+      connectionCloudTooltip: host => `Beyond Cloud · ${host}`,
       connectionSshTooltip: host => `SSH · ${host}`,
       connectionRemoteTooltip: host => `Remote · ${host}`,
       backendLabel: version => `バックエンド v${version}`,
@@ -3100,7 +3100,7 @@ export const jaOverrides = {
     binaryTitle: 'これはバイナリファイルのようです',
     binaryBody: label => `${label} をプレビューすると読み取り不能なテキストが表示される場合があります。`,
     largeTitle: 'このファイルは大きいです',
-    largeBody: (label, size) => `${label} は ${size} です。Hermes は最初の 512 KB のみを表示します。`,
+    largeBody: (label, size) => `${label} は ${size} です。Beyond は最初の 512 KB のみを表示します。`,
     previewAnyway: 'とにかくプレビュー',
     truncated: '最初の 512 KB を表示しています。',
     noInlineTitle: 'インラインプレビューなし',
@@ -3142,11 +3142,11 @@ export const jaOverrides = {
         'このアドレスはエージェントを実行しているマシンを指しており、このマシンではありません。ブラウザペインはページをローカルで読み込むため、リモートの開発サーバーにはポート転送か到達可能なホスト名が必要です。',
       failedToLoad: 'プレビューの読み込みに失敗しました',
       tryAgain: '再試行',
-      restarting: 'Hermes を再起動中...',
-      askRestart: 'Hermes にサーバーの再起動を依頼',
-      lookingRestart: taskId => `Hermes は再起動するプレビューサーバーを検索中です (${taskId})`,
+      restarting: 'Beyond を再起動中...',
+      askRestart: 'Beyond にサーバーの再起動を依頼',
+      lookingRestart: taskId => `Beyond は再起動するプレビューサーバーを検索中です (${taskId})`,
       restartingTitle: 'プレビューサーバーを再起動中',
-      restartingMessage: 'Hermes はバックグラウンドで作業中です。進捗はプレビューコンソールで確認してください。',
+      restartingMessage: 'Beyond はバックグラウンドで作業中です。進捗はプレビューコンソールで確認してください。',
       startRestartFailed: message => `サーバー再起動を開始できませんでした: ${message}`,
       restartFailed: 'サーバーの再起動に失敗しました',
       hideConsole: 'プレビューコンソールを非表示',
@@ -3158,17 +3158,17 @@ export const jaOverrides = {
       reload: 'ページを再読み込み',
       address: 'アドレス',
       addressPlaceholder: 'アドレスを入力',
-      blankPageBody: '上のアドレス欄に入力するか、Hermes にページを開くよう頼んでください。',
+      blankPageBody: '上のアドレス欄に入力するか、Beyond にページを開くよう頼んでください。',
       finishedRestarting: message =>
-        `Hermes がプレビューサーバーの再起動を完了しました${message ? `: ${message}` : ''}`,
+        `Beyond がプレビューサーバーの再起動を完了しました${message ? `: ${message}` : ''}`,
       failedRestarting: message => `サーバーの再起動に失敗しました: ${message}`,
       unknownError: '不明なエラー',
       restartedTitle: 'プレビューサーバーが再起動しました',
       reloadingNow: 'プレビューを再読み込み中です。',
       restartFailedTitle: 'プレビューの再起動に失敗しました',
-      restartFailedMessage: 'Hermes がサーバーを再起動できませんでした。',
+      restartFailedMessage: 'Beyond がサーバーを再起動できませんでした。',
       stillWorking:
-        'Hermes はまだ作業中ですが、再起動の結果がまだ届いていません。サーバーコマンドがフォアグラウンドで実行されている可能性があります。',
+        'Beyond はまだ作業中ですが、再起動の結果がまだ届いていません。サーバーコマンドがフォアグラウンドで実行されている可能性があります。',
       workspaceReloading: 'ワークスペースが変更され、プレビューを再読み込み中',
       fileChanged: url => `ファイルが変更され、プレビューを再読み込み中: ${url}`,
       filesChanged: (count, url) => `${count} 件のファイルが変更され、プレビューを再読み込み中: ${url}`,
@@ -3184,13 +3184,13 @@ export const jaOverrides = {
 
   interfaceMode: {
     title: 'インターフェースモード',
-    hint: '表示される内容が変わるだけで、Hermes にできることは変わりません。',
+    hint: '表示される内容が変わるだけで、Beyond にできることは変わりません。',
     sessionNote:
       'シンプルモードで設定されています。ここでの変更はこのセッション中のみ有効です。自分の設定にするには詳細モードに切り替えてください。',
     simple: {
       label: 'シンプル',
       description:
-        'Hermes と話すための表示。サイドバーとチャットのみ。ターミナル、ファイル、差分のペインは表示しません。'
+        'Beyond と話すための表示。サイドバーとチャットのみ。ターミナル、ファイル、差分のペインは表示しません。'
     },
     advanced: {
       label: '詳細',
@@ -3295,7 +3295,7 @@ export const jaOverrides = {
     thread: {
       loadingSession: 'セッションを読み込み中',
       showEarlier: '以前のメッセージを表示',
-      loadingResponse: 'Hermes が応答を読み込み中',
+      loadingResponse: 'Beyond が応答を読み込み中',
       resumeWhenBackgroundDone: count =>
         count === 1
           ? 'バックグラウンドタスクの完了後に再開します'
@@ -3333,7 +3333,7 @@ export const jaOverrides = {
         },
         invalid_response: {
           title: 'AI サービスが読み取れない応答を返しました',
-          body: provider => `${provider} は Hermes が読み取れない内容を返しました。しばらくしてから再試行してください。`
+          body: provider => `${provider} は Beyond が読み取れない内容を返しました。しばらくしてから再試行してください。`
         },
         empty_response: {
           title: 'AI サービスが空の応答を返しました',
@@ -3365,7 +3365,7 @@ export const jaOverrides = {
         ssl_cert_verification: {
           title: '安全な接続に失敗しました',
           body: provider =>
-            `Hermes は ${provider} との安全な接続を検証できませんでした。ネットワークやプロキシの設定を確認するか、プロバイダーを切り替えて再送してください。`
+            `Beyond は ${provider} との安全な接続を検証できませんでした。ネットワークやプロキシの設定を確認するか、プロバイダーを切り替えて再送してください。`
         },
         usage_window: {
           title: '含まれる利用量を使い切りました',
@@ -3415,7 +3415,7 @@ export const jaOverrides = {
       attachingFile: '添付中…'
     },
     approval: {
-      gatewayDisconnected: 'Hermes ゲートウェイが接続されていません',
+      gatewayDisconnected: 'Beyond ゲートウェイが接続されていません',
       sendFailed: '承認応答を送信できませんでした',
       run: '実行',
       command: 'コマンド',
@@ -3426,7 +3426,7 @@ export const jaOverrides = {
       reject: '拒否',
       alwaysTitle: 'このコマンドを常に許可しますか？',
       alwaysDescription: pattern =>
-        `これにより "${pattern}" パターンが永続的な許可リスト (~/.hermes/config.yaml) に追加されます。Hermes はこのセッションや将来のセッションで、このようなコマンドについて再度尋ねません。`,
+        `これにより "${pattern}" パターンが永続的な許可リスト (~/.beyond/config.yaml) に追加されます。Beyond はこのセッションや将来のセッションで、このようなコマンドについて再度尋ねません。`,
       alwaysAllow: '常に許可'
     },
     clarify: jaClarify,
@@ -3555,7 +3555,7 @@ export const jaOverrides = {
   },
 
   prompts: {
-    gatewayDisconnected: 'Hermes ゲートウェイが接続されていません',
+    gatewayDisconnected: 'Beyond ゲートウェイが接続されていません',
     sudoSendFailed: 'sudo パスワードを送信できませんでした',
     secretSendFailed: 'シークレットを送信できませんでした',
     sudoTitle: '管理者パスワード',
@@ -3567,7 +3567,7 @@ export const jaOverrides = {
       'Bot Screen のパッケージ（TigerVNC + Xfce）をゲートウェイホストにインストールするため、sudo パスワードが必要です。そのホストにのみ送信されます。',
     sudoPlaceholder: 'sudo パスワード',
     secretTitle: 'シークレットが必要です',
-    secretDesc: 'Hermes は続行するための認証情報が必要です。',
+    secretDesc: 'Beyond は続行するための認証情報が必要です。',
     secretPlaceholder: 'シークレット値',
     vaultUnlockSendFailed: 'マスターパスワードを送信できませんでした',
     vaultUnlockTitle: name => `${name} のロックを解除`,
@@ -3579,7 +3579,7 @@ export const jaOverrides = {
     vaultSaveSendFailed: 'ログイン情報を保存できませんでした',
     vaultSaveTitle: site => `${site} のログイン情報を保存しますか？`,
     vaultSaveDesc: origin =>
-      `Hermes は ${origin} のサインインページに到達しましたが、保存されたログイン情報がありません。ここで一度入力すると、このマシン上で暗号化して保存され、ページに直接入力されます。モデルはパスワードを一切見ません。`,
+      `Beyond は ${origin} のサインインページに到達しましたが、保存されたログイン情報がありません。ここで一度入力すると、このマシン上で暗号化して保存され、ページに直接入力されます。モデルはパスワードを一切見ません。`,
     vaultSaveIdentifierLabel: 'メールアドレスまたはユーザー名',
     vaultSaveIdentifierPlaceholder: 'you@example.com',
     vaultSavePasswordPlaceholder: 'パスワード',
@@ -3589,10 +3589,10 @@ export const jaOverrides = {
     vaultCodeSendFailed: 'コードを送信できませんでした',
     vaultCodeTitle: site => `${site} の確認コード`,
     vaultCodeDesc: site =>
-      `${site} がワンタイムコード（SMS、メール、または認証アプリ）を求めています。ここに入力すると Hermes がページに入力します。モデルはコードを一切見ません。`,
+      `${site} がワンタイムコード（SMS、メール、または認証アプリ）を求めています。ここに入力すると Beyond がページに入力します。モデルはコードを一切見ません。`,
     vaultCodeLabel: 'コード',
     vaultCodeFootnote:
-      'ヒント：「設定 → パスワードとログイン」でこのログインに認証キーを保存すると、Hermes がコードを自動入力します。',
+      'ヒント：「設定 → パスワードとログイン」でこのログインに認証キーを保存すると、Beyond がコードを自動入力します。',
     vaultCodeSkip: 'スキップ',
     vaultCodeConfirm: 'コードを入力'
   },
@@ -3666,8 +3666,8 @@ export const jaOverrides = {
     sessionExportFailed: 'セッションをエクスポートできませんでした',
     imageSaved: '画像を保存しました',
     downloadStarted: 'ダウンロードを開始しました',
-    restartToUseSaveImage: '画像を保存するには Hermes Desktop を再起動してください。',
-    restartToSaveImages: '画像を保存するには Hermes Desktop を再起動してください',
+    restartToUseSaveImage: '画像を保存するには Beyond Desktop を再起動してください。',
+    restartToSaveImages: '画像を保存するには Beyond Desktop を再起動してください',
     imageDownloadFailed: '画像のダウンロードに失敗しました',
     openImage: '画像を開く',
     downloadImage: '画像をダウンロード',
@@ -3691,7 +3691,7 @@ export const jaOverrides = {
       success: platform => `${platform} に引き継ぎました。いつでもここで再開できます。`,
       systemNote: platform => `↻ ${platform} に引き継ぎました — いつでもここで再開できます。`,
       failed: error => `引き継ぎに失敗しました: ${error}`,
-      timedOut: 'ゲートウェイの待機がタイムアウトしました。`hermes gateway` は起動していますか？'
+      timedOut: 'ゲートウェイの待機がタイムアウトしました。`beyond gateway` は起動していますか？'
     }
   },
 
@@ -3704,14 +3704,14 @@ export const jaOverrides = {
       },
       skills: {
         title: '一度教えれば覚えます',
-        text: 'スキルは手順書のフォルダで、必要な場面で Hermes が自分で読み込みます。'
+        text: 'スキルは手順書のフォルダで、必要な場面で Beyond が自分で読み込みます。'
       },
       messaging: {
-        title: 'デスクを離れても Hermes',
+        title: 'デスクを離れても Beyond',
         text: 'Telegram、Discord、Slack などに接続。同じエージェント、同じ記憶のままです。'
       },
       artifacts: {
-        title: 'Hermes が作ったものすべて',
+        title: 'Beyond が作ったものすべて',
         text: '全セッションの画像・ファイル・リンクを一箇所にまとめています。'
       },
       cron: {
@@ -3724,7 +3724,7 @@ export const jaOverrides = {
       },
       profiles: {
         title: 'プロファイルは独立しています',
-        text: 'それぞれが独自のキー・メモリ・セッションを持つ、別の Hermes です。'
+        text: 'それぞれが独自のキー・メモリ・セッションを持つ、別の Beyond です。'
       },
       'composer-mentions': {
         title: 'ファイルとコマンド',
@@ -3774,8 +3774,8 @@ export const jaOverrides = {
   },
   freeTier: {
     offer: {
-      heading: 'Hermes を使い続ける',
-      body: '現在は無料枠をご利用中です。Hermes を使い続けると、いずれ上限に達します。無料の Nous アカウントでサインインすると、より多くの利用枠が使えます。',
+      heading: 'Beyond を使い続ける',
+      body: '現在は無料枠をご利用中です。Beyond を使い続けると、いずれ上限に達します。無料の Beyond アカウントでサインインすると、より多くの利用枠が使えます。',
       signIn: 'サインイン',
       notNow: '今はしない'
     }

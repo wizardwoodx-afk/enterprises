@@ -4,7 +4,7 @@ import { isMessagingSource } from '@/lib/session-source'
 import { stableArray } from '@/lib/stable-array'
 import { readKey } from '@/lib/storage'
 import { $activeGatewayProfile, normalizeProfileKey } from '@/store/profile'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/beyond'
 
 import { $projectTree } from './project-tree'
 import {
@@ -74,13 +74,13 @@ const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 
 export const $sessionSeenCounts = persistentAtom<SeenCounts>(
-  'hermes.desktop.sessionSeenCounts',
+  'beyond.desktop.sessionSeenCounts',
   {},
   Codecs.json(sanitizeSeenCounts)
 )
 
 export const $unreadFinishedMarkers = persistentAtom<Markers>(
-  'hermes.desktop.unreadFinishedSessions',
+  'beyond.desktop.unreadFinishedSessions',
   {},
   Codecs.json(sanitizeMarkers)
 )
@@ -683,7 +683,7 @@ function rehydrateFromDiskOnce(): void {
   rehydratedFromDisk = true
 
   try {
-    const rawSeen = readKey('hermes.desktop.sessionSeenCounts')
+    const rawSeen = readKey('beyond.desktop.sessionSeenCounts')
     const diskSeen = rawSeen ? sanitizeSeenCounts(JSON.parse(rawSeen) as unknown) : {}
     const memorySeen = $sessionSeenCounts.get()
     const mergedSeen: SeenCounts = { ...diskSeen }
@@ -694,7 +694,7 @@ function rehydrateFromDiskOnce(): void {
 
     $sessionSeenCounts.set(mergedSeen)
 
-    const rawMarkers = readKey('hermes.desktop.unreadFinishedSessions')
+    const rawMarkers = readKey('beyond.desktop.unreadFinishedSessions')
     const diskMarkers = rawMarkers ? sanitizeMarkers(JSON.parse(rawMarkers) as unknown) : {}
     const memoryMarkers = $unreadFinishedMarkers.get()
     const merged: Markers = { ...diskMarkers }
@@ -729,7 +729,7 @@ if (!isSecondaryWindow() && !isBrowserWindow()) {
   $messagingSessions.listen(onListChange)
 
   // Opening a session acks it durably (the transient atom is already cleared
-  // synchronously by setSelectedStoredSessionId — this is the persisted half).
+  // synchrobeyondly by setSelectedStoredSessionId — this is the persisted half).
   // Unary on purpose: nanostores hands a listener (value, oldValue), and the
   // old selection would otherwise arrive as the profile hint.
   $selectedStoredSessionId.listen(id => ackStoredSessionId(id))

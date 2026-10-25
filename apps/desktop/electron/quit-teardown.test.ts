@@ -106,13 +106,13 @@ test('teardown failure still releases the final quit after all branches settle',
 test('only a teardown that brings a backend back may announce it', () => {
   // `soft` is what keeps a teardown out of resetBootProgressForReconnect(): the
   // "[boot] Restarting desktop connection" line in desktop.log and the
-  // hermes:boot-progress push to the renderer. A shutdown must stay silent,
+  // beyond:boot-progress push to the renderer. A shutdown must stay silent,
   // a teardown that re-homes may announce itself.
   assert.equal(backendTeardownOptions('quit').soft, true, 'a quit must not announce a reconnect')
   assert.equal(backendTeardownOptions('reconnect').soft, false, 'a re-home keeps the announcement')
 })
 
-test('a synchronous reentrant quit cannot start a second teardown', async () => {
+test('a synchrobeyond reentrant quit cannot start a second teardown', async () => {
   const finalQuit = vi.fn()
   const coordinator = createQuitTeardownCoordinator(finalQuit)
   const duplicate = vi.fn()

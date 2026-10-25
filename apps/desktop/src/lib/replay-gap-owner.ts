@@ -1,4 +1,4 @@
-import type { GatewayEvent } from '@hermes/shared'
+import type { GatewayEvent } from '@beyond/shared'
 
 import type { SessionOwnerScope } from '@/store/session-request-router'
 

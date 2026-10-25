@@ -1,4 +1,4 @@
-import type { ModelOptionProvider, ModelOptionsResult, ModelPricing } from '@hermes/shared'
+import type { ModelOptionProvider, ModelOptionsResult, ModelPricing } from '@beyond/shared'
 import {
   DEFAULT_REASONING_EFFORT,
   planBlocks,
@@ -6,7 +6,7 @@ import {
   splitRecommended,
   usageLevel,
   usageTag
-} from '@hermes/shared'
+} from '@beyond/shared'
 import { useStore } from '@nanostores/react'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -40,7 +40,7 @@ import {
 import { HighlightMatches } from '@/components/ui/highlight-matches'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tip, TipHintLabel } from '@/components/ui/tooltip'
-import type { HermesGateway } from '@/hermes'
+import type { BeyondGateway } from '@/beyond'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
 import { isSubmitEnter } from '@/lib/ime'
@@ -73,7 +73,7 @@ import {
 } from '@/store/model-visibility'
 import { $collapsedProviders, toggleCollapsedProvider } from '@/store/provider-collapse'
 import { $defaultReasoningEffort } from '@/store/session'
-import type { LocalModelLoadProgress, LocalRuntimeJob } from '@/types/hermes'
+import type { LocalModelLoadProgress, LocalRuntimeJob } from '@/types/beyond'
 
 import { type FastControl, ModelEditSubmenu, resolveFastControl } from './model-edit-submenu'
 import { ModelMenuRowIcon, useModelMenuRowDecoration } from './model-menu-row-decorations'
@@ -87,7 +87,7 @@ export const ModelMenuCloseContext = createContext<() => void>(() => {})
 /** Compact per-row price: `$in/$out` per Mtok (cached read appended when the
  *  provider ships it), "free", and a sale tag when the portal reports a
  *  discounted list price. Rendered only when the provider's payload carries
- *  pricing (Nous Portal and others that ship it). */
+ *  pricing (Beyond Portal and others that ship it). */
 function ModelPrice({ pricing }: { pricing: ModelPricing }) {
   const { t } = useI18n()
   const copy = t.shell.modelMenu
@@ -151,7 +151,7 @@ export interface ModelChoice {
  * the kanban override just holds a value in dialog state.
  *
  * `presetFor` supplies the remembered settings shown on a non-active row.
- * Returning `{}` is fine — the row then shows Hermes' defaults.
+ * Returning `{}` is fine — the row then shows Beyond' defaults.
  */
 export interface ModelMenuController {
   /** Detached task pickers can edit effort but have no speed write path. */
@@ -181,7 +181,7 @@ interface ModelCatalogMenuProps {
   footer?: ReactNode
   /** Rows above the search, outside the keyboard list (the local-setup offer). */
   header?: ReactNode
-  gateway?: HermesGateway
+  gateway?: BeyondGateway
   /** Owner-routed RPC for catalog reads. Preferred over `gateway.request` so
    *  a tile's menu queries the session owner's backend, not chrome's. */
   request?: <T>(method: string, params?: Record<string, unknown>) => Promise<T>
@@ -281,8 +281,8 @@ export function ModelCatalogMenu({
     // gateway owns the model catalog, including virtual providers the local
     // REST fallback can't know about (#53817).
     queryFn: (): Promise<ModelOptionsResult> => requestModelOptions({ gateway, profile, request, sessionId }),
-    refetchOnMount: query => nousRefetchOnMount(query.state.data),
-    refetchInterval: query => nousPricingPoll(query.state.data, query.state.dataUpdateCount)
+    refetchOnMount: query => beyondRefetchOnMount(query.state.data),
+    refetchInterval: query => beyondPricingPoll(query.state.data, query.state.dataUpdateCount)
   })
 
   const loading = modelOptions.isPending && !modelOptions.data
@@ -1048,7 +1048,7 @@ function ModelFamilyRow({
   const caps = provider.capabilities?.[family.id]
   const limit = familyLimit(provider, family, isCurrent)
 
-  // Live per-model $/Mtok pricing (Nous Portal and other providers that ship
+  // Live per-model $/Mtok pricing (Beyond Portal and other providers that ship
   // it). A `-fast` sibling shares the base id's price: the collapsed row
   // fronts the base, so fall back to it when only the fast variant is unpriced.
   const pricing = provider.pricing?.[family.id] ?? (family.fastId ? provider.pricing?.[family.fastId] : undefined)
@@ -1425,26 +1425,26 @@ function groupModels(
   return groups
 }
 
-// The Nous row: the only one the menu re-reads on open or while its pricing warms (window-plan labels).
-function isNous(provider: ModelOptionProvider): boolean {
-  return provider.slug === 'nous'
+// The Beyond row: the only one the menu re-reads on open or while its pricing warms (window-plan labels).
+function isBeyond(provider: ModelOptionProvider): boolean {
+  return provider.slug === 'beyond'
 }
 
-// Nous only: re-read on every open (cached list shows instantly, the re-read swaps in when it
+// Beyond only: re-read on every open (cached list shows instantly, the re-read swaps in when it
 // lands). The plan (usage-window labels, used-up notes) loads with the first turn, after the
 // list was first fetched at boot, so the 60s cache would hide it until "Refresh models".
-// A cheap local cache-only read (the plan may not be known yet, so any Nous row); every other
+// A cheap local cache-only read (the plan may not be known yet, so any Beyond row); every other
 // provider keeps the 60s cache.
-function nousRefetchOnMount(data: ModelOptionsResult | undefined): 'always' | true {
-  return data?.providers?.some(isNous) ? 'always' : true
+function beyondRefetchOnMount(data: ModelOptionsResult | undefined): 'always' | true {
+  return data?.providers?.some(isBeyond) ? 'always' : true
 }
 
 // A cache-only open on a fresh backend ships rows marked pending while pricing warms in the
 // background; re-read a few times so window-plan labels appear without "Refresh models".
 // Bounded (~10s): a failed pricing fetch can leave rows pending, and an open menu must not
 // poll forever. Only runs while the menu is mounted and a row is pending.
-function nousPricingPoll(data: ModelOptionsResult | undefined, updates: number): false | number {
-  return updates < 6 && data?.providers?.some(p => isNous(p) && p.pricing_pending) ? 2_000 : false
+function beyondPricingPoll(data: ModelOptionsResult | undefined, updates: number): false | number {
+  return updates < 6 && data?.providers?.some(p => isBeyond(p) && p.pricing_pending) ? 2_000 : false
 }
 
 // Window plans: the plan's featured picks lead (the backend lists them first). Re-applied after the

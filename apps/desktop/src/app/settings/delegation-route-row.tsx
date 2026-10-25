@@ -1,6 +1,6 @@
-import type { ProfileScope } from '@/hermes'
+import type { ProfileScope } from '@/beyond'
 import { useI18n } from '@/i18n'
-import type { HermesConfigRecord } from '@/types/hermes'
+import type { BeyondConfigRecord } from '@/types/beyond'
 
 import { FIELD_DESCRIPTIONS } from './constants'
 import { DelegationModelProviderField, type DelegationModelProviderValue } from './delegation-model-provider-field'
@@ -16,9 +16,9 @@ const DIRECT_ENDPOINT_KEYS = ['delegation.base_url', 'delegation.api_key', 'dele
 
 /** The config after applying a subagent route. */
 export function applyDelegationRoute(
-  config: HermesConfigRecord,
+  config: BeyondConfigRecord,
   { model, provider, resetDirectEndpoint }: DelegationModelProviderValue
-): HermesConfigRecord {
+): BeyondConfigRecord {
   let next = setNested(setNested(config, 'delegation.model', model), 'delegation.provider', provider)
 
   if (resetDirectEndpoint) {
@@ -34,9 +34,9 @@ export function DelegationRouteRow({
   scope,
   onConfigChange
 }: {
-  config: HermesConfigRecord
+  config: BeyondConfigRecord
   scope?: ProfileScope
-  onConfigChange: (next: HermesConfigRecord) => void
+  onConfigChange: (next: BeyondConfigRecord) => void
 }) {
   const { t } = useI18n()
 

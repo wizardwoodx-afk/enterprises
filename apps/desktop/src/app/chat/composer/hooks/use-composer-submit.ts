@@ -1,4 +1,4 @@
-import { SLASH_COMMAND_RE } from '@hermes/shared'
+import { SLASH_COMMAND_RE } from '@beyond/shared'
 import { type RefObject, useLayoutEffect, useRef } from 'react'
 
 import { usePaneVisible } from '@/components/pane-shell/pane-visibility'
@@ -314,7 +314,7 @@ export function useComposerSubmit({
     // and the draft routes normally. An onboarding setup card the message
     // moves past instead closes as unanswered and its turn ends there, so the
     // message runs as the next turn. The skip is fire-and-forget, not awaited:
-    // it clears the card synchronously and both RPCs ride the same socket in
+    // it clears the card synchrobeyondly and both RPCs ride the same socket in
     // call order, so the gateway resolves the clarify before it sees the
     // follow-up. Awaiting first would leave the draft live for a tick, long
     // enough for a second Enter to send it twice.

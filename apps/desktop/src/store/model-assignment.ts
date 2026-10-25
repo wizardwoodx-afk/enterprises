@@ -1,7 +1,7 @@
-import { type ProfileScope, setModelAssignment } from '@/hermes'
+import { type ProfileScope, setModelAssignment } from '@/beyond'
 import { translateNow } from '@/i18n'
 import { dismissNotification, notify } from '@/store/notifications'
-import type { ModelAssignmentRequest, ModelAssignmentResponse } from '@/types/hermes'
+import type { ModelAssignmentRequest, ModelAssignmentResponse } from '@/types/beyond'
 
 /**
  * Selection-guard warning as a confirm toast. Resolves true on Confirm, false

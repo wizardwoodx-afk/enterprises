@@ -2,7 +2,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { act, cleanup, render, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getGlobalModelInfo } from '@/hermes'
+import { getGlobalModelInfo } from '@/beyond'
 import { modelOptionsQueryKey } from '@/lib/model-options'
 import { $activeGatewayProfile } from '@/store/profile'
 import {
@@ -29,7 +29,7 @@ const notify = vi.fn()
 const notifyError = vi.fn()
 const dismissNotification = vi.fn()
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/beyond', () => ({
   getGlobalModelInfo: vi.fn(),
   setApiRequestProfile: vi.fn(),
   setGlobalModel: (...args: Parameters<typeof setGlobalModel>) => setGlobalModel(...args)
@@ -158,21 +158,21 @@ describe('useModelControls', () => {
     const queryClient = new QueryClient()
     $activeSessionId.set('runtime-1')
     setCurrentModel('tencent/hy3:free')
-    setCurrentProvider('nous')
+    setCurrentProvider('beyond')
     setCurrentModelSource('manual')
     queryClient.setQueryData(modelOptionsQueryKey('default'), {
       model: 'tencent/hy3:free',
-      provider: 'nous',
+      provider: 'beyond',
       providers: []
     })
     queryClient.setQueryData(modelOptionsQueryKey('default', 'runtime-1'), {
       model: 'tencent/hy3:free',
-      provider: 'nous',
+      provider: 'beyond',
       providers: []
     })
     vi.mocked(getGlobalModelInfo).mockResolvedValue({
       model: 'poolside/laguna-xs-2.1:free',
-      provider: 'nous'
+      provider: 'beyond'
     })
 
     const { result } = renderHook(() =>
@@ -182,16 +182,16 @@ describe('useModelControls', () => {
       })
     )
 
-    result.current.applySavedMainModel('nous', 'poolside/laguna-xs-2.1:free')
+    result.current.applySavedMainModel('beyond', 'poolside/laguna-xs-2.1:free')
     await result.current.refreshCurrentModel()
 
     // Settings changes the profile default, not the active session. The footer
     // and its session-scoped picker cache must keep showing the live runtime.
     expect($currentModel.get()).toBe('tencent/hy3:free')
-    expect($currentProvider.get()).toBe('nous')
+    expect($currentProvider.get()).toBe('beyond')
     expect(queryClient.getQueryData(modelOptionsQueryKey('default', 'runtime-1'))).toMatchObject({
       model: 'tencent/hy3:free',
-      provider: 'nous'
+      provider: 'beyond'
     })
 
     // The global cache reflects the save, and the next fresh draft may reseed
@@ -199,20 +199,20 @@ describe('useModelControls', () => {
     expect(getCurrentModelSource()).toBe('default')
     expect(queryClient.getQueryData(modelOptionsQueryKey('default'))).toMatchObject({
       model: 'poolside/laguna-xs-2.1:free',
-      provider: 'nous'
+      provider: 'beyond'
     })
 
     $activeSessionId.set(null)
     await result.current.refreshCurrentModel()
 
     expect($currentModel.get()).toBe('poolside/laguna-xs-2.1:free')
-    expect($currentProvider.get()).toBe('nous')
+    expect($currentProvider.get()).toBe('beyond')
   })
 
   it('paints a saved profile default immediately when no session is active', () => {
     const queryClient = new QueryClient()
     setCurrentModel('tencent/hy3:free')
-    setCurrentProvider('nous')
+    setCurrentProvider('beyond')
     setCurrentModelSource('manual')
 
     const { result } = renderHook(() =>
@@ -222,19 +222,19 @@ describe('useModelControls', () => {
       })
     )
 
-    result.current.applySavedMainModel('nous', 'poolside/laguna-xs-2.1:free')
+    result.current.applySavedMainModel('beyond', 'poolside/laguna-xs-2.1:free')
 
     expect($currentModel.get()).toBe('poolside/laguna-xs-2.1:free')
-    expect($currentProvider.get()).toBe('nous')
+    expect($currentProvider.get()).toBe('beyond')
     expect(getCurrentModelSource()).toBe('default')
     expect(queryClient.getQueryData(modelOptionsQueryKey('default'))).toEqual({
       model: 'poolside/laguna-xs-2.1:free',
-      provider: 'nous',
+      provider: 'beyond',
       providers: [
         {
           models: ['poolside/laguna-xs-2.1:free'],
-          name: 'nous',
-          slug: 'nous'
+          name: 'beyond',
+          slug: 'beyond'
         }
       ]
     })
@@ -242,11 +242,11 @@ describe('useModelControls', () => {
 
   it('preserves a populated model catalog when painting a saved profile default', () => {
     const queryClient = new QueryClient()
-    const providers = [{ models: ['tencent/hy3:free'], name: 'Nous', slug: 'nous' }]
+    const providers = [{ models: ['tencent/hy3:free'], name: 'Beyond', slug: 'beyond' }]
 
     queryClient.setQueryData(modelOptionsQueryKey('default'), {
       model: 'tencent/hy3:free',
-      provider: 'nous',
+      provider: 'beyond',
       providers
     })
 
@@ -257,11 +257,11 @@ describe('useModelControls', () => {
       })
     )
 
-    result.current.applySavedMainModel('nous', 'poolside/laguna-xs-2.1:free')
+    result.current.applySavedMainModel('beyond', 'poolside/laguna-xs-2.1:free')
 
     expect(queryClient.getQueryData(modelOptionsQueryKey('default'))).toEqual({
       model: 'poolside/laguna-xs-2.1:free',
-      provider: 'nous',
+      provider: 'beyond',
       providers
     })
   })
@@ -430,7 +430,7 @@ describe('useModelControls', () => {
     // who did nothing wrong; the pick still applies to the next turn.
     $activeSessionId.set('session-1')
     setCurrentModel('fable-5')
-    setCurrentProvider('nous')
+    setCurrentProvider('beyond')
 
     const requestGateway = vi.fn(async () => {
       throw new Error('session busy — /interrupt the current turn before switching models')
@@ -450,7 +450,7 @@ describe('useModelControls', () => {
   it('still rolls back and reports a real switch failure', async () => {
     $activeSessionId.set('session-1')
     setCurrentModel('fable-5')
-    setCurrentProvider('nous')
+    setCurrentProvider('beyond')
     setCurrentReasoningEffortWire('max')
 
     const requestGateway = vi.fn(async () => {
@@ -464,7 +464,7 @@ describe('useModelControls', () => {
     await expect(controls.selectModel({ model: 'bogus', provider: 'xai' })).resolves.toBe(false)
 
     expect($currentModel.get()).toBe('fable-5')
-    expect($currentProvider.get()).toBe('nous')
+    expect($currentProvider.get()).toBe('beyond')
     // The old route's clamp is true again once the switch is undone.
     expect($currentReasoningEffortWire.get()).toBe('max')
     expect(notifyError).toHaveBeenCalled()
@@ -671,7 +671,7 @@ describe('useModelControls', () => {
 
   it('refreshes legacy/default-derived composer state from the profile default', async () => {
     setCurrentModel('openai/gpt-5.5')
-    setCurrentProvider('nous')
+    setCurrentProvider('beyond')
     setCurrentModelSource('')
     vi.mocked(getGlobalModelInfo).mockResolvedValue({ model: 'gpt-5.5', provider: 'openai-codex' })
 

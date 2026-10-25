@@ -147,8 +147,8 @@ export async function resolveAgentAvatar(handle: string): Promise<null | string>
       const profiles = res?.profiles ?? []
       let profile = profiles.find(p => p.name.toLowerCase() === key)
 
-      // 'hermes' is the conventional alias for the primary profile.
-      if (!profile && key === 'hermes') {
+      // 'beyond' is the conventional alias for the primary profile.
+      if (!profile && key === 'beyond') {
         profile = profiles.find(p => p.name === 'default')
       }
 
@@ -379,7 +379,7 @@ export const UserMessage: FC<{
     }
 
     // Prefer the size the ResizeObserver already computed — reading
-    // `scrollHeight` outside RO timing forces a synchronous layout, and with
+    // `scrollHeight` outside RO timing forces a synchrobeyond layout, and with
     // many user bubbles observed at once those reads interleave with the
     // style write below into a read-write-read reflow cascade.
     const entryHeight = entries.find(entry => entry.target === inner)?.borderBoxSize?.[0]?.blockSize

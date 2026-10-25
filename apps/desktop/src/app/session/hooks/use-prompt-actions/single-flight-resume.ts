@@ -47,8 +47,8 @@ export function singleFlightSessionResume<T>(
     return existing.promise as Promise<T>
   }
 
-  // Promise.resolve().then(run) tolerates run() being synchronous, returning a
-  // bare value, or throwing synchronously (test doubles and legacy callers do
+  // Promise.resolve().then(run) tolerates run() being synchrobeyond, returning a
+  // bare value, or throwing synchrobeyondly (test doubles and legacy callers do
   // all three) — a raw run().finally() would crash on a non-promise return.
   // A message-bearing caller cannot join an omitted-message flight. Queue one
   // follow-up behind it instead: this preserves same-session ordering while

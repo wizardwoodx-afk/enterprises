@@ -4,7 +4,7 @@ export const jaNotifications = {
   intro: 'アプリ内トーストとは別の、ネイティブのデスクトップ通知です。設定は端末ごとに保存されます。',
   enableAll: '通知を有効にする',
   enableAllDesc: 'オフで以下の通知をすべて無効にします。',
-  focusedHint: '完了通知は Hermes がバックグラウンドにあるときのみ表示されます。',
+  focusedHint: '完了通知は Beyond がバックグラウンドにあるときのみ表示されます。',
   kinds: {
     approval: {
       label: '承認が必要',
@@ -12,11 +12,11 @@ export const jaNotifications = {
     },
     input: {
       label: '入力が必要',
-      description: 'Hermes が質問したか、パスワードやシークレットを必要としています。'
+      description: 'Beyond が質問したか、パスワードやシークレットを必要としています。'
     },
     turnDone: {
       label: '応答完了',
-      description: 'Hermes がバックグラウンドのときにターンが完了しました。'
+      description: 'Beyond がバックグラウンドのときにターンが完了しました。'
     },
     turnError: {
       label: 'ターン失敗',
@@ -32,11 +32,11 @@ export const jaNotifications = {
     },
     plugin: {
       label: 'プラグイン通知',
-      description: 'Hermes がバックグラウンドの間に、デスクトッププラグインが通知を送信しました。'
+      description: 'Beyond がバックグラウンドの間に、デスクトッププラグインが通知を送信しました。'
     }
   },
   test: 'テスト通知を送信',
-  testTitle: 'Hermes',
+  testTitle: 'Beyond',
   testBody: '通知は正常に動作しています。',
   testSent: 'テストを送信しました。表示されない場合は、OS の通知許可と集中モード／おやすみモードを確認してください。',
   testUnsupported: 'このシステムはネイティブ通知に対応していません。',

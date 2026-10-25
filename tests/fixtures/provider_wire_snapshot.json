@@ -3191,9 +3191,9 @@
    ]
   }
  },
- "base-url:nous": {
+ "base-url:beyond": {
   "api_mode": "chat_completions",
-  "base_url": "https://inference-api.nousresearch.com/v1",
+  "base_url": "https://api.beyond.app/v1",
   "high": {
    "extra_body": {
     "reasoning": {
@@ -8216,9 +8216,9 @@
    ]
   }
  },
- "nous": {
+ "beyond": {
   "api_mode": "chat_completions",
-  "base_url": "https://inference-api.nousresearch.com/v1",
+  "base_url": "https://api.beyond.app/v1",
   "high": {
    "extra_body": {
     "reasoning": {
@@ -8227,8 +8227,8 @@
     },
     "session_id": "wire-snapshot",
     "tags": [
-     "product=hermes-agent",
-     "client=hermes-client-v<VERSION>",
+     "product=beyond-agent",
+     "client=beyond-client-v<VERSION>",
      "conversation=wire-snapshot"
     ]
    },
@@ -8325,8 +8325,8 @@
    "extra_body": {
     "session_id": "wire-snapshot",
     "tags": [
-     "product=hermes-agent",
-     "client=hermes-client-v<VERSION>",
+     "product=beyond-agent",
+     "client=beyond-client-v<VERSION>",
      "conversation=wire-snapshot"
     ]
    },
@@ -8426,8 +8426,8 @@
     },
     "session_id": "wire-snapshot",
     "tags": [
-     "product=hermes-agent",
-     "client=hermes-client-v<VERSION>",
+     "product=beyond-agent",
+     "client=beyond-client-v<VERSION>",
      "conversation=wire-snapshot"
     ]
    },

@@ -18,7 +18,7 @@ afterEach((): void => {
 const baseVersion: DesktopVersionInfo = {
   appVersion: '0.19.0',
   electronVersion: '37.0.0',
-  hermesRoot: '/tmp/hermes',
+  beyondRoot: '/tmp/beyond',
   nodeVersion: '22.0.0',
   platform: 'linux'
 }
@@ -36,15 +36,15 @@ describe('VersionDetails', () => {
     { version: { source: 'nix', distribution: 'nix' }, visible: ['Build Origin', 'Nix', 'Distribution'] },
     { version: { source: 'ci', distribution: 'docker' }, visible: ['CI', 'Distribution', 'Docker'] },
     {
-      version: { distribution: 'desktop-app', hermesRuntime: { type: 'embedded' } },
+      version: { distribution: 'desktop-app', beyondRuntime: { type: 'embedded' } },
       visible: ['Runtime', 'Embedded runtime']
     },
     {
-      version: { hermesRuntime: { type: 'external', source: { type: 'git', root: '/home/u/.hermes/hermes-agent' } } },
-      visible: ['Runtime', 'git (/home/u/.hermes/hermes-agent)'],
+      version: { beyondRuntime: { type: 'external', source: { type: 'git', root: '/home/u/.beyond/beyond-agent' } } },
+      visible: ['Runtime', 'git (/home/u/.beyond/beyond-agent)'],
       absent: ['External (uses the machine runtime)']
     },
-    { version: { hermesRuntime: { type: 'external' } }, visible: ['Runtime', 'External (uses the machine runtime)'] },
+    { version: { beyondRuntime: { type: 'external' } }, visible: ['Runtime', 'External (uses the machine runtime)'] },
     {
       version: { distribution: 'desktop-app', updateMechanism: 'microsoft-store' },
       visible: ['Distribution', 'Microsoft Store'],
@@ -67,7 +67,7 @@ describe('VersionDetails', () => {
       visible: ['Desktop app (installer)'],
       absent: ['Desktop app (MSIX)', 'Microsoft Store']
     },
-    // `hermes desktop` packs the same bootstrap payload from a source checkout;
+    // `beyond desktop` packs the same bootstrap payload from a source checkout;
     // a locally built stamp names the source install, never the installer.
     {
       version: {
@@ -77,12 +77,12 @@ describe('VersionDetails', () => {
         source: 'local',
         installedByScript: true
       },
-      visible: ['Source (install script) + hermes desktop'],
+      visible: ['Source (install script) + beyond desktop'],
       absent: ['Desktop app (installer)']
     },
     {
       version: { distribution: 'desktop-app', updateMechanism: 'self', payload: 'bootstrap', source: 'local' },
-      visible: ['Source + hermes desktop'],
+      visible: ['Source + beyond desktop'],
       absent: ['Desktop app (installer)']
     },
     // install.sh / install.ps1 checkout (receipt present) vs a manual git
@@ -113,11 +113,11 @@ describe('VersionDetails', () => {
   })
 
   it('opens the commit URL via the system-browser bridge without opening a preview tab', async () => {
-    const openExternal: Mock<Window['hermesDesktop']['openExternal']> = vi
-      .fn<Window['hermesDesktop']['openExternal']>()
+    const openExternal: Mock<Window['beyondDesktop']['openExternal']> = vi
+      .fn<Window['beyondDesktop']['openExternal']>()
       .mockResolvedValue(undefined)
 
-    vi.stubGlobal('hermesDesktop', { openExternal } satisfies Pick<Window['hermesDesktop'], 'openExternal'>)
+    vi.stubGlobal('beyondDesktop', { openExternal } satisfies Pick<Window['beyondDesktop'], 'openExternal'>)
 
     render(
       <I18nProvider configClient={null} initialLocale="en">
@@ -129,7 +129,7 @@ describe('VersionDetails', () => {
 
     await waitFor(() => {
       expect(openExternal).toHaveBeenCalledWith(
-        'https://github.com/NousResearch/hermes-agent/commit/d233b6d7a9c5b79288e48dfb3b29e2ead106ac73'
+        'https://github.com/beyond-app/beyond/commit/d233b6d7a9c5b79288e48dfb3b29e2ead106ac73'
       )
     })
     expect($previewTabs.get()).toHaveLength(0)

@@ -4,17 +4,17 @@ import path from 'node:path'
 
 import { app } from 'electron'
 
-import { resolveDesktopHermesHome } from './data-paths'
+import { resolveDesktopBeyondHome } from './data-paths'
 import { readDesktopLaunchConfig } from './renderer-heap-flags'
 import { wslgLaunchArgs } from './wslg-launch'
 import { spawnWslgLaunch } from './wslg-launch-process'
 
 function configuredElectronFlags(env: NodeJS.ProcessEnv): string[] {
   // Resolve the home exactly like main.ts does, through the shared resolver:
-  // HERMES_DATA_DIR_SUFFIX channel installs and profiles/-rooted HERMES_HOME
+  // BEYOND_DATA_DIR_SUFFIX channel installs and profiles/-rooted BEYOND_HOME
   // values must pick the same config.yaml before the relaunch and inside the
   // app, or desktop.electron_flags silently never reaches the relaunch.
-  const home = resolveDesktopHermesHome({
+  const home = resolveDesktopBeyondHome({
     home: os.homedir(),
     env,
     // Linux-only pre-launch path; the win32 legacy-migration probe is never
@@ -65,7 +65,7 @@ if (args) {
   const child = spawnWslgLaunch(args)
 
   child.once('error', error => {
-    console.error('[hermes] Wayland ozone launch failed:', error)
+    console.error('[beyond] Wayland ozone launch failed:', error)
     app.exit(1)
   })
   child.once('exit', code => app.exit(code ?? 1))

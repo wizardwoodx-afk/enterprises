@@ -12,12 +12,12 @@ import type {
   MemoryProviderConfig,
   MemoryProviderOAuthStatus,
   MemoryStatusResponse
-} from '@/types/hermes'
+} from '@/types/beyond'
 
 import {
   capabilityScoped,
-  hermesApi,
-  hermesApiAs,
+  beyondApi,
+  beyondApiAs,
   type OwnerScope,
   ownerScoped,
   type ProfileScope,
@@ -58,7 +58,7 @@ export function audioTranscribeRequestTimeoutMs(dataUrl: string): number {
 
 // surface=declared serves the curated desktop schema; the dashboard consumes the raw plugin schema.
 export function getMemoryProviderConfig(provider: string, profile?: null | string): Promise<MemoryProviderConfig> {
-  return hermesApi<MemoryProviderConfig>({
+  return beyondApi<MemoryProviderConfig>({
     ...profileScoped(profile),
     path: `/api/memory/providers/${encodeURIComponent(provider)}/config?surface=declared`
   })
@@ -69,7 +69,7 @@ export function saveMemoryProviderConfig(
   values: Record<string, string>,
   profile?: null | string
 ): Promise<{ ok: boolean }> {
-  return hermesApi<{ ok: boolean }>({
+  return beyondApi<{ ok: boolean }>({
     ...profileScoped(profile),
     path: `/api/memory/providers/${encodeURIComponent(provider)}/config?surface=declared`,
     method: 'PUT',
@@ -83,7 +83,7 @@ export function startMemoryProviderOAuth(
   provider: string,
   profile?: null | string
 ): Promise<MemoryProviderOAuthStatus> {
-  return hermesApi<MemoryProviderOAuthStatus>({
+  return beyondApi<MemoryProviderOAuthStatus>({
     ...profileScoped(profile),
     path: `/api/memory/providers/${encodeURIComponent(provider)}/oauth/start`,
     method: 'POST'
@@ -94,25 +94,25 @@ export function getMemoryProviderOAuthStatus(
   provider: string,
   profile?: null | string
 ): Promise<MemoryProviderOAuthStatus> {
-  return hermesApi<MemoryProviderOAuthStatus>({
+  return beyondApi<MemoryProviderOAuthStatus>({
     ...profileScoped(profile),
     path: `/api/memory/providers/${encodeURIComponent(provider)}/oauth/status`
   })
 }
 
 // ---------------------------------------------------------------------------
-// Memory data + curator (parity with `hermes memory` / `hermes curator`).
+// Memory data + curator (parity with `beyond memory` / `beyond curator`).
 // ---------------------------------------------------------------------------
 
 export function getMemoryStatus(): Promise<MemoryStatusResponse> {
-  return hermesApi<MemoryStatusResponse>({
+  return beyondApi<MemoryStatusResponse>({
     ...profileScoped(),
     path: '/api/memory'
   })
 }
 
 export function resetMemory(target: 'all' | 'memory' | 'user'): Promise<{ ok: boolean; deleted: string[] }> {
-  return hermesApi<{ ok: boolean; deleted: string[] }>({
+  return beyondApi<{ ok: boolean; deleted: string[] }>({
     ...profileScoped(),
     path: '/api/memory/reset',
     method: 'POST',
@@ -121,14 +121,14 @@ export function resetMemory(target: 'all' | 'memory' | 'user'): Promise<{ ok: bo
 }
 
 export function getCuratorStatus(): Promise<CuratorStatusResponse> {
-  return hermesApi<CuratorStatusResponse>({
+  return beyondApi<CuratorStatusResponse>({
     ...profileScoped(),
     path: '/api/curator'
   })
 }
 
 export function setCuratorPaused(paused: boolean): Promise<{ ok: boolean; paused: boolean }> {
-  return hermesApi<{ ok: boolean; paused: boolean }>({
+  return beyondApi<{ ok: boolean; paused: boolean }>({
     ...profileScoped(),
     path: '/api/curator/paused',
     method: 'PUT',
@@ -137,7 +137,7 @@ export function setCuratorPaused(paused: boolean): Promise<{ ok: boolean; paused
 }
 
 export function runCurator(): Promise<ActionResponse> {
-  return hermesApi<ActionResponse>({
+  return beyondApi<ActionResponse>({
     ...profileScoped(),
     path: '/api/curator/run',
     method: 'POST',
@@ -146,17 +146,17 @@ export function runCurator(): Promise<ActionResponse> {
 }
 
 export function restartGateway(profile?: null | string): Promise<ActionResponse> {
-  return hermesApi<ActionResponse>({
+  return beyondApi<ActionResponse>({
     ...profileScoped(profile),
     path: '/api/gateway/restart',
     method: 'POST'
   })
 }
 
-export function updateHermes(): Promise<ActionResponse> {
-  return hermesApi<ActionResponse>({
+export function updateBeyond(): Promise<ActionResponse> {
+  return beyondApi<ActionResponse>({
     ...profileScoped(),
-    path: '/api/hermes/update',
+    path: '/api/beyond/update',
     method: 'POST'
   })
 }
@@ -164,15 +164,15 @@ export function updateHermes(): Promise<ActionResponse> {
 /** Query the connected backend's own update state. In remote mode this is the
  *  authoritative source for the backend's behind-count + "what's changed",
  *  distinct from the Electron client clone's git state. */
-export function checkHermesUpdate(force = false): Promise<BackendUpdateCheckResponse> {
-  return hermesApi<BackendUpdateCheckResponse>({
+export function checkBeyondUpdate(force = false): Promise<BackendUpdateCheckResponse> {
+  return beyondApi<BackendUpdateCheckResponse>({
     ...profileScoped(),
-    path: `/api/hermes/update/check${force ? '?force=true' : ''}`
+    path: `/api/beyond/update/check${force ? '?force=true' : ''}`
   })
 }
 
 export function getActionStatus(name: string, lines = 200, profile?: ProfileScope): Promise<ActionStatusResponse> {
-  return window.hermesDesktop.api<ActionStatusResponse>({
+  return window.beyondDesktop.api<ActionStatusResponse>({
     ...capabilityScoped(profile),
     path: `/api/actions/${encodeURIComponent(name)}/status?lines=${Math.max(1, lines)}`
   })
@@ -199,14 +199,14 @@ export function transcribeAudio(
   }
 
   return owner
-    ? hermesApiAs<AudioTranscriptionResponse>(owner, request)
-    : hermesApi<AudioTranscriptionResponse>({ ...profileScoped(), ...request })
+    ? beyondApiAs<AudioTranscriptionResponse>(owner, request)
+    : beyondApi<AudioTranscriptionResponse>({ ...profileScoped(), ...request })
 }
 
 // `owner` = the speaking session's (connection, profile) — a Bot's own TTS
 // voice on its own gateway; omitted halves → the active scope.
 export function speakText(text: string, owner?: OwnerScope): Promise<AudioSpeakResponse> {
-  return hermesApi<AudioSpeakResponse>({
+  return beyondApi<AudioSpeakResponse>({
     ...ownerScoped(owner),
     path: '/api/audio/speak',
     method: 'POST',
@@ -229,7 +229,7 @@ export const AUDIO_TTS_LEASE_REQUEST_TIMEOUT_MS = 180_000
  * `lease` names the toggle — `desktop:read-aloud`, `desktop:conversation`.
  */
 export function setTtsLease(lease: string, active: boolean): Promise<AudioTtsLeaseResponse> {
-  return hermesApi<AudioTtsLeaseResponse>({
+  return beyondApi<AudioTtsLeaseResponse>({
     ...profileScoped(),
     path: '/api/audio/tts-lease',
     method: 'POST',
@@ -252,7 +252,7 @@ export const AUDIO_STT_LEASE_REQUEST_TIMEOUT_MS = 180_000
  * is never re-routed by a later gateway/profile switch.
  */
 export function setSttLease(lease: string, active: boolean, owner: ResolvedOwner): Promise<AudioSttLeaseResponse> {
-  return hermesApiAs<AudioSttLeaseResponse>(owner, {
+  return beyondApiAs<AudioSttLeaseResponse>(owner, {
     path: '/api/audio/stt-lease',
     method: 'POST',
     body: { active, lease },
@@ -261,15 +261,15 @@ export function setSttLease(lease: string, active: boolean, owner: ResolvedOwner
 }
 
 export function getElevenLabsVoices(profile?: null | string): Promise<ElevenLabsVoicesResponse> {
-  return hermesApi<ElevenLabsVoicesResponse>({
+  return beyondApi<ElevenLabsVoicesResponse>({
     path: '/api/audio/elevenlabs/voices',
     ...profileScoped(profile)
   })
 }
 
 // ---------------------------------------------------------------------------
-// Maintenance operations (parity with `hermes doctor` / `hermes security
-// audit` / `hermes backup` / `hermes debug share` and the dashboard System
+// Maintenance operations (parity with `beyond doctor` / `beyond security
+// audit` / `beyond backup` / `beyond debug share` and the dashboard System
 // page). All except debug share are spawn-based background actions tailed via
 // getActionStatus().
 //
@@ -280,11 +280,11 @@ export function getElevenLabsVoices(profile?: null | string): Promise<ElevenLabs
 // ---------------------------------------------------------------------------
 
 export function runDoctor(): Promise<ActionResponse> {
-  return hermesApi<ActionResponse>({ ...profileScoped(), path: '/api/ops/doctor', method: 'POST', body: {} })
+  return beyondApi<ActionResponse>({ ...profileScoped(), path: '/api/ops/doctor', method: 'POST', body: {} })
 }
 
 export function runSecurityAudit(): Promise<ActionResponse> {
-  return hermesApi<ActionResponse>({
+  return beyondApi<ActionResponse>({
     ...profileScoped(),
     path: '/api/ops/security-audit',
     method: 'POST',
@@ -293,7 +293,7 @@ export function runSecurityAudit(): Promise<ActionResponse> {
 }
 
 export function runBackup(): Promise<ActionResponse & { archive?: string }> {
-  return hermesApi<ActionResponse & { archive?: string }>({
+  return beyondApi<ActionResponse & { archive?: string }>({
     ...profileScoped(),
     path: '/api/ops/backup',
     method: 'POST',
@@ -302,12 +302,12 @@ export function runBackup(): Promise<ActionResponse & { archive?: string }> {
 }
 
 export function runDebugShare(): Promise<DebugShareResponse> {
-  return hermesApi<DebugShareResponse>({
+  return beyondApi<DebugShareResponse>({
     ...profileScoped(),
     path: '/api/ops/debug-share',
     method: 'POST',
     body: {},
-    // Synchronous upload of report + logs to the paste service.
+    // Synchrobeyond upload of report + logs to the paste service.
     timeoutMs: 120_000
   })
 }

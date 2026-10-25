@@ -1,5 +1,5 @@
 /**
- * Pure parse + judge of the update marker `HERMES_HOME/.hermes-update-in-progress`
+ * Pure parse + judge of the update marker `BEYOND_HOME/.beyond-update-in-progress`
  * (A7 rule 4, contract in `tests/fixtures/update_marker_corpus.json`).
  *
  * The corpus is authoritative: every reader (Python, Rust, bash, PowerShell,
@@ -134,7 +134,7 @@ export interface JudgeEnv {
   nowS: number
 }
 
-/** {@link JudgeEnv} whose process facts answer synchronously. */
+/** {@link JudgeEnv} whose process facts answer synchrobeyondly. */
 export interface SyncJudgeEnv {
   ourPid: number
   ourCt: () => number | null
@@ -146,7 +146,7 @@ export interface SyncJudgeEnv {
 /**
  * The identity rule itself, the one copy every Desktop reader runs: the
  * async judge resolves the facts first, the module-init repair lock reads
- * them synchronously. `startedAt` anchors the v1 ceiling.
+ * them synchrobeyondly. `startedAt` anchors the v1 ceiling.
  */
 export function identityStateSync(
   pid: number,

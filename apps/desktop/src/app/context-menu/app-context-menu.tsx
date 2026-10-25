@@ -7,7 +7,7 @@ import { terminalMenuHandleFor } from '@/app/right-sidebar/terminal/terminal-con
 import { openStarMapNodeMenuFor } from '@/app/starmap/context-menu-handle'
 import { DROPDOWN_KIT } from '@/components/ui/actions-menu'
 import { Codicon } from '@/components/ui/codicon'
-import { HERMES_CONTEXT_MENU_TRIGGER_ATTR } from '@/components/ui/context-menu'
+import { BEYOND_CONTEXT_MENU_TRIGGER_ATTR } from '@/components/ui/context-menu'
 import { writeClipboardText } from '@/components/ui/copy-button'
 import {
   DropdownMenu,
@@ -109,7 +109,7 @@ function terminalSections(open: Extract<OpenContextMenu, { kind: 'terminal' }>, 
           key="terminal-paste"
           label={t.contextMenu.edit.paste}
           onSelect={() =>
-            void window.hermesDesktop?.readClipboard().then(text => (text ? terminal.paste?.(text) : undefined))
+            void window.beyondDesktop?.readClipboard().then(text => (text ? terminal.paste?.(text) : undefined))
           }
         />
       ) : null,
@@ -164,7 +164,7 @@ function domSections(
   }
 
   const editableCommand = (command: 'copy' | 'cut' | 'paste') => {
-    withEditableFocus(() => void window.hermesDesktop?.contextMenuEdit?.(command))
+    withEditableFocus(() => void window.beyondDesktop?.contextMenuEdit?.(command))
   }
 
   // Select all runs entirely in the renderer, scoped to the editable itself.
@@ -196,7 +196,7 @@ function domSections(
   }
 
   const spellcheckAction = (action: { kind: 'add' | 'replace'; word: string }) => {
-    withEditableFocus(() => void window.hermesDesktop?.contextMenuSpellcheck?.(action))
+    withEditableFocus(() => void window.beyondDesktop?.contextMenuSpellcheck?.(action))
   }
 
   if (linkUrl) {
@@ -264,7 +264,7 @@ function domSections(
           icon="file-media"
           key="image-copy"
           label={copy.image.copyImage}
-          onSelect={() => void window.hermesDesktop?.contextMenuCopyImage?.()}
+          onSelect={() => void window.beyondDesktop?.contextMenuCopyImage?.()}
         />,
         target.imageUrl ? (
           <Item
@@ -279,7 +279,7 @@ function domSections(
             icon="save"
             key="image-save"
             label={copy.image.saveImageAs}
-            onSelect={() => void window.hermesDesktop?.saveImageFromUrl?.(target.imageUrl)}
+            onSelect={() => void window.beyondDesktop?.saveImageFromUrl?.(target.imageUrl)}
           />
         ) : null
       ].filter(Boolean)
@@ -453,7 +453,7 @@ function guestSections(open: Extract<OpenContextMenu, { kind: 'guest' }>, t: Tra
             icon="save"
             key="guest-image-save"
             label={copy.image.saveImageAs}
-            onSelect={() => void window.hermesDesktop?.saveImageFromUrl?.(imageUrl)}
+            onSelect={() => void window.beyondDesktop?.saveImageFromUrl?.(imageUrl)}
           />
         ) : null
       ].filter(Boolean)
@@ -585,7 +585,7 @@ export function AppContextMenu() {
     const onContextMenu = (event: MouseEvent) => {
       const element = event.target instanceof Element ? event.target : null
 
-      const trigger = element?.closest(`[${HERMES_CONTEXT_MENU_TRIGGER_ATTR}], [data-slot="context-menu-trigger"]`)
+      const trigger = element?.closest(`[${BEYOND_CONTEXT_MENU_TRIGGER_ATTR}], [data-slot="context-menu-trigger"]`)
 
       // Only the pane-body wrapper is a fallback menu. Explicit row, tab and
       // status-bar menus still own their whole gesture, even inside a pane.
@@ -649,7 +649,7 @@ export function AppContextMenu() {
 
   // Spell-check facts arrive from main after the menu opens (Chromium reports
   // them on its own context-menu event); attach them to the open menu.
-  useEffect(() => window.hermesDesktop?.onContextMenuSpellcheck?.(augmentSpellcheck), [])
+  useEffect(() => window.beyondDesktop?.onContextMenuSpellcheck?.(augmentSpellcheck), [])
 
   if (!open) {
     return null

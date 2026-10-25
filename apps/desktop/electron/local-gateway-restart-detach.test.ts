@@ -6,37 +6,37 @@ import { expect, test } from 'vitest'
 
 import { runGatewayEnsure, runGatewayOwnerRestart } from './local-gateway'
 
-// A real bounded client against a fake `hermes`: `new` knows `--detach`; `old` predates it and
+// A real bounded client against a fake `beyond`: `new` knows `--detach`; `old` predates it and
 // rejects it the way argparse does. Each run appends its argv, so the test reads what was executed.
-async function fakeHermes(kind: 'new' | 'old') {
+async function fakeBeyond(kind: 'new' | 'old') {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'gw-detach-'))
   const calls = path.join(dir, 'calls')
 
   const reject = kind === 'old'
-    ? 'case " $* " in *" --detach "*) echo "hermes: error: unrecognized arguments: --detach" >&2; exit 2;; esac\n'
+    ? 'case " $* " in *" --detach "*) echo "beyond: error: unrecognized arguments: --detach" >&2; exit 2;; esac\n'
     : ''
 
-  const bin = path.join(dir, 'hermes')
+  const bin = path.join(dir, 'beyond')
   await fs.writeFile(bin, `#!/bin/sh\necho "$*" >> "${calls}"\n${reject}echo "✓ restarted"\n`, { mode: 0o755 })
-  const run = (args: string[]) => runGatewayEnsure({ command: bin, args, env: {}, shell: false }, dir, dir, {}, { timeoutMs: 5000, label: 'hermes gateway restart' })
+  const run = (args: string[]) => runGatewayEnsure({ command: bin, args, env: {}, shell: false }, dir, dir, {}, { timeoutMs: 5000, label: 'beyond gateway restart' })
 
   return { run, calls: async () => (await fs.readFile(calls, 'utf8')).trim().split('\n') }
 }
 
 test.skipIf(process.platform === 'win32')('a stale-owner restart asks for a detached replacement', async () => {
-  const hermes = await fakeHermes('new')
-  const result = await runGatewayOwnerRestart(hermes.run, 'work')
+  const beyond = await fakeBeyond('new')
+  const result = await runGatewayOwnerRestart(beyond.run, 'work')
 
   expect(result.code).toBe(0)
-  expect(await hermes.calls()).toEqual(['--profile work gateway restart --detach'])
+  expect(await beyond.calls()).toEqual(['--profile work gateway restart --detach'])
 })
 
 // apps/desktop/AGENTS.md "Compatibility": a runtime older than `--detach` still restarts (its old
 // behaviour, which works under a service) instead of failing on the flag and leaving the stale owner.
 test.skipIf(process.platform === 'win32')('a runtime that predates --detach still restarts the owner', async () => {
-  const hermes = await fakeHermes('old')
-  const result = await runGatewayOwnerRestart(hermes.run, 'default')
+  const beyond = await fakeBeyond('old')
+  const result = await runGatewayOwnerRestart(beyond.run, 'default')
 
   expect(result.code).toBe(0)
-  expect(await hermes.calls()).toEqual(['--profile default gateway restart --detach', '--profile default gateway restart'])
+  expect(await beyond.calls()).toEqual(['--profile default gateway restart --detach', '--profile default gateway restart'])
 })

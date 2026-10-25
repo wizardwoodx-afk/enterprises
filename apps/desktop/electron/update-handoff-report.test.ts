@@ -13,7 +13,7 @@ function reportFor(home: string, park: (run: ReturnType<typeof parkedRunReport>)
   const run = parkedRunReport()
   park(run)
   run.report({
-    hermesHome: home,
+    beyondHome: home,
     log: line => lines.push(line),
     dialog: { showMessageBox: async () => ({ response: 2, checkboxChecked: false }) },
     shell: { showItemInFolder: () => undefined },

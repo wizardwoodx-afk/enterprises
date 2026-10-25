@@ -1,5 +1,5 @@
-import type { ModelOptionsResult } from '@hermes/shared'
-import { fuzzyRank, modelSearchText } from '@hermes/shared'
+import type { ModelOptionsResult } from '@beyond/shared'
+import { fuzzyRank, modelSearchText } from '@beyond/shared'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactElement } from 'react'
@@ -9,7 +9,7 @@ import { I18nProvider } from '@/i18n'
 import { $localModelsEnabled } from '@/store/local-models-flag'
 import { localModelsKey, localModelsOwner } from '@/store/local-runtime-jobs'
 import { stubMenuDomApis, stubResizeObserver } from '@/test/jsdom'
-import type { LocalRuntimeJob } from '@/types/hermes'
+import type { LocalRuntimeJob } from '@/types/beyond'
 
 import { ModelPickerDialog } from './model-picker'
 
@@ -17,7 +17,7 @@ import { ModelPickerDialog } from './model-picker'
 // whatever the backend answers; answering with the seeded jobs keeps the two equal.
 const seededJobs: { current: readonly LocalRuntimeJob[] } = vi.hoisted(() => ({ current: [] }))
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/beyond', () => ({
   getLocalModelsJobs: vi.fn(async () => ({ jobs: [...seededJobs.current] })),
   getLocalModelsStatus: vi.fn().mockResolvedValue({ loading: {} })
 }))
@@ -43,9 +43,9 @@ const OPTIONS: ModelOptionsResult = {
       authenticated: true
     },
     {
-      slug: 'nous',
-      name: 'Nous',
-      models: ['Hermes-4.5'],
+      slug: 'beyond',
+      name: 'Beyond',
+      models: ['Beyond-4.5'],
       authenticated: true
     }
   ]
@@ -133,7 +133,7 @@ describe('ModelPickerDialog download rows', () => {
     })
     renderPicker()
 
-    expect(await screen.findByText('Hermes-4.5')).toBeTruthy()
+    expect(await screen.findByText('Beyond-4.5')).toBeTruthy()
     expect(screen.getByText('Qwen3.8 Flash Next (UD-Q4_K_XL)')).toBeTruthy()
     expect(screen.getByText('41%')).toBeTruthy()
   })
@@ -177,7 +177,7 @@ const WINDOW_USAGE = {
   top_tier_model_ids: ['example/model-b']
 }
 
-// The gateway's per-plan words, passed through by the backend (Hermes never computes them).
+// The gateway's per-plan words, passed through by the backend (Beyond never computes them).
 const WINDOW_LEVELS = {
   'example/model-d': 'medium',
   'example/model-b': 'top_tier',
@@ -196,8 +196,8 @@ describe('ModelPickerDialog plan usage', () => {
     vi.mocked(requestModelOptions).mockResolvedValue({
       providers: [
         {
-          slug: 'nous',
-          name: 'Nous',
+          slug: 'beyond',
+          name: 'Beyond',
           models: ['example/model-d', 'example/model-b', 'example/model-free:free'],
           authenticated: true,
           plan_usage: WINDOW_USAGE,
@@ -205,7 +205,7 @@ describe('ModelPickerDialog plan usage', () => {
         }
       ]
     })
-    renderPicker({ currentModel: 'example/model-d', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'example/model-d', currentProvider: 'beyond' })
 
     expect(await screen.findByText('Every model below is included', { exact: false })).toBeTruthy()
     // Gauges read as used and fill up: 0.82 left → 18% used, 0.97 left → 3% used.
@@ -230,8 +230,8 @@ describe('ModelPickerDialog plan usage', () => {
     vi.mocked(requestModelOptions).mockResolvedValue({
       providers: [
         {
-          slug: 'nous',
-          name: 'Nous',
+          slug: 'beyond',
+          name: 'Beyond',
           models: ['example/model-d'],
           authenticated: true,
           plan_usage: {
@@ -242,7 +242,7 @@ describe('ModelPickerDialog plan usage', () => {
         }
       ]
     })
-    renderPicker({ currentModel: 'example/model-d', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'example/model-d', currentProvider: 'beyond' })
 
     expect(await screen.findByText('Month')).toBeTruthy()
     expect(screen.getByText('40% used')).toBeTruthy()
@@ -252,8 +252,8 @@ describe('ModelPickerDialog plan usage', () => {
     vi.mocked(requestModelOptions).mockResolvedValue({
       providers: [
         {
-          slug: 'nous',
-          name: 'Nous',
+          slug: 'beyond',
+          name: 'Beyond',
           models: ['example/model-d'],
           authenticated: true,
           plan_usage: {
@@ -267,7 +267,7 @@ describe('ModelPickerDialog plan usage', () => {
         }
       ]
     })
-    renderPicker({ currentModel: 'example/model-d', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'example/model-d', currentProvider: 'beyond' })
 
     expect(await screen.findByText('Next 5 hours')).toBeTruthy()
     expect(screen.getByText('50% used')).toBeTruthy()
@@ -277,8 +277,8 @@ describe('ModelPickerDialog plan usage', () => {
     vi.mocked(requestModelOptions).mockResolvedValue({
       providers: [
         {
-          slug: 'nous',
-          name: 'Nous',
+          slug: 'beyond',
+          name: 'Beyond',
           models: ['example/model-d', 'example/model-b', 'example/model-free:free'],
           authenticated: true,
           plan_usage: {
@@ -292,7 +292,7 @@ describe('ModelPickerDialog plan usage', () => {
         }
       ]
     })
-    renderPicker({ currentModel: 'example/model-d', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'example/model-d', currentProvider: 'beyond' })
 
     // Only the top-tier row draws on the spent top-tier allowance: it dims; Medium and Free still have room.
     const large = await screen.findByText('example/model-b')
@@ -307,8 +307,8 @@ describe('ModelPickerDialog plan usage', () => {
     vi.mocked(requestModelOptions).mockResolvedValue({
       providers: [
         {
-          slug: 'nous',
-          name: 'Nous',
+          slug: 'beyond',
+          name: 'Beyond',
           models: ['example/model-d', 'example/model-b', 'example/model-free:free'],
           authenticated: true,
           plan_usage: {
@@ -319,7 +319,7 @@ describe('ModelPickerDialog plan usage', () => {
         }
       ]
     })
-    renderPicker({ currentModel: 'example/model-d', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'example/model-d', currentProvider: 'beyond' })
 
     // A spent all-model allowance is said once, above the list, not on every paid row.
     expect(await screen.findByText('Daily limit reached', { exact: false })).toBeTruthy()
@@ -330,8 +330,8 @@ describe('ModelPickerDialog plan usage', () => {
     vi.mocked(requestModelOptions).mockResolvedValue({
       providers: [
         {
-          slug: 'nous',
-          name: 'Nous',
+          slug: 'beyond',
+          name: 'Beyond',
           models: ['example/model-d', 'example/model-b', 'example/model-free:free'],
           authenticated: true,
           plan_usage: {
@@ -343,7 +343,7 @@ describe('ModelPickerDialog plan usage', () => {
         }
       ]
     })
-    renderPicker({ currentModel: 'example/model-d', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'example/model-d', currentProvider: 'beyond' })
 
     expect(await screen.findByText('Weekly limit reached', { exact: false })).toBeTruthy()
     expect(screen.getByText('· paid models now use your credits (pay as you go)', { exact: false })).toBeTruthy()
@@ -355,8 +355,8 @@ describe('ModelPickerDialog plan usage', () => {
     vi.mocked(requestModelOptions).mockResolvedValue({
       providers: [
         {
-          slug: 'nous',
-          name: 'Nous',
+          slug: 'beyond',
+          name: 'Beyond',
           models: ['example/model-d', 'example/model-b', 'example/model-free:free'],
           authenticated: true,
           plan_usage: {
@@ -371,7 +371,7 @@ describe('ModelPickerDialog plan usage', () => {
         }
       ]
     })
-    renderPicker({ currentModel: 'example/model-d', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'example/model-d', currentProvider: 'beyond' })
 
     expect(
       await screen.findByText('· Large models now use your credits (pay as you go)', { exact: false })
@@ -384,8 +384,8 @@ describe('ModelPickerDialog plan usage', () => {
     vi.mocked(requestModelOptions).mockResolvedValue({
       providers: [
         {
-          slug: 'nous',
-          name: 'Nous',
+          slug: 'beyond',
+          name: 'Beyond',
           models: ['example/model-d'],
           authenticated: true,
           pricing: {
@@ -395,7 +395,7 @@ describe('ModelPickerDialog plan usage', () => {
         }
       ]
     })
-    renderPicker({ currentModel: 'example/model-d', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'example/model-d', currentProvider: 'beyond' })
 
     expect(await screen.findByText('$1.00 / $5.00')).toBeTruthy()
     expect(screen.queryByText('Credit Plan', { exact: false })).toBeNull()
@@ -406,8 +406,8 @@ describe('ModelPickerDialog plan usage', () => {
     vi.mocked(requestModelOptions).mockResolvedValue({
       providers: [
         {
-          slug: 'nous',
-          name: 'Nous',
+          slug: 'beyond',
+          name: 'Beyond',
           models: ['example/model-b', 'example/model-d', 'example/model-free:free'],
           authenticated: true,
           plan_usage: { ...WINDOW_USAGE, featured_model_ids: ['example/model-b'] },
@@ -415,7 +415,7 @@ describe('ModelPickerDialog plan usage', () => {
         }
       ]
     })
-    renderPicker({ currentModel: 'example/model-d', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'example/model-d', currentProvider: 'beyond' })
 
     expect(await screen.findByText('Recommended')).toBeTruthy()
     expect(screen.getByText('Other models')).toBeTruthy()
@@ -425,8 +425,8 @@ describe('ModelPickerDialog plan usage', () => {
     vi.mocked(requestModelOptions).mockResolvedValue({
       providers: [
         {
-          slug: 'nous',
-          name: 'Nous',
+          slug: 'beyond',
+          name: 'Beyond',
           models: ['example/model-d'],
           authenticated: true,
           pricing: { 'example/model-d': { input: '$1.00', output: '$5.00', free: false } },
@@ -435,7 +435,7 @@ describe('ModelPickerDialog plan usage', () => {
         }
       ]
     })
-    renderPicker({ currentModel: 'example/model-d', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'example/model-d', currentProvider: 'beyond' })
 
     expect(await screen.findByText('$1.00 / $5.00')).toBeTruthy()
     expect(screen.queryByText('Recommended')).toBeNull()
@@ -452,9 +452,9 @@ describe('ModelPickerDialog search ranking', () => {
 
   it('orders model rows exactly as the shared fuzzyRank does', async () => {
     vi.mocked(requestModelOptions).mockResolvedValue({
-      providers: [{ slug: 'nous', name: 'Nous', models: MODELS, authenticated: true }]
+      providers: [{ slug: 'beyond', name: 'Beyond', models: MODELS, authenticated: true }]
     })
-    renderPicker({ currentModel: 'gpt-4o', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'gpt-4o', currentProvider: 'beyond' })
     await screen.findByText('gpt-4o')
 
     const query = 'g4o'
@@ -481,9 +481,9 @@ describe('ModelPickerDialog search ranking', () => {
     const catalog = ['gpt-4o', 'claude-3-opus', 'qwen3.8-flash']
 
     vi.mocked(requestModelOptions).mockResolvedValue({
-      providers: [{ slug: 'nous', name: 'Nous', models: catalog, authenticated: true }]
+      providers: [{ slug: 'beyond', name: 'Beyond', models: catalog, authenticated: true }]
     })
-    renderPicker({ currentModel: 'gpt-4o', currentProvider: 'nous' })
+    renderPicker({ currentModel: 'gpt-4o', currentProvider: 'beyond' })
     await screen.findByText('gpt-4o')
 
     fireEvent.change(screen.getByRole('combobox'), { target: { value: query } })

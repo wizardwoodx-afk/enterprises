@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type * as HermesApi from '@/hermes'
+import type * as BeyondApi from '@/beyond'
 
 import { LogsPane } from './panes'
 
@@ -10,12 +10,12 @@ import { LogsPane } from './panes'
 // is that refetched data scrolls to the bottom ONLY while the user is already
 // at the bottom — a deliberate scroll-up must not be yanked back down by the
 // next refetch. jsdom has no layout, so the <pre>'s scroll geometry is stubbed
-// per test and `scrollTo` is observed directly; rAF is driven synchronously so
+// per test and `scrollTo` is observed directly; rAF is driven synchrobeyondly so
 // each effect's frame can be awaited deterministically.
 let lines: string[] = []
 
-vi.mock('@/hermes', async importOriginal => ({
-  ...(await importOriginal<typeof HermesApi>()),
+vi.mock('@/beyond', async importOriginal => ({
+  ...(await importOriginal<typeof BeyondApi>()),
   getLogs: vi.fn(async () => ({ lines: [...lines] }))
 }))
 

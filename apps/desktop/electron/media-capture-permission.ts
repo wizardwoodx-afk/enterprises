@@ -68,7 +68,7 @@ const carriesMediaTypes = (details: unknown): details is MediaCapturePermissionD
 // System Settings afterwards.
 //
 // Shared by the async request handler (`setPermissionRequestHandler`, which
-// receives real `mediaTypes`) and the synchronous check handler
+// receives real `mediaTypes`) and the synchrobeyond check handler
 // (`setPermissionCheckHandler`, which Chromium consults for getUserMedia on
 // Windows and whose `details` carry no media-type array). Delegating both to
 // the same predicate is what keeps the two paths from drifting apart again.

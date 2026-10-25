@@ -1,4 +1,4 @@
-import { JsonRpcGatewayError } from '@hermes/shared'
+import { JsonRpcGatewayError } from '@beyond/shared'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { LIVENESS_REPROBE_DELAY_MS } from '@/lib/gateway-liveness-policy'
@@ -35,9 +35,9 @@ const reconnectStateMocks = vi.hoisted(() => ({
   resetTileRuntimeBindings: vi.fn()
 }))
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/beyond', () => ({
   setApiRequestConnection: vi.fn(),
-  HermesGateway: class {
+  BeyondGateway: class {
     connectionState = 'closed'
     close = vi.fn(() => {
       this.connectionState = 'closed'
@@ -87,7 +87,7 @@ const {
 } = await import('./gateway')
 
 function installDesktop(stub: Record<string, unknown>): void {
-  ;(window as unknown as { hermesDesktop: unknown }).hermesDesktop = stub
+  ;(window as unknown as { beyondDesktop: unknown }).beyondDesktop = stub
 }
 
 function descriptorFor(connectionId: string, profile: string) {
@@ -112,13 +112,13 @@ afterEach(() => {
   gatewayMocks.eventHandlers.length = 0
   vi.clearAllMocks()
   vi.useRealTimers()
-  delete (window as unknown as { hermesDesktop?: unknown }).hermesDesktop
+  delete (window as unknown as { beyondDesktop?: unknown }).beyondDesktop
 })
 
 describe('a redial of the active route', () => {
   it('is not cancelled by a prune that runs while it is dialing', async () => {
     // Editing the connection you are viewing defers the redial until its lease drops, then
-    // disposes the entry and re-activates the same scope asynchronously. While that is in flight
+    // disposes the entry and re-activates the same scope asynchrobeyondly. While that is in flight
     // the entry is gone from the map, so the pruner's safety net sees an active scope with no
     // entry and calls setActive(primary) — which bumps the activation epoch and turns the redial's
     // own applyActive(epoch) into a no-op. The window then sits on the primary backend and the
@@ -692,7 +692,7 @@ describe('reconnect fail-stop on a removed connection', () => {
     // path (wake sweep, agent activation) used to make ensureActiveGatewayOpen
     // return null immediately: reconnectSecondary early-returns on
     // `reconnecting`, the socket is still closed, and the caller surfaced
-    // "Hermes gateway is not connected" on the Sessions + action. The drive
+    // "Beyond gateway is not connected" on the Sessions + action. The drive
     // must ride out the in-flight activation and hand back the opened socket.
     let releaseDial: (() => void) | undefined
 
@@ -779,10 +779,10 @@ describe('secondary stalled-dial budget', () => {
     vi.useFakeTimers()
 
     // What main's ensureLocalGateway / parseGatewayEnsureOutput / assertLocalGatewayEndpoint throw,
-    // as they cross the IPC boundary. Each re-dial spawns another `hermes gateway ensure`.
+    // as they cross the IPC boundary. Each re-dial spawns another `beyond gateway ensure`.
     for (const permanent of [
-      "Error invoking remote method 'hermes:connection:get-for': Error: Gateway incompatible (runtime_protocol). Use hermes gateway status for recovery.",
-      'hermes gateway ensure produced no result (exit 2): invalid choice. Update Hermes or check the profile, then retry.',
+      "Error invoking remote method 'beyond:connection:get-for': Error: Gateway incompatible (runtime_protocol). Use beyond gateway status for recovery.",
+      'beyond gateway ensure produced no result (exit 2): invalid choice. Update Beyond or check the profile, then retry.',
       'Invalid local gateway endpoint'
     ]) {
       closeSecondaryGateways()
@@ -816,9 +816,9 @@ describe('secondary stalled-dial budget', () => {
       .fn()
       .mockResolvedValueOnce(descriptorFor('homelab', 'bot-a'))
       .mockRejectedValueOnce(stalled)
-      .mockRejectedValueOnce(new Error('Failed to connect to Hermes gateway'))
+      .mockRejectedValueOnce(new Error('Failed to connect to Beyond gateway'))
       .mockRejectedValueOnce(stalled)
-      .mockRejectedValueOnce(new Error('Failed to connect to Hermes gateway'))
+      .mockRejectedValueOnce(new Error('Failed to connect to Beyond gateway'))
       .mockRejectedValue(stalled)
 
     installDesktop({ getConnectionFor })
@@ -887,7 +887,7 @@ describe('secondary stalled-dial budget', () => {
     const getConnectionFor = vi
       .fn()
       .mockResolvedValueOnce(descriptorFor('homelab', 'bot-a'))
-      .mockRejectedValueOnce(new Error('Failed to connect to Hermes gateway'))
+      .mockRejectedValueOnce(new Error('Failed to connect to Beyond gateway'))
 
     installDesktop({ getConnectionFor })
 

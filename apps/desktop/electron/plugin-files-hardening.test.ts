@@ -17,25 +17,25 @@ const unprivileged = posix && process.getuid?.() !== 0
 
 let scratch: string
 let userData: string
-let hermesHome: string
+let beyondHome: string
 let vault: string
 let files: PluginFiles
 
 const make = () =>
   createPluginFiles({
     userDataDir: () => userData,
-    protectedRoots: () => [hermesHome],
+    protectedRoots: () => [beyondHome],
     trashItem: target => fs.promises.rm(target, { recursive: true })
   })
 
 beforeEach(() => {
-  scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'hermes-plugin-files-hard-')))
+  scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'beyond-plugin-files-hard-')))
   userData = path.join(scratch, 'userData')
-  hermesHome = path.join(scratch, 'home', '.hermes')
+  beyondHome = path.join(scratch, 'home', '.beyond')
   vault = path.join(scratch, 'home', 'Vault')
   fs.mkdirSync(userData, { recursive: true })
-  fs.mkdirSync(hermesHome, { recursive: true })
-  fs.writeFileSync(path.join(hermesHome, 'config.yaml'), 'model: secret-config\n')
+  fs.mkdirSync(beyondHome, { recursive: true })
+  fs.writeFileSync(path.join(beyondHome, 'config.yaml'), 'model: secret-config\n')
   fs.mkdirSync(path.join(vault, 'notes'), { recursive: true })
   fs.writeFileSync(path.join(vault, 'notes', 'a.md'), '# A\n')
   files = make()
@@ -119,9 +119,9 @@ describe('only plain files', () => {
     ).toMatchObject({ ok: false, error: 'not-a-file' })
   })
 
-  it.runIf(posix)('refuses a hard link, which may be a second name for Hermes data', async () => {
+  it.runIf(posix)('refuses a hard link, which may be a second name for Beyond data', async () => {
     const id = await grantVault()
-    fs.linkSync(path.join(hermesHome, 'config.yaml'), path.join(vault, 'notes', 'c.md'))
+    fs.linkSync(path.join(beyondHome, 'config.yaml'), path.join(vault, 'notes', 'c.md'))
 
     expect(await files.run('plexus', { op: 'readText', folder: id, path: 'notes/c.md' })).toMatchObject({
       ok: false,
@@ -130,7 +130,7 @@ describe('only plain files', () => {
     expect(
       await files.run('plexus', { op: 'writeText', folder: id, path: 'notes/c.md', text: 'pwned' })
     ).toMatchObject({ ok: false, error: 'protected' })
-    expect(fs.readFileSync(path.join(hermesHome, 'config.yaml'), 'utf8')).toBe('model: secret-config\n')
+    expect(fs.readFileSync(path.join(beyondHome, 'config.yaml'), 'utf8')).toBe('model: secret-config\n')
   })
 })
 
@@ -153,32 +153,32 @@ describe('a swap between the check and the open is refused', () => {
     }) as never)
   }
 
-  it.runIf(posix)('a parent folder swapped for a link into the Hermes home: no file lands there', async () => {
+  it.runIf(posix)('a parent folder swapped for a link into the Beyond home: no file lands there', async () => {
     const id = await grantVault()
     const sub = path.join(vault, 'sub')
     fs.mkdirSync(sub)
 
     swapAfterCheck('lstat', path.join(sub, 'pwn.txt'), () => {
       fs.renameSync(sub, path.join(vault, 'sub-old'))
-      fs.symlinkSync(hermesHome, sub)
+      fs.symlinkSync(beyondHome, sub)
     })
 
     // Refused either as outside the folder or, when the swap lands before the
-    // identity check, as Hermes data.
+    // identity check, as Beyond data.
     expect(
       ((await files.run('plexus', { op: 'writeText', folder: id, path: 'sub/pwn.txt', text: 'pwned' })) as { error?: string })
         .error
     ).toMatch(/^(outside-folder|protected)$/)
-    expect(fs.existsSync(path.join(hermesHome, 'pwn.txt'))).toBe(false)
+    expect(fs.existsSync(path.join(beyondHome, 'pwn.txt'))).toBe(false)
   })
 
-  it.runIf(posix)('a checked file swapped for a link to Hermes data is not read or written', async () => {
+  it.runIf(posix)('a checked file swapped for a link to Beyond data is not read or written', async () => {
     const id = await grantVault()
     const note = path.join(vault, 'notes', 'a.md')
 
     const swap = () => {
       fs.rmSync(note)
-      fs.symlinkSync(path.join(hermesHome, 'config.yaml'), note)
+      fs.symlinkSync(path.join(beyondHome, 'config.yaml'), note)
     }
 
     swapAfterCheck('stat', note, swap)
@@ -195,7 +195,7 @@ describe('a swap between the check and the open is refused', () => {
     expect(
       await files.run('plexus', { op: 'writeText', folder: id, path: 'notes/a.md', text: 'pwned' })
     ).toMatchObject({ ok: false })
-    expect(fs.readFileSync(path.join(hermesHome, 'config.yaml'), 'utf8')).toBe('model: secret-config\n')
+    expect(fs.readFileSync(path.join(beyondHome, 'config.yaml'), 'utf8')).toBe('model: secret-config\n')
   })
 })
 
@@ -218,13 +218,13 @@ describe('a swap before the final look is refused too', () => {
     }) as never)
   }
 
-  it.runIf(posix)('a checked file swapped for a link to Hermes data: not read, not written', async () => {
+  it.runIf(posix)('a checked file swapped for a link to Beyond data: not read, not written', async () => {
     const id = await grantVault()
     const note = path.join(vault, 'notes', 'a.md')
 
     const swap = () => {
       fs.rmSync(note)
-      fs.symlinkSync(path.join(hermesHome, 'config.yaml'), note)
+      fs.symlinkSync(path.join(beyondHome, 'config.yaml'), note)
     }
 
     afterRealpath(note, swap)
@@ -241,25 +241,25 @@ describe('a swap before the final look is refused too', () => {
     expect(await files.run('plexus', { op: 'writeText', folder: id, path: 'notes/a.md', text: 'pwned' })).toMatchObject({
       ok: false
     })
-    expect(fs.readFileSync(path.join(hermesHome, 'config.yaml'), 'utf8')).toBe('model: secret-config\n')
+    expect(fs.readFileSync(path.join(beyondHome, 'config.yaml'), 'utf8')).toBe('model: secret-config\n')
   })
 
-  it.runIf(posix)('a parent folder swapped for a link into the Hermes home: not read, not written', async () => {
+  it.runIf(posix)('a parent folder swapped for a link into the Beyond home: not read, not written', async () => {
     const id = await grantVault()
-    fs.writeFileSync(path.join(hermesHome, 'a.md'), 'hermes-secret\n')
+    fs.writeFileSync(path.join(beyondHome, 'a.md'), 'beyond-secret\n')
     const notes = path.join(vault, 'notes')
     const note = path.join(notes, 'a.md')
 
     const swap = () => {
       fs.renameSync(notes, path.join(vault, 'notes-old'))
-      fs.symlinkSync(hermesHome, notes)
+      fs.symlinkSync(beyondHome, notes)
     }
 
     afterRealpath(note, swap)
     const read = await files.run('plexus', { op: 'readText', folder: id, path: 'notes/a.md' })
 
     expect(read).toMatchObject({ ok: false })
-    expect(JSON.stringify(read)).not.toContain('hermes-secret')
+    expect(JSON.stringify(read)).not.toContain('beyond-secret')
 
     vi.restoreAllMocks()
     fs.rmSync(notes)
@@ -269,14 +269,14 @@ describe('a swap before the final look is refused too', () => {
     expect(await files.run('plexus', { op: 'writeText', folder: id, path: 'notes/a.md', text: 'pwned' })).toMatchObject({
       ok: false
     })
-    expect(fs.readFileSync(path.join(hermesHome, 'a.md'), 'utf8')).toBe('hermes-secret\n')
+    expect(fs.readFileSync(path.join(beyondHome, 'a.md'), 'utf8')).toBe('beyond-secret\n')
   })
 })
 
 describe('rename, trash and list after a parent swap', () => {
-  // Another process swaps `notes` for a link into the Hermes home right after
+  // Another process swaps `notes` for a link into the Beyond home right after
   // `resolve` finished (its last look is the second lstat of the entry): the
-  // op must not act on the Hermes home.
+  // op must not act on the Beyond home.
   const swapParentAfterResolve = (entry: string, notes: string) => {
     const original = fs.promises.lstat.bind(fs.promises) as (target: fs.PathLike) => Promise<fs.Stats>
     let seen = 0
@@ -287,17 +287,17 @@ describe('rename, trash and list after a parent swap', () => {
       } finally {
         if (String(target) === entry && ++seen === 2) {
           fs.renameSync(notes, `${notes}-old`)
-          fs.symlinkSync(hermesHome, notes)
+          fs.symlinkSync(beyondHome, notes)
         }
       }
     }) as never)
   }
 
   beforeEach(() => {
-    fs.writeFileSync(path.join(hermesHome, 'a.md'), 'hermes-file\n')
+    fs.writeFileSync(path.join(beyondHome, 'a.md'), 'beyond-file\n')
   })
 
-  it.runIf(posix)('rename does not move a Hermes file', async () => {
+  it.runIf(posix)('rename does not move a Beyond file', async () => {
     const id = await grantVault()
     const notes = path.join(vault, 'notes')
     swapParentAfterResolve(path.join(notes, 'a.md'), notes)
@@ -305,8 +305,8 @@ describe('rename, trash and list after a parent swap', () => {
     expect(await files.run('plexus', { op: 'rename', folder: id, path: 'notes/a.md', name: 'b.md' })).toMatchObject({
       ok: false
     })
-    expect(fs.readFileSync(path.join(hermesHome, 'a.md'), 'utf8')).toBe('hermes-file\n')
-    expect(fs.existsSync(path.join(hermesHome, 'b.md'))).toBe(false)
+    expect(fs.readFileSync(path.join(beyondHome, 'a.md'), 'utf8')).toBe('beyond-file\n')
+    expect(fs.existsSync(path.join(beyondHome, 'b.md'))).toBe(false)
   })
 
   it.runIf(posix)('a swap in the last instant before the rename is undone', async () => {
@@ -319,7 +319,7 @@ describe('rename, trash and list after a parent swap', () => {
       if (!swapped && String(from) === path.join(notes, 'a.md')) {
         swapped = true
         fs.renameSync(notes, `${notes}-old`)
-        fs.symlinkSync(hermesHome, notes)
+        fs.symlinkSync(beyondHome, notes)
       }
 
       return original(from, to)
@@ -329,8 +329,8 @@ describe('rename, trash and list after a parent swap', () => {
       ok: false,
       error: 'outside-folder'
     })
-    expect(fs.readFileSync(path.join(hermesHome, 'a.md'), 'utf8')).toBe('hermes-file\n')
-    expect(fs.existsSync(path.join(hermesHome, 'b.md'))).toBe(false)
+    expect(fs.readFileSync(path.join(beyondHome, 'a.md'), 'utf8')).toBe('beyond-file\n')
+    expect(fs.existsSync(path.join(beyondHome, 'b.md'))).toBe(false)
   })
 
   it.runIf(posix)('the undo never overwrites a file recreated meanwhile', async () => {
@@ -342,10 +342,10 @@ describe('rename, trash and list after a parent swap', () => {
     vi.spyOn(fs.promises, 'rename').mockImplementation((async (from: fs.PathLike, to: fs.PathLike) => {
       if (++calls === 1) {
         fs.renameSync(notes, `${notes}-old`)
-        fs.symlinkSync(hermesHome, notes)
+        fs.symlinkSync(beyondHome, notes)
         await original(from, to)
         // Another app writes a new a.md where the moved one was.
-        fs.writeFileSync(path.join(hermesHome, 'a.md'), 'newer\n')
+        fs.writeFileSync(path.join(beyondHome, 'a.md'), 'newer\n')
 
         return
       }
@@ -357,25 +357,25 @@ describe('rename, trash and list after a parent swap', () => {
       ok: false,
       error: 'outside-folder'
     })
-    expect(fs.readFileSync(path.join(hermesHome, 'a.md'), 'utf8')).toBe('newer\n')
-    expect(fs.readFileSync(path.join(hermesHome, 'b.md'), 'utf8')).toBe('hermes-file\n')
+    expect(fs.readFileSync(path.join(beyondHome, 'a.md'), 'utf8')).toBe('newer\n')
+    expect(fs.readFileSync(path.join(beyondHome, 'b.md'), 'utf8')).toBe('beyond-file\n')
   })
 
-  it.runIf(posix)('trash does not remove a Hermes file', async () => {
+  it.runIf(posix)('trash does not remove a Beyond file', async () => {
     const id = await grantVault()
     const notes = path.join(vault, 'notes')
     swapParentAfterResolve(path.join(notes, 'a.md'), notes)
 
     expect(await files.run('plexus', { op: 'trash', folder: id, path: 'notes/a.md' })).toMatchObject({ ok: false })
-    expect(fs.readFileSync(path.join(hermesHome, 'a.md'), 'utf8')).toBe('hermes-file\n')
+    expect(fs.readFileSync(path.join(beyondHome, 'a.md'), 'utf8')).toBe('beyond-file\n')
   })
 
-  it.runIf(posix)('list does not return the Hermes home', async () => {
+  it.runIf(posix)('list does not return the Beyond home', async () => {
     const id = await grantVault()
     const sub = path.join(vault, 'notes', 'sub')
     fs.mkdirSync(sub)
-    fs.mkdirSync(path.join(hermesHome, 'sub'))
-    fs.writeFileSync(path.join(hermesHome, 'sub', 'config.yaml'), 'x\n')
+    fs.mkdirSync(path.join(beyondHome, 'sub'))
+    fs.writeFileSync(path.join(beyondHome, 'sub', 'config.yaml'), 'x\n')
     swapParentAfterResolve(sub, path.join(vault, 'notes'))
 
     const listed = await files.run('plexus', { op: 'list', folder: id, path: 'notes/sub' })
@@ -385,15 +385,15 @@ describe('rename, trash and list after a parent swap', () => {
   })
 })
 
-describe('Hermes data mounted inside a granted folder', () => {
-  // Stands in for a bind mount of the Hermes home at Vault/mounted (present
+describe('Beyond data mounted inside a granted folder', () => {
+  // Stands in for a bind mount of the Beyond home at Vault/mounted (present
   // before the grant or added after): same filesystem identity, inside path.
   it('refuses every op under it', async () => {
     const mounted = path.join(vault, 'mounted')
     fs.mkdirSync(mounted)
     fs.writeFileSync(path.join(mounted, 'config.yaml'), 'mirror\n')
     const id = await grantVault()
-    const home = fs.statSync(hermesHome)
+    const home = fs.statSync(beyondHome)
     const original = fs.promises.stat.bind(fs.promises) as (target: fs.PathLike, options?: never) => Promise<fs.Stats>
 
     vi.spyOn(fs.promises, 'stat').mockImplementation((async (target: fs.PathLike, options?: never) => {

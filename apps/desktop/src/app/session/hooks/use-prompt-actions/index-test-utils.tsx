@@ -1,4 +1,4 @@
-import type { GatewayEvent } from '@hermes/shared'
+import type { GatewayEvent } from '@beyond/shared'
 import { QueryClient } from '@tanstack/react-query'
 import { act, render } from '@testing-library/react'
 import type { MutableRefObject } from 'react'
@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react'
 
 import type { ClientSessionState } from '@/app/types'
 import { createClientSessionState } from '@/lib/chat-runtime'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/beyond'
 
 import { useMessageStream } from '../use-message-stream'
 
@@ -46,7 +46,7 @@ export function sessionInfo(overrides: Partial<SessionInfo> = {}): SessionInfo {
 }
 
 // Wrap render() in act() so the Harness's useEffect (onReady callback +
-// internal state from usePromptActions) flushes synchronously instead of
+// internal state from usePromptActions) flushes synchrobeyondly instead of
 // spilling async state updates outside act().
 export async function actRender(ui: React.ReactElement) {
   let result: ReturnType<typeof render>
@@ -175,7 +175,7 @@ export function Harness({
     queryClient: queryClient.current,
     updateSessionState,
     hydrateFromStoredSession: async () => undefined,
-    refreshHermesConfig: async () => undefined,
+    refreshBeyondConfig: async () => undefined,
     refreshSessions
   })
 

@@ -1,10 +1,10 @@
 # Architecture
 
-Hermes Desktop is a **front end, not a separate agent**. It drives the same Hermes
+Beyond is a **front end, not a separate agent**. It drives the same agent
 runtime, sessions, memory, skills and config that the CLI, TUI and messaging
 gateway use. Nothing is duplicated between surfaces.
 
-This document is a map for working in this checkout. The upstream docs —
+This document is a map for working in this checkout. The docs —
 [`apps/desktop/AGENTS.md`](../apps/desktop/AGENTS.md),
 [`DESIGN.md`](../apps/desktop/DESIGN.md),
 [`ENGINEERING.md`](../apps/desktop/ENGINEERING.md) and
@@ -19,14 +19,14 @@ conventions.
 │  backend resolution + probing · process lifetime · windows   │
 │  native fs/git/clipboard/screenshot · updater · MSIX         │
 └───────────────┬──────────────────────────────────────────────┘
-                │ contextBridge → window.hermesDesktop  (narrow, allowlisted)
+                │ contextBridge → window.beyondDesktop  (narrow, allowlisted)
 ┌───────────────▼──────────────────────────────────────────────┐
 │ React renderer  (apps/desktop/src/)                          │
 │  routes, panes, transcript (@assistant-ui), stores, plugins  │
 └───────────────┬──────────────────────────────────────────────┘
                 │ HTTP + WebSocket, via apps/shared
 ┌───────────────▼──────────────────────────────────────────────┐
-│ Hermes Agent runtime — `hermes serve`                        │
+│ the agent runtime runtime — `beyond serve`                        │
 │  tui_gateway JSON-RPC / WS API · tools · memory · skills     │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -34,7 +34,7 @@ conventions.
 - **Electron** resolves and validates a runnable backend, owns native
   capabilities, and exposes a narrow preload bridge.
 - **React** owns routes, panes, interaction state and the transcript.
-- **Hermes Agent** runs as a headless `hermes serve` process exposing the
+- **the agent runtime** runs as a headless `beyond serve` process exposing the
   `tui_gateway` JSON-RPC/WebSocket API. The renderer connects through
   `apps/shared`, which the browser dashboard also uses.
 
@@ -66,25 +66,25 @@ enforces this (see `apps/desktop/eslint.config.mjs`).
 Bundled artifacts run their included payload and report damage instead of
 installing a second checkout. Non-bundled builds resolve in order:
 
-1. explicit source-root override (`HERMES_DESKTOP_HERMES_ROOT`)
+1. explicit source-root override (`BEYOND_DESKTOP_RUNTIME_ROOT`)
 2. development checkout
 3. completed managed install
-4. `HERMES_DESKTOP_HERMES` deployment override (packagers such as Nix)
+4. `BEYOND_DESKTOP_RUNTIME` deployment override (packagers such as Nix)
 5. bootstrap offer (first-run installer)
 
 Candidates are **probed** before use — HTTP and WebSocket — and the app never
-adopts an arbitrary `hermes` on `PATH` or a system Python. A runtime predating
+adopts an arbitrary `beyond` on `PATH` or a system Python. A runtime predating
 `serve` falls back to headless `dashboard --no-open` for the backend command
 only; the dashboard UI is never launched or embedded.
 
-Remote and Hermes Cloud modes reuse the same remote-capability path; only auth
+Remote and Beyond Cloud modes reuse the same remote-capability path; only auth
 and discovery differ. In remote mode the **gateway host is the execution
 boundary** — tools, terminal commands and file operations run there, not on the
 machine showing the UI.
 
 ## State on disk
 
-User data lives in `HERMES_HOME` — `~/.hermes`, or `%LOCALAPPDATA%\hermes` on
+User data lives in `BEYOND_HOME` — `~/.beyond`, or `%LOCALAPPDATA%\beyond` on
 Windows — the same layout a CLI install uses, which is what makes the desktop
 and CLI interchangeable. The app's own settings, encrypted connection config and
 window state live alongside it in Electron's user data directory.
@@ -93,7 +93,7 @@ window state live alongside it in Electron's user data directory.
 
 Plugins extend the app without touching core: UI contributions, tools, hooks,
 themes and integrations. Bundled plugins are fenced by ESLint to speak only
-`@hermes/plugin-sdk` (+ `react`), never `@/…` internals, so the SDK surface stays
+`@beyond/plugin-sdk` (+ `react`), never `@/…` internals, so the SDK surface stays
 honest — the same isolation a runtime-fetched published plugin gets.
 
 ## Testing layers

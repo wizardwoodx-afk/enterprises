@@ -146,13 +146,13 @@ let detachListener: (() => void) | undefined
  *
  * Kept for secondary-window renderers that still drive search via the
  * Electron bridge. The primary window's renderer-side walker calls
- * `updateFindResults` synchronously and never wires this listener.
+ * `updateFindResults` synchrobeyondly and never wires this listener.
  */
 export function initFindInPageListener(): () => void {
   listenerRefs += 1
 
   if (listenerRefs === 1) {
-    detachListener = window.hermesDesktop?.onFoundInPage?.(result => {
+    detachListener = window.beyondDesktop?.onFoundInPage?.(result => {
       updateFindResults(result.activeMatchOrdinal, result.count)
     })
   }
@@ -205,7 +205,7 @@ export function initOpenFindBarListener(): () => void {
   openFindBarRefs += 1
 
   if (openFindBarRefs === 1) {
-    detachOpenFindBar = window.hermesDesktop?.onOpenFindBarRequested?.(() => {
+    detachOpenFindBar = window.beyondDesktop?.onOpenFindBarRequested?.(() => {
       openFindBar()
     })
   }

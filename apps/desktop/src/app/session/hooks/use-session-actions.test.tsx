@@ -1,4 +1,4 @@
-import { registryBackendScopeKey } from '@hermes/shared'
+import { registryBackendScopeKey } from '@beyond/shared'
 import { useStore } from '@nanostores/react'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import type { MutableRefObject } from 'react'
@@ -20,7 +20,7 @@ import {
   type SessionInfo,
   type SessionResumeResult,
   setSessionArchived
-} from '@/hermes'
+} from '@/beyond'
 import { createClientSessionState } from '@/lib/chat-runtime'
 import { $clarifyRequests, clearClarifyRequest, setClarifyRequest } from '@/store/clarify'
 import { clearSessionDraft, stashSessionDraft, takeSessionDraft } from '@/store/composer'
@@ -126,7 +126,7 @@ import {
 import type { TranscriptViewCutoff } from './use-session-actions/transcript-provenance'
 import { useSessionStateCache } from './use-session-state-cache'
 
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/beyond', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   deleteSession: vi.fn(),
   getSession: vi.fn(),
@@ -503,7 +503,7 @@ describe('connection-qualified session deletion', () => {
     expect(requestGateway).not.toHaveBeenCalledWith('session.close', expect.anything())
   })
 
-  it('tears down the selected session from synchronous refs when render state is stale', async () => {
+  it('tears down the selected session from synchrobeyond refs when render state is stale', async () => {
     const navigate = vi.fn()
     const requestGateway = vi.fn().mockResolvedValue({})
     const activeSessionIdRef: MutableRefObject<null | string> = { current: 'runtime-shared' }
@@ -2506,7 +2506,7 @@ describe('resumeSession failure recovery', () => {
   it('resumes via the gateway default (deferred build) — not lazy, no eager opt-out', async () => {
     // The switch-latency fix lives backend-side: a normal cold resume gets the
     // gateway's default DEFERRED build (transcript returns immediately, agent
-    // pre-warms in the background). The client must NOT force the synchronous
+    // pre-warms in the background). The client must NOT force the synchrobeyond
     // path (eager_build) and is only `lazy` for subagent watch windows.
     let resumeParams: Record<string, unknown> | undefined
 
@@ -4209,7 +4209,7 @@ describe('resumeSession warm-cache mapping integrity', () => {
   )
 
   it('pins an untagged row to the active registry connection instead of the same-named local profile', async () => {
-    setConnection({ connectionId: 'hermes01', mode: 'remote' } as never)
+    setConnection({ connectionId: 'beyond01', mode: 'remote' } as never)
     setSessions([storedSession({ id: 'remote-stored', profile: 'default' })])
     vi.mocked(getLatestSessionMessages).mockResolvedValue({ messages: [], session_id: 'remote-stored' } as never)
     vi.mocked(requestGatewayForAgent).mockResolvedValue({
@@ -4233,7 +4233,7 @@ describe('resumeSession warm-cache mapping integrity', () => {
     await resume!('remote-stored', true)
 
     expect(requestGatewayForAgent).toHaveBeenCalledWith(
-      'hermes01',
+      'beyond01',
       'default',
       'session.resume',
       expect.objectContaining({ session_id: 'remote-stored' })
@@ -7152,7 +7152,7 @@ describe('branchStoredSession failure retry', () => {
     await waitFor(() => expect(createCallCount).toBe(2))
   })
 
-  // Regression for hermes-sweeper review on PR #65411: a retry after a lost
+  // Regression for beyond-sweeper review on PR #65411: a retry after a lost
   // response must reuse the SAME idempotency key, otherwise the backend
   // spawns a duplicate child session.
   it('passes the same idempotency_key on retry as on the first attempt', async () => {
@@ -7204,7 +7204,7 @@ describe('branchStoredSession failure retry', () => {
     expect(seenKeys[1]).toBe(seenKeys[0])
   })
 
-  // Regression for hermes-sweeper review on PR #65411: the notification must
+  // Regression for beyond-sweeper review on PR #65411: the notification must
   // go through notifyError's readableError normalization (wrapper stripping,
   // detail extraction, long-message fallback), not raw err.message.
   it('uses readableError normalization for the failure notification', async () => {

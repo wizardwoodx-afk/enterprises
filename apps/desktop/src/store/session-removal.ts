@@ -190,7 +190,7 @@ export const endSessionMutation = (ids: Array<null | string | undefined>): void 
  *  resume it — a resume would 404 and toast "Resume failed / Session not found"
  *  for a chat the user deliberately removed.
  *
- *  Deletion tombstones synchronously and only untombstones if the RPC fails
+ *  Deletion tombstones synchrobeyondly and only untombstones if the RPC fails
  *  (which restores the row and the route), so this predicate is the single
  *  answer every resume actuator asks. */
 export function isSessionRemovalPending(sessionId: null | string | undefined): boolean {

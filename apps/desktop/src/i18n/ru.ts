@@ -111,7 +111,7 @@ export const ruOverrides = {
   boot: ruBoot.boot,
   notifications: {
     sharedProfileWarning:
-      'Другая установка Hermes использует этот профиль. Обе установки используют общие настройки и данные, поэтому изменения могут конфликтовать. Можно продолжить работу или закрыть другую установку перед внесением изменений.',
+      'Другая установка Beyond использует этот профиль. Обе установки используют общие настройки и данные, поэтому изменения могут конфликтовать. Можно продолжить работу или закрыть другую установку перед внесением изменений.',
     region: 'Уведомления',
     hide: 'Скрыть',
     show: 'Показать',
@@ -124,13 +124,13 @@ export const ruOverrides = {
     copyDetailFailed: 'Не удалось скопировать подробность уведомления',
     backendOutOfDateTitle: 'Устаревший бэкенд',
     backendOutOfDateMessage:
-      'Ваш бэкенд Hermes старше этой сборки приложения и может работать некорректно. Обновите их, чтобы они совпали.',
+      'Ваш бэкенд Beyond старше этой сборки приложения и может работать некорректно. Обновите их, чтобы они совпали.',
     desktopOutOfDateTitle: 'Устаревшее приложение',
     desktopOutOfDateMessage:
-      'Это приложение Hermes старше подключённого бэкенда и может работать некорректно. Обновите приложение, чтобы они совпали.',
+      'Это приложение Beyond старше подключённого бэкенда и может работать некорректно. Обновите приложение, чтобы они совпали.',
     updateDesktopApp: 'Обновить приложение',
     installMethodUnsupportedTitle: 'Неподдерживаемый способ установки',
-    updateHermes: 'Обновить Hermes',
+    updateBeyond: 'Обновить Beyond',
     updateReadyTitle: 'Обновление готово',
     updateReadyMessage: count =>
       `Доступно ${count} ${count % 10 === 1 && count % 100 !== 11 ? 'новое изменение' : count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 12 || count % 100 > 14) ? 'новых изменения' : 'новых изменений'}.`,
@@ -153,7 +153,7 @@ export const ruOverrides = {
       diskFull: 'Диск заполнен — освободите место и повторите.',
       gatewayAuthFailed: 'Аутентификация шлюза не удалась — проверьте API_SERVER_KEY.',
       methodNotAllowed:
-        'Бэкенд приложения отклонил запрос (405 Method Not Allowed). Попробуйте перезапустить Hermes Desktop.',
+        'Бэкенд приложения отклонил запрос (405 Method Not Allowed). Попробуйте перезапустить Beyond Desktop.',
       microphonePermission: 'Доступ к микрофону запрещён.',
       openaiRejectedApiKey: 'OpenAI отклонил API-ключ.',
       openaiTtsNeedsKey: 'Для TTS OpenAI нужен VOICE_TOOLS_OPENAI_KEY или OPENAI_API_KEY.'
@@ -185,8 +185,8 @@ export const ruOverrides = {
       rejectAction: 'Отклонить',
       inputTitle: 'Требуется ввод',
       inputTitleNamed: session => `Требуется ввод — ${session}`,
-      inputBody: 'Hermes ожидает ваш ответ.',
-      turnDoneTitle: 'Hermes завершил',
+      inputBody: 'Beyond ожидает ваш ответ.',
+      turnDoneTitle: 'Beyond завершил',
       turnDoneBody: '',
       turnErrorTitle: 'Ход не удался',
       backgroundDoneTitle: 'Фоновая задача завершена',
@@ -348,11 +348,11 @@ export const ruOverrides = {
     noResults: 'Языки не найдены'
   },
   settings: {
-    // Window plans (Nous subscription with included usage). Other billing strings: overlay-gaps.json.
+    // Window plans (Beyond subscription with included usage). Other billing strings: overlay-gaps.json.
     billing: {
       keepGoingOnCredits: {
         title: 'Продолжать за кредиты',
-        description: 'Тратить кредиты, когда включённый объём закончится. Выключено: Hermes ждёт сброса.',
+        description: 'Тратить кредиты, когда включённый объём закончится. Выключено: Beyond ждёт сброса.',
         approveInBrowser:
           'Чтобы изменить это, одобрите удалённые траты в браузере. Изменение применится сразу после одобрения.',
         openAgain: 'Открыть снова',
@@ -434,7 +434,7 @@ export const ruOverrides = {
     exportConfig: 'Экспорт конфигурации',
     importConfig: 'Импорт конфигурации',
     resetToDefaults: 'Сбросить к значениям по умолчанию',
-    resetConfirm: 'Сбросить все настройки к значениям Hermes по умолчанию?',
+    resetConfirm: 'Сбросить все настройки к значениям Beyond по умолчанию?',
     exportFailed: 'Не удалось экспортировать',
     resetFailed: 'Не удалось сбросить',
     pluginPages: ruPluginSettings.pluginPages,
@@ -469,7 +469,7 @@ export const ruOverrides = {
       advanced: 'Дополнительно'
     },
     searchPlaceholder: {
-      about: 'О Hermes Desktop',
+      about: 'О Beyond Desktop',
       config: 'Поиск настроек…',
       gateway: 'Подключение шлюза…',
       keys: 'Поиск API-ключей…',
@@ -488,7 +488,7 @@ export const ruOverrides = {
       title: 'Внешний вид',
       intro: 'Только для приложения. Режим — это яркость, тема — палитра и оформление чата.',
       colorMode: 'Цветовой режим',
-      colorModeDesc: 'Выберите фиксированный режим или позвольте Hermes следовать настройкам системы.',
+      colorModeDesc: 'Выберите фиксированный режим или позвольте Beyond следовать настройкам системы.',
       toolViewTitle: 'Отображение вызовов инструментов',
       toolViewDesc: 'Режим «Продукт» скрывает сырые данные инструментов, «Технический» показывает полный вход/выход.',
       hideCodeDiffsTitle: 'Скрывать изменения кода',
@@ -564,7 +564,7 @@ export const ruOverrides = {
       modelPricingTitle: 'Цены моделей',
       modelPricingDesc: 'Показывать в выборе модели цены за миллион токенов: ввод, вывод и чтение из кэша.',
       reactionsTitle: 'Реакции на сообщения',
-      reactionsDesc: 'Эмодзи-тапбеки в стиле iMessage — реагируйте на сообщения, и Hermes сможет реагировать на ваши.',
+      reactionsDesc: 'Эмодзи-тапбеки в стиле iMessage — реагируйте на сообщения, и Beyond сможет реагировать на ваши.',
       composerPopoutTitle: 'Плавающий композер',
       composerPopoutDesc:
         'Позволяет вытягивать композер из его док-зоны. Когда выключено, он остаётся закреплённым внизу.',
@@ -602,9 +602,9 @@ export const ruOverrides = {
       pet: {
         title: 'Питомец',
         intro:
-          'Заберите анимированного питомца из petdex, который парит над приложением и реагирует на действия Hermes — «бегает», пока выполняются инструменты, радуется успеху и хмурится при ошибках.',
+          'Заберите анимированного питомца из petdex, который парит над приложением и реагирует на действия Beyond — «бегает», пока выполняются инструменты, радуется успеху и хмурится при ошибках.',
         restartHint:
-          'Питомцам нужен быстрый перезапуск — текущее приложение запустилось до появления этой функции. Выйдите из Hermes и откройте снова, затем вернитесь сюда.',
+          'Питомцам нужен быстрый перезапуск — текущее приложение запустилось до появления этой функции. Выйдите из Beyond и откройте снова, затем вернитесь сюда.',
         scaleTitle: 'Размер',
         scaleDesc: 'Меняет размер парящего питомца. Применяется мгновенно везде.',
         roamTitle: 'Блуждание',
@@ -827,7 +827,7 @@ export const ruOverrides = {
       timezone: 'Идентификатор часового пояса IANA. Пустое значение — системный часовой пояс.',
       agent: {
         imageInputMode: 'Управляет тем, как вложения изображений отправляются модели.',
-        maxTurns: 'Верхний предел ходов с вызовами инструментов, после которого Hermes останавливает запуск.'
+        maxTurns: 'Верхний предел ходов с вызовами инструментов, после которого Beyond останавливает запуск.'
       },
       terminal: {
         cwd: 'Папка проекта по умолчанию для инструментов и терминала.',
@@ -841,9 +841,9 @@ export const ruOverrides = {
       codeExecution: {
         mode: 'Насколько строго выполнение кода ограничено текущим проектом.'
       },
-      fileReadMaxChars: 'Максимальное число символов, которые Hermes может прочитать из одного запроса к файлу.',
+      fileReadMaxChars: 'Максимальное число символов, которые Beyond может прочитать из одного запроса к файлу.',
       approvals: {
-        mode: 'Как Hermes обрабатывает команды, требующие явного подтверждения.',
+        mode: 'Как Beyond обрабатывает команды, требующие явного подтверждения.',
         timeout: 'Как долго запросы подтверждения ждут перед тайм-аутом.'
       },
       security: {
@@ -897,14 +897,14 @@ export const ruOverrides = {
       },
       updates: {
         nonInteractiveLocalChanges:
-          'Когда Hermes обновляет себя из приложения (без запроса в терминале), сохранять локальные правки исходников (stash) или выбрасывать (discard). Обновления из терминала всегда спрашивают.'
+          'Когда Beyond обновляет себя из приложения (без запроса в терминале), сохранять локальные правки исходников (stash) или выбрасывать (discard). Обновления из терминала всегда спрашивают.'
       }
     }),
     about: { updates: 'Обновления', channel: ruUpdateChannel },
     config: {
       minimizeToTrayTitle: 'Сворачивать в трей',
       minimizeToTrayDesc:
-        'Сворачивание окон или закрытие главного окна скрывает их в системном трее (строке меню macOS), оставляя Hermes работать. Для выхода выберите «Выйти из Hermes» в меню трея или нажмите Cmd+Q. По умолчанию выключено; действует только на этом устройстве.',
+        'Сворачивание окон или закрытие главного окна скрывает их в системном трее (строке меню macOS), оставляя Beyond работать. Для выхода выберите «Выйти из Beyond» в меню трея или нажмите Cmd+Q. По умолчанию выключено; действует только на этом устройстве.',
       minimizeToTrayUnavailable:
         'Системный трей недоступен. Окна будут сворачиваться и закрываться как обычно. Выключите и снова включите настройку, чтобы повторить попытку.',
       none: 'Нет',
@@ -915,7 +915,7 @@ export const ruOverrides = {
       searchPlaceholder: 'Поиск…',
       noResults: 'Ничего не найдено',
       systemDefault: 'Системное по умолчанию',
-      loading: 'Загрузка конфигурации Hermes…',
+      loading: 'Загрузка конфигурации Beyond…',
       emptyTitle: 'Настраивать нечего',
       emptyDesc: 'В этом разделе нет настраиваемых параметров.',
       failedLoad: 'Не удалось загрузить настройки',
@@ -950,27 +950,27 @@ export const ruOverrides = {
       description:
         'Нажмите и отпустите ⌘ + Option на Mac или Ctrl + Alt на Windows/Linux, чтобы вызвать HUD из любого приложения. По умолчанию выключено; действует только на этом устройстве.',
       permission:
-        'Разрешите Hermes в Системных настройках → Конфиденциальность и безопасность → Мониторинг ввода, затем повторите попытку. Жест не записывает нажатия клавиш и не снимает экран.',
+        'Разрешите Beyond в Системных настройках → Конфиденциальность и безопасность → Мониторинг ввода, затем повторите попытку. Жест не записывает нажатия клавиш и не снимает экран.',
       unavailable:
-        'Вспомогательная программа жеста HUD не запустилась или неожиданно остановилась. Повторите попытку или перезапустите Hermes. Обычное сочетание HUD по-прежнему работает внутри Hermes.',
+        'Вспомогательная программа жеста HUD не запустилась или неожиданно остановилась. Повторите попытку или перезапустите Beyond. Обычное сочетание HUD по-прежнему работает внутри Beyond.',
       missingHelper:
-        'В этой установке Hermes отсутствует вспомогательная программа жеста HUD. Обновите или переустановите Hermes и повторите попытку.',
+        'В этой установке Beyond отсутствует вспомогательная программа жеста HUD. Обновите или переустановите Beyond и повторите попытку.',
       unsupportedSession:
         'Этот сеанс рабочего стола не поддерживает глобальные нажатия модификаторов. В Linux требуется X11; Wayland не поддерживается.'
     },
     screenshot: {
       enabledTitle: 'Сочетание клавиш для снимка окна',
       enabledDesc:
-        'Нажмите обе клавиши Command одновременно в любом приложении, чтобы снять его переднее окно и прикрепить снимок к текущему черновику Hermes. Автоматической отправки нет. По умолчанию выключено; действует только на этом Mac. Окно может содержать конфиденциальные данные — проверьте вложение перед отправкой.',
+        'Нажмите обе клавиши Command одновременно в любом приложении, чтобы снять его переднее окно и прикрепить снимок к текущему черновику Beyond. Автоматической отправки нет. По умолчанию выключено; действует только на этом Mac. Окно может содержать конфиденциальные данные — проверьте вложение перед отправкой.',
       statusTitle: 'Состояние сочетания для снимка окна',
       checking: 'Проверка сочетания для снимка окна…',
       disabled: 'Сочетание для снимка окна выключено.',
       starting: 'Запускается отслеживание сочетания. Оно пока не готово.',
       ready: 'Сочетание готово. Снимки прикрепляются к текущему черновику без отправки.',
       inputPermission:
-        'Разрешение на мониторинг ввода позволяет Hermes распознавать обе клавиши Command, когда активно другое приложение. Разрешите Hermes доступ в Системных настройках → Конфиденциальность и безопасность → Мониторинг ввода, затем вернитесь сюда и повторите попытку.',
+        'Разрешение на мониторинг ввода позволяет Beyond распознавать обе клавиши Command, когда активно другое приложение. Разрешите Beyond доступ в Системных настройках → Конфиденциальность и безопасность → Мониторинг ввода, затем вернитесь сюда и повторите попытку.',
       screenPermission:
-        'Разрешение на запись экрана позволяет Hermes снимать переднее окно приложения при использовании этого сочетания. Разрешите Hermes доступ в Системных настройках → Конфиденциальность и безопасность → Запись экрана, затем вернитесь сюда и повторите попытку. Перезапустите Hermes, если macOS попросит.',
+        'Разрешение на запись экрана позволяет Beyond снимать переднее окно приложения при использовании этого сочетания. Разрешите Beyond доступ в Системных настройках → Конфиденциальность и безопасность → Запись экрана, затем вернитесь сюда и повторите попытку. Перезапустите Beyond, если macOS попросит.',
       openSettings: 'Открыть Системные настройки',
       retry: 'Повторить',
       unavailable: 'Сочетание для снимка окна недоступно. Повторите попытку или выключите его.',
@@ -985,7 +985,7 @@ export const ruOverrides = {
     quickEntry: {
       enabledTitle: 'Быстрый ввод',
       enabledDesc:
-        'Глобальным горячим ключом вызывайте маленький композер откуда угодно и отправляйте запрос, не открывая Hermes.',
+        'Глобальным горячим ключом вызывайте маленький композер откуда угодно и отправляйте запрос, не открывая Beyond.',
       shortcutTitle: 'Горячий ключ быстрого ввода',
       shortcutDesc: 'Нужен хотя бы один модификатор, например CommandOrControl+Shift+Space.',
       active: 'Горячий ключ активен.',
@@ -1016,7 +1016,7 @@ export const ruOverrides = {
     connections: {
       title: 'Зарегистрированные шлюзы',
       intro:
-        'Управляйте этим устройством и всеми шлюзами Hermes, до которых можно дотянуться через удалённые, SSH или Cloud-соединения.',
+        'Управляйте этим устройством и всеми шлюзами Beyond, до которых можно дотянуться через удалённые, SSH или Cloud-соединения.',
       stagedNote:
         'Переключайтесь между шлюзами из раздела «Сеансы». Профили, чаты, мессенджеры и cron-задачи остаются за своим шлюзом; работа на других шлюзах продолжается.',
       launchModeTitle: 'При запуске возвращаться к «Сеансам» на последнем шлюзе',
@@ -1043,15 +1043,15 @@ export const ruOverrides = {
       updateAllRunning: 'Обновление всех инстансов…',
       updateAllDone: 'Обновления разосланы',
       updateAllFailed: 'Не удалось разослать обновления',
-      updateSkippedCloud: 'Управляется Hermes Cloud',
+      updateSkippedCloud: 'Управляется Beyond Cloud',
       kindLocal: 'Локальный',
       kindRemote: 'Удалённый шлюз',
-      kindCloud: 'Hermes Cloud',
+      kindCloud: 'Beyond Cloud',
       kindSsh: 'SSH',
-      kindLocalDesc: 'Рантайм Hermes, которым управляет это приложение.',
-      kindRemoteDesc: 'Шлюз Hermes, доступный по HTTP(S) — LAN, Tailscale или интернет.',
-      kindCloudDesc: 'Хостинговая инстанция, обнаруженная через ваш аккаунт Hermes Cloud.',
-      kindSshDesc: 'Установка Hermes, доступная по SSH.',
+      kindLocalDesc: 'Рантайм Beyond, которым управляет это приложение.',
+      kindRemoteDesc: 'Шлюз Beyond, доступный по HTTP(S) — LAN, Tailscale или интернет.',
+      kindCloudDesc: 'Хостинговая инстанция, обнаруженная через ваш аккаунт Beyond Cloud.',
+      kindSshDesc: 'Установка Beyond, доступная по SSH.',
       labelTitle: 'Имя',
       labelDesc:
         'Обязательно. Показывается везде, где фигурирует эта инстанция; должно быть уникальным (напр. «Домашняя лаборатория», «Рабочий ноутбук»).',
@@ -1060,7 +1060,7 @@ export const ruOverrides = {
       sshHostTitle: 'SSH-хост',
       headersTitle: 'Дополнительные заголовки шлюза',
       headersDesc:
-        'Отправляются с каждым HTTP- и WebSocket-запросом к этому шлюзу — например, для прокси доступа вроде Cloudflare Access (CF-Access-Client-Id / CF-Access-Client-Secret). Значения хранятся зашифрованными. Заголовки, которыми управляет Hermes (Authorization, Cookie, Host…), игнорируются.',
+        'Отправляются с каждым HTTP- и WebSocket-запросом к этому шлюзу — например, для прокси доступа вроде Cloudflare Access (CF-Access-Client-Id / CF-Access-Client-Secret). Значения хранятся зашифрованными. Заголовки, которыми управляет Beyond (Authorization, Cookie, Host…), игнорируются.',
       headerValuePlaceholder: 'Значение',
       headerValueSaved: 'Сохранено — оставьте пустым, чтобы не менять',
       headerAdd: 'Добавить заголовок',
@@ -1071,7 +1071,7 @@ export const ruOverrides = {
       sameBackendHint: label => `Тот же бэкенд, что и «${label}»`,
       localAddHint: 'Локальное недоступно: управляемое локальное соединение уже существует (их всегда только одно).',
       cloudAddHint:
-        'Подсказка: вход в Hermes Cloud выше автоматически обнаруживает ваших агентов — эту форму используйте только для ручной регистрации известного URL инстанса.',
+        'Подсказка: вход в Beyond Cloud выше автоматически обнаруживает ваших агентов — эту форму используйте только для ручной регистрации известного URL инстанса.',
       save: 'Сохранить соединение',
       saving: 'Сохранение…',
       cancel: 'Отмена',
@@ -1084,23 +1084,23 @@ export const ruOverrides = {
       title: 'Подключение шлюза',
       envOverride: 'переопределение переменными окружения',
       intro:
-        'По умолчанию — локальный. Используйте удалённый, когда приложение должно управлять бэкендом Hermes в другом месте. Соединения шлюзов — на уровне машины; профили обнаруживаются из подключённых шлюзов.',
+        'По умолчанию — локальный. Используйте удалённый, когда приложение должно управлять бэкендом Beyond в другом месте. Соединения шлюзов — на уровне машины; профили обнаруживаются из подключённых шлюзов.',
       envOverrideTitle: 'Переменные окружения управляют этой сессией приложения.',
       envOverrideDesc:
-        'Сбросьте HERMES_DESKTOP_REMOTE_URL и HERMES_DESKTOP_REMOTE_TOKEN, чтобы использовать сохранённую настройку ниже.',
+        'Сбросьте BEYOND_DESKTOP_REMOTE_URL и BEYOND_DESKTOP_REMOTE_TOKEN, чтобы использовать сохранённую настройку ниже.',
       modeTitle: 'Режим подключения',
       localTitle: 'Локальный шлюз',
-      localDesc: 'Запускает приватный бэкенд Hermes на localhost. Это значение по умолчанию, работает офлайн.',
+      localDesc: 'Запускает приватный бэкенд Beyond на localhost. Это значение по умолчанию, работает офлайн.',
       remoteTitle: 'Удалённый шлюз',
-      remoteDesc: 'Подключает это приложение к удалённому бэкенду Hermes.',
+      remoteDesc: 'Подключает это приложение к удалённому бэкенду Beyond.',
       remoteAuthHint:
         'Хостинговые шлюзы используют OAuth или логин/пароль; самохостинговые могут использовать токен сессии.',
-      cloudTitle: 'Hermes Cloud',
-      cloudDesc: 'Войдите в Hermes Cloud один раз и выбирайте агентов из своего аккаунта — без вставки URL.',
-      cloudSignInTitle: 'Hermes Cloud',
-      cloudSignIn: 'Войти в Hermes Cloud',
-      cloudSignedIn: 'Вы вошли в Hermes Cloud',
-      cloudNeedsSignIn: 'Войдите в Hermes Cloud, чтобы обнаружить агентов в вашем аккаунте.',
+      cloudTitle: 'Beyond Cloud',
+      cloudDesc: 'Войдите в Beyond Cloud один раз и выбирайте агентов из своего аккаунта — без вставки URL.',
+      cloudSignInTitle: 'Beyond Cloud',
+      cloudSignIn: 'Войти в Beyond Cloud',
+      cloudSignedIn: 'Вы вошли в Beyond Cloud',
+      cloudNeedsSignIn: 'Войдите в Beyond Cloud, чтобы обнаружить агентов в вашем аккаунте.',
       cloudSignedInDesc: 'Вы вошли. Выберите агента ниже; сессия обновляется автоматически.',
       cloudAgentsTitle: 'Ваши агенты',
       cloudOrgPickerTitle: 'Выберите организацию',
@@ -1110,7 +1110,7 @@ export const ruOverrides = {
       cloudLoadingAgents: 'Загрузка ваших агентов…',
       cloudNoAgents: {
         before: 'Агенты на этом аккаунте не найдены. Создайте агента в',
-        linkText: 'портале Nous',
+        linkText: 'портале Beyond',
         after: ', затем обновите страницу.'
       },
       cloudRefresh: 'Обновить',
@@ -1121,18 +1121,18 @@ export const ruOverrides = {
       cloudUseSaved: 'Использовать шлюз',
       cloudActive: 'Активен в этом окне',
       cloudConnecting: 'Подключение…',
-      cloudDiscoverFailed: 'Не удалось загрузить агентов Hermes Cloud',
+      cloudDiscoverFailed: 'Не удалось загрузить агентов Beyond Cloud',
       cloudConnectFailed: 'Не удалось подключиться к этому агенту',
-      cloudSignInFailed: 'Не удалось войти в Hermes Cloud',
-      cloudSignedOutTitle: 'Выход из Hermes Cloud',
-      cloudSignedOutMessage: 'Сессия Hermes Cloud сброшена.',
+      cloudSignInFailed: 'Не удалось войти в Beyond Cloud',
+      cloudSignedOutTitle: 'Выход из Beyond Cloud',
+      cloudSignedOutMessage: 'Сессия Beyond Cloud сброшена.',
       cloudConnectedTitle: 'Подключено',
       cloudConnectedPill: 'Подключено',
       cloudConnectedTo: name => `Подключено к ${name}.`,
       cloudAgentProvisioning: 'Развёртывание…',
       cloudStatusLabel: status => `Статус: ${status}`,
       remoteUrlTitle: 'Удалённый URL',
-      remoteUrlDesc: 'Базовый URL удалённого бэкенда дашборда. Поддерживаются префиксы пути, например /hermes.',
+      remoteUrlDesc: 'Базовый URL удалённого бэкенда дашборда. Поддерживаются префиксы пути, например /beyond.',
       probing: 'Проверяем, как аутентифицируется этот шлюз…',
       probeError:
         'Пока не удалось связаться с этим шлюзом. Проверьте URL — способ аутентификации появится, когда он ответит.',
@@ -1173,9 +1173,9 @@ export const ruOverrides = {
       enterUrlFirst: 'Сначала введите удалённый URL.',
       restartingTitle: 'Перезапуск соединения шлюза',
       savedTitle: 'Настройки шлюза сохранены',
-      restartingMessage: 'Hermes Desktop переподключится с сохранёнными настройками — оболочка останется открытой.',
+      restartingMessage: 'Beyond Desktop переподключится с сохранёнными настройками — оболочка останется открытой.',
       savedMessage: 'Сохранено для следующего перезапуска.',
-      connectedTo: (baseUrl, version) => `Подключено к ${baseUrl}${version ? ` · Hermes ${version}` : ''}`,
+      connectedTo: (baseUrl, version) => `Подключено к ${baseUrl}${version ? ` · Beyond ${version}` : ''}`,
       reachableTitle: 'Удалённый шлюз доступен',
       signedOutTitle: 'Вы вышли',
       signedOutMessage: 'Сессия удалённого шлюза сброшена.',
@@ -1187,7 +1187,7 @@ export const ruOverrides = {
       saveFailed: 'Не удалось сохранить настройки шлюза',
       sshTitle: 'Подключение по SSH',
       sshDesc:
-        'Hermes запускается на удалённой машине по SSH и туннелируется в это приложение — ничего не нужно запускать или открывать самим. Требуется рабочая SSH-аутентификация по ключу на хост.',
+        'Beyond запускается на удалённой машине по SSH и туннелируется в это приложение — ничего не нужно запускать или открывать самим. Требуется рабочая SSH-аутентификация по ключу на хост.',
       sshTrustHint:
         'Первый предъявленный ключ хоста доверяется и фиксируется; последующие изменения приведут к отказу.',
       sshHostTitle: 'Хост',
@@ -1203,27 +1203,27 @@ export const ruOverrides = {
       sshPortDesc: 'Пусто = 22 или порт из ~/.ssh/config.',
       sshKeyTitle: 'Файл ключа',
       sshKeyDesc: 'Путь к закрытому ключу. Пусто = ssh-agent или ~/.ssh/config.',
-      sshHermesPathTitle: 'Путь к Hermes (необязательно)',
-      sshHermesPathDesc: 'Полный путь к бинарнику hermes на удалённой машине. Пусто = автоопределение.',
-      sshHermesPathPlaceholder: 'автоопределение',
+      sshBeyondPathTitle: 'Путь к Beyond (необязательно)',
+      sshBeyondPathDesc: 'Полный путь к бинарнику beyond на удалённой машине. Пусто = автоопределение.',
+      sshBeyondPathPlaceholder: 'автоопределение',
       sshTestConnection: 'Проверить SSH',
       sshConnect: 'Подключиться',
       sshButtonsHint: '«Сохранить» применится при следующем запуске. «Подключиться» переподключится сейчас.',
-      sshReachable: (host, platform) => `Доступен: ${host} (${platform}) — Hermes найден`,
+      sshReachable: (host, platform) => `Доступен: ${host} (${platform}) — Beyond найден`,
       sshIncompleteHost: 'Введите SSH-хост перед подключением.',
       sshErrUnreachable: 'Не удалось достичь этого хоста по SSH. Проверьте хост, порт и сеть.',
       sshErrAuth:
-        'SSH-аутентификация не удалась. Загрузите ключ в ssh-agent (ssh-add) или задайте IdentityFile в ~/.ssh/config — Hermes запускает ssh в неинтерактивном режиме.',
+        'SSH-аутентификация не удалась. Загрузите ключ в ssh-agent (ssh-add) или задайте IdentityFile в ~/.ssh/config — Beyond запускает ssh в неинтерактивном режиме.',
       sshErrHostKey:
         'Ключ хоста ИЗМЕНИЛСЯ с последнего подключения. Убедитесь, что это ожидаемо, затем выполните ssh-keygen -R <host> и переподключитесь.',
       sshErrNotInstalled:
-        'Hermes не установлен на удалённой машине. Установите его там (curl -fsSL https://hermes-agent.nousresearch.com/install.sh | sh) или задайте путь к Hermes.',
+        'Beyond не установлен на удалённой машине. Установите его там (curl -fsSL https://beyond.app/install.sh | sh) или задайте путь к Beyond.',
       sshErrPlatform:
-        'Неподдерживаемая удалённая платформа. SSH-режим Hermes Desktop поддерживает удалённые хосты Linux, macOS и Windows.',
+        'Неподдерживаемая удалённая платформа. SSH-режим Beyond Desktop поддерживает удалённые хосты Linux, macOS и Windows.',
       sshErrTimeout: 'SSH-соединение истекло. Хост может быть недоступен или «спит».',
-      sshErrUpdateRequired: 'Перед подключением через SSH обновите Hermes на удалённой машине.',
+      sshErrUpdateRequired: 'Перед подключением через SSH обновите Beyond на удалённой машине.',
       sshErrInteractiveAuth:
-        'Tailscale SSH требует интерактивной проверки в браузере. Выполните `ssh <host> true` в терминале, завершите проверку и повторите попытку — Hermes запускает SSH неинтерактивно.',
+        'Tailscale SSH требует интерактивной проверки в браузере. Выполните `ssh <host> true` в терминале, завершите проверку и повторите попытку — Beyond запускает SSH неинтерактивно.',
       sshErrUnknown: 'SSH-соединение не удалось.'
     },
     keys: {
@@ -1271,7 +1271,7 @@ export const ruOverrides = {
       noOutput: 'Вывода пока нет.',
       deepLinkTitle: 'Добавить MCP-сервер?',
       deepLinkDescription:
-        'Ссылка запросила добавить этот MCP-сервер в Hermes. Проверьте конфигурацию ниже — она пришла из ссылки, а не из Hermes.',
+        'Ссылка запросила добавить этот MCP-сервер в Beyond. Проверьте конфигурацию ниже — она пришла из ссылки, а не из Beyond.',
       deepLinkStdioWarning:
         'Этот сервер запускает локальный процесс на вашей машине командой, показанной ниже. Продолжайте только если доверяете источнику.',
       deepLinkConfirm: 'Добавить сервер',
@@ -1289,7 +1289,7 @@ export const ruOverrides = {
       connectAccount: 'Подключить аккаунт',
       haveApiKey: 'Ввести API-ключ вместо этого?',
       intro:
-        'Войдите по подписке — копировать API-ключ не нужно. Hermes проведёт вход в браузере прямо здесь, в приложении.',
+        'Войдите по подписке — копировать API-ключ не нужно. Beyond проведёт вход в браузере прямо здесь, в приложении.',
       connected: 'Подключено',
       collapse: 'Свернуть',
       connectAnother: 'Подключить другой провайдер',
@@ -1310,7 +1310,7 @@ export const ruOverrides = {
       noKeysMatch: 'Провайдеры, подходящие под поиск, не найдены.',
       localEndpoint: {
         title: 'Локальный / свой эндпоинт',
-        description: 'Направьте Hermes на любой OpenAI-совместимый эндпоинт (Zyphra, vLLM, llama.cpp, Ollama и т. д.).'
+        description: 'Направьте Beyond на любой OpenAI-совместимый эндпоинт (Zyphra, vLLM, llama.cpp, Ollama и т. д.).'
       },
       loading: 'Загрузка провайдеров…'
     },
@@ -1373,13 +1373,13 @@ export const ruOverrides = {
       activeBackend: 'Активен',
       activeBackendHint: 'Это ваш активный бэкенд',
       useBackend: 'Использовать этот бэкенд',
-      nousIncluded: 'Входит в подписку Nous — войдите в Nous Portal, чтобы активировать.',
-      nousAuthNeededTitle: 'Войдите в Nous Portal',
-      nousAuthNeededMessage: provider => `${provider} сохранён, но не активируется, пока вы не войдёте в Nous Portal.`,
-      nousAuthSignIn: 'Войти',
-      nousAuthDoneTitle: 'Nous Portal подключён',
-      nousAuthDoneMessage: 'Ваши бэкенды по подписке теперь активны.',
-      nousAuthFailed: 'Вход в Nous Portal не завершён',
+      beyondIncluded: 'Входит в подписку Beyond — войдите в Beyond Portal, чтобы активировать.',
+      beyondAuthNeededTitle: 'Войдите в Beyond Portal',
+      beyondAuthNeededMessage: provider => `${provider} сохранён, но не активируется, пока вы не войдёте в Beyond Portal.`,
+      beyondAuthSignIn: 'Войти',
+      beyondAuthDoneTitle: 'Beyond Portal подключён',
+      beyondAuthDoneMessage: 'Ваши бэкенды по подписке теперь активны.',
+      beyondAuthFailed: 'Вход в Beyond Portal не завершён',
       noApiKeyRequired: 'API-ключ не требуется.',
       postSetupHint: step =>
         `Этому бэкенду нужна однократная установка (${step}). Выполняется на этой машине — может занять несколько минут.`,
@@ -1491,7 +1491,7 @@ export const ruOverrides = {
     edit: 'Изменить',
     archive: 'В архив',
     skillArchivedTitle: 'Навык в архиве',
-    skillArchivedMessage: 'Восстановить через hermes curator restore.',
+    skillArchivedMessage: 'Восстановить через beyond curator restore.',
     hub: {
       searchPlaceholder: 'Поиск в хабе навыков',
       search: 'Поиск',
@@ -1561,7 +1561,7 @@ export const ruOverrides = {
     loadFailed: 'Не удалось загрузить граф памяти',
     loading: 'Загрузка…',
     emptyTitle: 'Пока ничего не изучено',
-    emptyDesc: 'По мере того как Hermes создаёт навыки и память для вашей работы, они появятся здесь.',
+    emptyDesc: 'По мере того как Beyond создаёт навыки и память для вашей работы, они появятся здесь.',
     share: 'Поделиться картой',
     shareHint:
       'Скопируйте код, чтобы поделиться этой картой, или вставьте код для загрузки. Включает только раскладку, а не вашу память или текст навыков.',
@@ -1642,7 +1642,7 @@ export const ruOverrides = {
       placeholder: 'Поиск питомцев…',
       loading: 'Загрузка галереи petdex…',
       error: 'Не удалось подключиться к галерее petdex.',
-      staleBackend: 'Перезапустите Hermes, чтобы использовать питомцев — бэкенд старше этой функции.',
+      staleBackend: 'Перезапустите Beyond, чтобы использовать питомцев — бэкенд старше этой функции.',
       empty: 'Совпадающих питомцев нет.',
       turnOff: 'Отключить',
       turnOn: 'Включить',
@@ -1669,8 +1669,8 @@ export const ruOverrides = {
       hatchComposing: 'Собираем по частям…',
       hatchSaving: 'Почти готово…',
       namePlaceholder: 'Имя для вашего питомца',
-      staleBackend: 'Обновите Hermes, чтобы генерировать питомцев.',
-      backgroundHint: 'Можно закрыть — Hermes уведомит, когда будет готово.',
+      staleBackend: 'Обновите Beyond, чтобы генерировать питомцев.',
+      backgroundHint: 'Можно закрыть — Beyond уведомит, когда будет готово.',
       slowProviderHint: 'Это может занять несколько минут',
       remix: 'Ремикс',
       remixConfirmTitle: 'Сделать ремикс из этого облика?',
@@ -1700,7 +1700,7 @@ export const ruOverrides = {
     sections: { maintenance: 'Обслуживание', sessions: 'Сеансы', system: 'Система', usage: 'Использование' },
     nav: {
       newChat: { title: 'Новый сеанс', detail: 'Начать новый сеанс' },
-      settings: { title: 'Настройки', detail: 'Настройка Hermes desktop' },
+      settings: { title: 'Настройки', detail: 'Настройка Beyond desktop' },
       capabilities: { title: 'Возможности', detail: 'Навыки, инструменты и MCP-серверы' },
       messaging: { title: 'Сообщения', detail: 'Настройка Telegram, Slack, Discord и других' },
       artifacts: { title: 'Артефакты', detail: 'Просмотр сгенерированных результатов' }
@@ -1722,7 +1722,7 @@ export const ruOverrides = {
     noSessions: 'Сеансов пока нет.',
     gatewayRunning: 'Шлюз сообщений работает',
     gatewayStopped: 'Шлюз сообщений остановлен',
-    hermesActiveSessions: (version, count) => `Hermes ${version} · Активные сеансы: ${count}`,
+    beyondActiveSessions: (version, count) => `Beyond ${version} · Активные сеансы: ${count}`,
     restartGateway: 'Перезапустить шлюз',
     openBrowser: 'Переключить браузер',
     toggleBrowser: 'Переключить браузер',
@@ -1731,7 +1731,7 @@ export const ruOverrides = {
     sharedGatewayRestartDescription: bots => `Все боты на этом устройстве переподключатся: ${bots}`,
     sharedGatewayRestartConfirm: 'Перезапустить все',
     sharedGatewayRestarted: count => `Общий шлюз перезапущен (ботов: ${count})`,
-    updateHermes: 'Обновить Hermes',
+    updateBeyond: 'Обновить Beyond',
     reloadWindow: 'Перезагрузить окно',
     actionRunning: 'выполняется',
     actionDone: 'готово',
@@ -1892,11 +1892,11 @@ export const ruOverrides = {
     telegramQr: {
       title: 'Выберите способ подключения Telegram-бота',
       subtitle:
-        'Оба способа подключают бота под вашим контролем и сохраняют его данные только в этой установке Hermes.',
+        'Оба способа подключают бота под вашим контролем и сохраняют его данные только в этой установке Beyond.',
       quickSetup: 'Быстрая настройка',
       recommended: 'Рекомендуется',
       quickHelp:
-        'Отсканируйте QR-код и подтвердите в Telegram. Hermes создаст бота и определит ваш Telegram ID автоматически.',
+        'Отсканируйте QR-код и подтвердите в Telegram. Beyond создаст бота и определит ваш Telegram ID автоматически.',
       createWithQr: 'Создать по QR',
       starting: 'Запуск…',
       replaceWarning:
@@ -1983,7 +1983,7 @@ export const ruOverrides = {
       },
       MATRIX_HOMESERVER: { label: 'URL homeserver', placeholder: 'https://matrix.org' },
       MATRIX_ACCESS_TOKEN: { label: 'Токен доступа' },
-      MATRIX_USER_ID: { label: 'ID пользователя бота', placeholder: '@hermes:example.org' },
+      MATRIX_USER_ID: { label: 'ID пользователя бота', placeholder: '@beyond:example.org' },
       MATRIX_ALLOWED_USERS: {
         label: 'Разрешённые ID пользователей Matrix',
         help: 'Рекомендуется. ID пользователей (по одному в поле) в формате @user:server.'
@@ -2097,13 +2097,13 @@ export const ruOverrides = {
     manageProfiles: 'Управлять профилями…',
     connectGateway: 'Управлять шлюзами…',
     fleet: {
-      localDevice: 'Это устройство (локальный бэкенд — установит Hermes, если его нет, иначе откроет новую сессию)',
+      localDevice: 'Это устройство (локальный бэкенд — установит Beyond, если его нет, иначе откроет новую сессию)',
       switchDeviceTitle: 'Переключиться на это устройство?',
       switchDeviceDesc: 'Откроется новая сессия на этом компьютере. Текущий разговор останется на другом шлюзе.',
       switchDeviceConfirm: 'Переключить',
       installDeviceTitle: 'Переключиться на это устройство?',
       installDeviceDesc:
-        'Hermes будет установлен локально, затем откроется новая сессия на этом компьютере. Установка не начнётся, пока вы не подтвердите.',
+        'Beyond будет установлен локально, затем откроется новая сессия на этом компьютере. Установка не начнётся, пока вы не подтвердите.',
       installDeviceConfirm: 'Установить локально',
       connectExistingInstead: 'Вместо этого подключить существующий'
     },
@@ -2114,7 +2114,7 @@ export const ruOverrides = {
     setAsDefault: 'Сделать по умолчанию',
     defaultProfile: 'Профиль по умолчанию',
     defaultSet: name => `${name} теперь используется по умолчанию`,
-    defaultDescription: 'Используется при запуске Hermes и для новых чатов. Профили существующих сессий не меняются.',
+    defaultDescription: 'Используется при запуске Beyond и для новых чатов. Профили существующих сессий не меняются.',
     failedSetDefault: 'Не удалось установить профиль по умолчанию',
     setColor: color => `Установить цвет ${color}`,
     autoColor: 'Авто',
@@ -2152,7 +2152,7 @@ export const ruOverrides = {
     deleteDescMid: ' и сотрёт его ',
     deleteDescSuffix: ' каталог. Это действие необратимо.',
     deleting: 'Удаление...',
-    createDesc: 'Профили — это независимые среды Hermes: отдельные настройки, навыки и SOUL.md.',
+    createDesc: 'Профили — это независимые среды Beyond: отдельные настройки, навыки и SOUL.md.',
     nameLabel: 'Имя',
     cloneFrom: 'Клонировать из',
     cloneFromNone: 'Нет (пустой)',
@@ -2186,7 +2186,7 @@ export const ruOverrides = {
     failedRename: 'Не удалось переименовать профиль'
   },
   modelAssignment: {
-    saveFailed: 'Hermes не сохранил это изменение модели.'
+    saveFailed: 'Beyond не сохранил это изменение модели.'
   },
 
   cron: {
@@ -2248,7 +2248,7 @@ export const ruOverrides = {
     everyHourAt: minute => `Каждый час на :${minute}`,
     newCron: 'Новый cron',
     emptyDescNew:
-      'Запланируйте промпт, который будет выполняться по cron-выражению. Hermes выполнит его и доставит результаты в выбранное вами место.',
+      'Запланируйте промпт, который будет выполняться по cron-выражению. Beyond выполнит его и доставит результаты в выбранное вами место.',
     emptyDescSearch: 'Попробуйте более широкий запрос.',
     emptyTitleNew: 'Запланированных задач пока нет',
     emptyTitleSearch: 'Нет совпадений',
@@ -2526,12 +2526,12 @@ export const ruOverrides = {
   composer: {
     message: 'Сообщение',
     wakingProfile: profile => `Пробуждаем ${profile}…`,
-    placeholderStarting: 'Запуск Hermes...',
-    placeholderReconnecting: 'Переподключение к Hermes…',
+    placeholderStarting: 'Запуск Beyond...',
+    placeholderReconnecting: 'Переподключение к Beyond…',
     placeholderFollowUp: 'Отправить продолжение',
     newSessionPlaceholders: [
       'Что будем делать?',
-      'Дайте Hermes задачу',
+      'Дайте Beyond задачу',
       'О чём вы думаете?',
       'Опишите, что нужно',
       'Что обсудим?',
@@ -2588,7 +2588,7 @@ export const ruOverrides = {
       '/resume': 'Возобновить сохранённый сеанс',
       '/details': 'уровень детализации транскрипта',
       '/copy': 'скопировать выделенное или последнее сообщение ассистента',
-      '/quit': 'выйти из hermes',
+      '/quit': 'выйти из beyond',
       '/start': 'Подтвердить запуск платформы без ответа',
       '/new': 'Начать новый чат в приложении',
       '/topic': 'Включить или просмотреть темы личных сообщений Telegram',
@@ -2612,19 +2612,19 @@ export const ruOverrides = {
       '/journey': 'Открыть граф памяти — навыки и воспоминания во времени',
       '/queue': 'Добавить, просмотреть, изменить, удалить, переместить или очистить запросы в очереди',
       '/steer': 'Добавить сообщение после следующего вызова инструмента без прерывания',
-      '/goal': 'Задать постоянную цель, над которой Hermes работает до завершения',
+      '/goal': 'Задать постоянную цель, над которой Beyond работает до завершения',
       '/heartbeat': 'Задать повторяющийся запрос для этого сеанса в состоянии простоя',
       '/refine': 'Проанализировать беседу и сохранить выводы в памяти или навыках',
       '/review': 'Запустить независимого субагента для проверки обсуждаемой работы',
       '/loop': 'Повторять запрос с заданным интервалом в этом сеансе',
-      '/plan': 'Записать план реализации в Markdown в .hermes/plans/ без выполнения',
+      '/plan': 'Записать план реализации в Markdown в .beyond/plans/ без выполнения',
       '/moa': 'Выполнить запрос через Mixture of Agents, затем вернуть исходную модель',
       '/subgoal': 'Добавить или изменить критерии активной цели',
       '/status': 'Показать состояние текущего сеанса',
       '/egress': 'Показать состояние исходящего прокси Docker',
       '/context': 'Показать использование контекста, категории, статистику сжатия и скорость обработки',
       '/whoami': 'Показать права доступа к слеш-командам',
-      '/profile': 'Переключить активный профиль Hermes',
+      '/profile': 'Переключить активный профиль Beyond',
       '/codex-runtime': 'Переключить среду Codex app-server для моделей OpenAI/Codex',
       '/personality': 'Выбрать готовую личность',
       '/battery': 'Переключить цветной индикатор батареи в строке состояния',
@@ -2648,10 +2648,10 @@ export const ruOverrides = {
       '/browser': 'Управлять браузером агента [connect|disconnect|status]',
       '/palette': 'Открыть палитру команд',
       '/usage': 'Показать расход токенов и лимиты; reset использует накопленный сброс лимита Codex',
-      '/subscription': 'Показать план Nous и изменить его в браузере',
-      '/topup': 'Показать баланс Nous и управлять оплатой',
+      '/subscription': 'Показать план Beyond и изменить его в браузере',
+      '/topup': 'Показать баланс Beyond и управлять оплатой',
       '/platform': 'Приостановить, возобновить или перечислить сбоящие платформы шлюза',
-      '/version': 'Показать версию Hermes Agent',
+      '/version': 'Показать версию Beyond Agent',
       '/debug': 'Загрузить отчёт отладки с данными системы и журналами и получить ссылку',
       '/model': 'Переключить модель для этого сеанса'
     },
@@ -2666,7 +2666,7 @@ export const ruOverrides = {
       'composer.history': 'переключать поповер / историю'
     },
     attachUrlTitle: 'Прикрепить URL',
-    attachUrlDesc: 'Hermes загрузит страницу и добавит её как контекст для этого хода.',
+    attachUrlDesc: 'Beyond загрузит страницу и добавит её как контекст для этого хода.',
     urlPlaceholder: 'https://example.com/post',
     urlHintPre: 'Укажите полный URL, например ',
     attach: 'Прикрепить',
@@ -2887,7 +2887,7 @@ export const ruOverrides = {
       createPr: 'Создать PR',
       openPr: 'Открыть PR',
       ghMissing: 'Установите GitHub CLI (gh) и войдите, чтобы открывать PR',
-      agentShip: 'Попросить Hermes открыть PR',
+      agentShip: 'Попросить Beyond открыть PR',
       agentShipUnavailable: 'Чат, которому принадлежат эти изменения, не на экране.',
       agentShipPrompt:
         'Проверьте текущие изменения, закоммитьте их с ясным conventional-commit сообщением, запушьте ветку и создайте pull request.',
@@ -2899,23 +2899,23 @@ export const ruOverrides = {
     }
   },
   updates: {
-    discontinuedTitle: 'Эта сборка Hermes больше не поддерживается',
+    discontinuedTitle: 'Эта сборка Beyond больше не поддерживается',
     discontinuedBody:
-      'Эта сборка Hermes больше не поддерживается и может перестать работать — удалите её. Ваши данные останутся на диске.',
+      'Эта сборка Beyond больше не поддерживается и может перестать работать — удалите её. Ваши данные останутся на диске.',
     channels: { stable: 'Стабильный', canary: 'Тестовый' },
     bundleSwapPending: 'Перезапустите, чтобы завершить обновление',
     bundleSwapPendingDesc:
-      'Обновлённое приложение уже установлено — достаточно перезапустить Hermes, чтобы загрузить его. Чаты и настройки не пострадают.',
-    bundleSwapPendingAction: 'Перезапустить Hermes',
+      'Обновлённое приложение уже установлено — достаточно перезапустить Beyond, чтобы загрузить его. Чаты и настройки не пострадают.',
+    bundleSwapPendingAction: 'Перезапустить Beyond',
     stages: {
       idle: 'Готовимся…',
       prepare: 'Готовимся…',
       fetch: 'Скачиваем…',
       pull: 'Почти готово…',
       pydeps: 'Завершаем…',
-      update: 'Обновляем Hermes…',
+      update: 'Обновляем Beyond…',
       rebuild: 'Пересобираем desktop-приложение…',
-      restart: 'Перезапускаем Hermes…',
+      restart: 'Перезапускаем Beyond…',
       done: 'Обновление завершено',
       manual: 'Обновление из терминала',
       guiSkew: 'Обновите desktop-приложение',
@@ -2925,17 +2925,17 @@ export const ruOverrides = {
     checkFailedTitle: 'Не удалось проверить обновления',
     tryAgain: 'Попробовать снова',
     notAvailableTitle: 'Обновление недоступно',
-    unsupportedMessage: 'Эта версия Hermes не может обновлять себя из приложения.',
+    unsupportedMessage: 'Эта версия Beyond не может обновлять себя из приложения.',
     connectionRetry: 'Проверьте соединение и попробуйте снова.',
-    gitUnusable: 'Hermes не удалось запустить Git на этом компьютере, поэтому проверить обновления не получилось.',
+    gitUnusable: 'Beyond не удалось запустить Git на этом компьютере, поэтому проверить обновления не получилось.',
     latestBody: 'У вас последняя версия.',
     versionDetailsDistributionStore: 'Microsoft Store',
     latestBodyBackend: 'Бэкенд работает на последней версии.',
     allSetTitle: 'Всё готово',
     availableTitle: 'Доступно новое обновление',
-    availableBody: 'Новая версия Hermes готова к установке.',
+    availableBody: 'Новая версия Beyond готова к установке.',
     availableTitleBackend: 'Доступно обновление бэкенда',
-    availableBodyBackend: 'Новая версия подключённого бэкенда Hermes готова к установке.',
+    availableBodyBackend: 'Новая версия подключённого бэкенда Beyond готова к установке.',
     availableBodyNoChangelog: 'Новая версия готова. Заметки о выпуске недоступны для этого типа установки.',
     updateNow: 'Обновить сейчас',
     maybeLater: 'Возможно позже',
@@ -2944,31 +2944,31 @@ export const ruOverrides = {
     manualTitle: 'Обновление из терминала',
     manualUnavailableTitle: 'Обновление здесь недоступно',
     manualBody:
-      'Hermes установлен из командной строки, поэтому обновления тоже выполняются там. Вставьте это в терминал:',
-    manualPickedUp: 'Hermes подхватит новую версию при следующем запуске.',
-    manualBodyBackend: 'Бэкенд Hermes управляется вне этого приложения. Выполните это на сервере, где он размещён:',
+      'Beyond установлен из командной строки, поэтому обновления тоже выполняются там. Вставьте это в терминал:',
+    manualPickedUp: 'Beyond подхватит новую версию при следующем запуске.',
+    manualBodyBackend: 'Бэкенд Beyond управляется вне этого приложения. Выполните это на сервере, где он размещён:',
     manualPickedUpBackend: 'Бэкенд загрузит новую версию после завершения обновления.',
     guiSkewTitle: 'Обновите desktop-приложение',
     guiSkewBody:
-      'Бэкенд обновлён, но пакет этого desktop-приложения не изменился. Обновите или переустановите desktop-приложение Hermes (ваш AppImage / .deb / .rpm), чтобы версии совпали.',
+      'Бэкенд обновлён, но пакет этого desktop-приложения не изменился. Обновите или переустановите desktop-приложение Beyond (ваш AppImage / .deb / .rpm), чтобы версии совпали.',
     copy: 'Копировать',
     copied: 'Скопировано',
     done: 'Готово',
     applyingBody:
-      'Обновлятор Hermes возьмёт процесс на себя в своём окне и автоматически перезапустит Hermes, когда закончит. Пожалуйста, не открывайте Hermes вручную во время обновления.',
+      'Обновлятор Beyond возьмёт процесс на себя в своём окне и автоматически перезапустит Beyond, когда закончит. Пожалуйста, не открывайте Beyond вручную во время обновления.',
     applyingBodyBackend:
-      'Удалённый бэкенд применяет обновление и перезапустится. Hermes переподключится автоматически, когда он снова заработает.',
-    applyingClose: 'Это окно закроется во время обновления, затем Hermes откроется сам.',
+      'Удалённый бэкенд применяет обновление и перезапустится. Beyond переподключится автоматически, когда он снова заработает.',
+    applyingClose: 'Это окно закроется во время обновления, затем Beyond откроется сам.',
     errorTitle: 'Обновление не завершилось',
     errorBody: 'Не переживайте — ничего не потеряно. Можно попробовать снова прямо сейчас.',
-    blockerTitle: 'Закрыть локальные предпросмотры, чтобы обновить Hermes?',
+    blockerTitle: 'Закрыть локальные предпросмотры, чтобы обновить Beyond?',
     blockerBody:
-      'Hermes нужно остановить эти локальные предпросмотры перед обновлением. Ваши файлы не будут изменены или удалены.',
-    foreignBlockerTitle: 'Закрыть другие процессы, чтобы обновить Hermes',
+      'Beyond нужно остановить эти локальные предпросмотры перед обновлением. Ваши файлы не будут изменены или удалены.',
+    foreignBlockerTitle: 'Закрыть другие процессы, чтобы обновить Beyond',
     foreignBlockerBody:
-      'Hermes не может безопасно закрыть эти процессы автоматически. Закройте приложение, терминал или службу, которой принадлежит каждый из них, и повторите обновление.',
+      'Beyond не может безопасно закрыть эти процессы автоматически. Закройте приложение, терминал или службу, которой принадлежит каждый из них, и повторите обновление.',
     mixedBlockerBody:
-      'Hermes может закрыть локальные предпросмотры, перечисленные ниже. Остальные процессы нужно закрыть вручную, прежде чем обновление сможет продолжиться.',
+      'Beyond может закрыть локальные предпросмотры, перечисленные ниже. Остальные процессы нужно закрыть вручную, прежде чем обновление сможет продолжиться.',
     closePreviewsAndUpdate: 'Закрыть предпросмотры и обновить',
     closePreviewsAndCheckAgain: 'Закрыть предпросмотры и проверить снова',
     localPreview: 'Локальный предпросмотр',
@@ -3021,7 +3021,7 @@ export const ruOverrides = {
     justNowSuffix: ' · только что',
     bundleOutOfSync: 'Сборка приложения устарела',
     bundleOutOfSyncDesc:
-      'Рантайм Hermes обновлён, но само приложение — ещё старая сборка: новые функции интерфейса (например, Bot Mode) не появятся до обновления. Запустите обновление ниже, чтобы пересобрать приложение. Если предупреждение не исчезнет, переустановите с последнего установщика.',
+      'Рантайм Beyond обновлён, но само приложение — ещё старая сборка: новые функции интерфейса (например, Bot Mode) не появятся до обновления. Запустите обновление ниже, чтобы пересобрать приложение. Если предупреждение не исчезнет, переустановите с последнего установщика.',
     bundleOutOfSyncAction: 'Скачать установщик',
     checkingShort: 'Проверка…'
   },
@@ -3033,7 +3033,7 @@ export const ruOverrides = {
       skipped: 'Пропущено',
       failed: 'Ошибка'
     },
-    oneTimeTitle: 'Hermes требует одноразовой установки',
+    oneTimeTitle: 'Beyond требует одноразовой установки',
     unsupportedDesc: platform =>
       `Автоматическая установка при первом запуске пока недоступна на ${platform}. Откройте Терминал и выполните команду ниже, затем перезапустите это приложение. При следующих запусках этот шаг будет пропущен.`,
     installCommand: 'Команда установки',
@@ -3041,23 +3041,23 @@ export const ruOverrides = {
     viewDocs: 'Открыть документацию по установке',
     installTo: 'Будет установлено в',
     retryAfterRun: 'Я выполнил — попробовать снова',
-    setupChoiceTitle: 'Настройка Hermes Desktop',
+    setupChoiceTitle: 'Настройка Beyond Desktop',
     setupChoiceDesc:
-      'Подключите это приложение к уже работающему шлюзу Hermes или установите Hermes локально на этот компьютер.',
-    connectExistingTitle: 'Подключиться к существующему Hermes',
+      'Подключите это приложение к уже работающему шлюзу Beyond или установите Beyond локально на этот компьютер.',
+    connectExistingTitle: 'Подключиться к существующему Beyond',
     connectExistingShort: 'Подключить существующий',
     connectExistingDesc:
       'Используйте удалённый бэкенд с сессионным токеном или входом через браузер. Локальная установка не начнётся.',
-    installLocalTitle: 'Установить Hermes локально',
-    installLocalDesc: 'Скачайте Hermes, создайте его Python-окружение и запустите бэкенд на этом компьютере.',
-    localStartUnavailable: 'Не удалось начать локальную установку. Перезапустите Hermes Desktop и попробуйте снова.',
-    remoteSetupTitle: 'Подключиться к существующему Hermes',
-    remoteSetupDesc: 'Введите URL вашего шлюза. Hermes Desktop определит, нужен токен или вход через браузер.',
+    installLocalTitle: 'Установить Beyond локально',
+    installLocalDesc: 'Скачайте Beyond, создайте его Python-окружение и запустите бэкенд на этом компьютере.',
+    localStartUnavailable: 'Не удалось начать локальную установку. Перезапустите Beyond Desktop и попробуйте снова.',
+    remoteSetupTitle: 'Подключиться к существующему Beyond',
+    remoteSetupDesc: 'Введите URL вашего шлюза. Beyond Desktop определит, нужен токен или вход через браузер.',
     remoteUrlTitle: 'URL шлюза',
-    remoteUrlDesc: 'Используйте базовый URL шлюза Hermes, включая https:// для удалённых.',
-    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
+    remoteUrlDesc: 'Используйте базовый URL шлюза Beyond, включая https:// для удалённых.',
+    remoteUrlPlaceholder: 'https://gateway.example.com/beyond',
     probing: 'Определяем аутентификацию шлюза...',
-    probeError: 'Не удалось подключиться к этому шлюзу Hermes.',
+    probeError: 'Не удалось подключиться к этому шлюзу Beyond.',
     identityProvider: 'ваш провайдер аутентификации',
     authTitle: 'Аутентификация',
     authNeedsOauth: provider => `Сначала войдите через ${provider}, чтобы проверить этот шлюз.`,
@@ -3077,12 +3077,12 @@ export const ruOverrides = {
     applyRemote: 'Применить и переподключиться',
     backToSetup: 'Назад',
     failedTitle: 'Установка не удалась',
-    settingUpTitle: 'Настройка Hermes Agent',
+    settingUpTitle: 'Настройка Beyond Agent',
     finishingTitle: 'Завершаем',
     failedDesc:
-      'Один из шагов установки завершился ошибкой. На Windows это может произойти, если запущена другая инстанция Hermes CLI или desktop. Остановите все работающие инстанции Hermes и повторите. Подробности — ниже или в журнале desktop.',
+      'Один из шагов установки завершился ошибкой. На Windows это может произойти, если запущена другая инстанция Beyond CLI или desktop. Остановите все работающие инстанции Beyond и повторите. Подробности — ниже или в журнале desktop.',
     activeDesc:
-      'Это одноразовая настройка. Установщик Hermes скачивает зависимости и настраивает вашу машину. При следующих запусках этот шаг будет пропущен.',
+      'Это одноразовая настройка. Установщик Beyond скачивает зависимости и настраивает вашу машину. При следующих запусках этот шаг будет пропущен.',
     progress: (completed, total) => `Выполнено ${completed} из ${total} шагов`,
     currentStage: stage => ` — сейчас: ${stage}`,
     fetchingManifest: 'Загружаем манифест установщика...',
@@ -3109,7 +3109,7 @@ export const ruOverrides = {
     loadFailed: 'Не удалось загрузить модели',
     noAuthenticatedProviders: 'Нет провайдеров с аутентификацией.',
     pro: 'Pro',
-    proNeedsSubscription: 'Модели Pro требуют платной подписки Nous.',
+    proNeedsSubscription: 'Модели Pro требуют платной подписки Beyond.',
     free: 'Free',
     freeTier: 'Бесплатный тариф',
     priceTitle: 'Цена вход / выход за миллион токенов',
@@ -3213,13 +3213,13 @@ export const ruOverrides = {
       update: 'обновление',
       updateInProgress: 'Обновление выполняется',
       commitsBehind: (count, branch) => `${count} ${RU_NOUN(count, 'коммит', 'коммита', 'коммитов')} позади ${branch}`,
-      desktopVersion: version => `Hermes Desktop v${version}`,
+      desktopVersion: version => `Beyond Desktop v${version}`,
       backendVersion: version => `Бэкенд v${version}`,
       clientLabel: version => `клиент v${version}`,
       connectionSsh: host => `SSH: ${host}`,
       connectionRemote: host => `Удалённый: ${host}`,
       connectionCloud: host => `Облако: ${host}`,
-      connectionCloudTooltip: host => `Hermes Cloud · ${host}`,
+      connectionCloudTooltip: host => `Beyond Cloud · ${host}`,
       connectionSshTooltip: host => `SSH · ${host}`,
       connectionRemoteTooltip: host => `Удалённый · ${host}`,
       backendLabel: version => `бэкенд v${version}`,
@@ -3368,7 +3368,7 @@ export const ruOverrides = {
     binaryTitle: 'Похоже на бинарный файл',
     binaryBody: label => `Предпросмотр ${label} может показать нечитаемый текст.`,
     largeTitle: 'Этот файл большой',
-    largeBody: (label, size) => `${label} — ${size}. Hermes покажет только первые 512 КБ.`,
+    largeBody: (label, size) => `${label} — ${size}. Beyond покажет только первые 512 КБ.`,
     previewAnyway: 'Предпросмотр всё равно',
     truncated: 'Показаны первые 512 КБ.',
     noInlineTitle: 'Нет inline-предпросмотра',
@@ -3411,11 +3411,11 @@ export const ruOverrides = {
         'Этот адрес указывает на машину, на которой работает ваш агент, а не на эту. Панель браузера загружает страницы локально, поэтому для удалённого dev-сервера нужен порт-форвардинг или доступный hostname.',
       failedToLoad: 'Не удалось загрузить предпросмотр',
       tryAgain: 'Попробовать снова',
-      restarting: 'Hermes перезапускается...',
-      askRestart: 'Попросить Hermes перезапустить сервер',
-      lookingRestart: taskId => `Hermes ищет сервер предпросмотра для перезапуска (${taskId})`,
+      restarting: 'Beyond перезапускается...',
+      askRestart: 'Попросить Beyond перезапустить сервер',
+      lookingRestart: taskId => `Beyond ищет сервер предпросмотра для перезапуска (${taskId})`,
       restartingTitle: 'Перезапуск сервера предпросмотра',
-      restartingMessage: 'Hermes работает в фоне. Следите за прогрессом в консоли предпросмотра.',
+      restartingMessage: 'Beyond работает в фоне. Следите за прогрессом в консоли предпросмотра.',
       startRestartFailed: message => `Не удалось запустить перезапуск сервера: ${message}`,
       restartFailed: 'Перезапуск сервера не удался',
       hideConsole: 'Скрыть консоль предпросмотра',
@@ -3427,16 +3427,16 @@ export const ruOverrides = {
       reload: 'Перезагрузить страницу',
       address: 'Адрес',
       addressPlaceholder: 'Введите адрес',
-      blankPageBody: 'Введите адрес выше, чтобы просматривать, или попросите Hermes открыть страницу.',
-      finishedRestarting: message => `Hermes завершил перезапуск сервера предпросмотра${message ? `: ${message}` : ''}`,
+      blankPageBody: 'Введите адрес выше, чтобы просматривать, или попросите Beyond открыть страницу.',
+      finishedRestarting: message => `Beyond завершил перезапуск сервера предпросмотра${message ? `: ${message}` : ''}`,
       failedRestarting: message => `Перезапуск сервера не удался: ${message}`,
       unknownError: 'неизвестная ошибка',
       restartedTitle: 'Сервер предпросмотра перезапущен',
       reloadingNow: 'Перезагружаем предпросмотр.',
       restartFailedTitle: 'Перезапуск предпросмотра не удался',
-      restartFailedMessage: 'Hermes не смог перезапустить сервер.',
+      restartFailedMessage: 'Beyond не смог перезапустить сервер.',
       stillWorking:
-        'Hermes всё ещё работает, но результата перезапуска пока нет. Команда сервера может выполняться в foreground.',
+        'Beyond всё ещё работает, но результата перезапуска пока нет. Команда сервера может выполняться в foreground.',
       workspaceReloading: 'Рабочее пространство изменилось, перезагружаем предпросмотр',
       fileChanged: url => `Файл изменился, перезагружаем предпросмотр: ${url}`,
       filesChanged: (count, url) =>
@@ -3452,12 +3452,12 @@ export const ruOverrides = {
   },
   interfaceMode: {
     title: 'Режим интерфейса',
-    hint: 'Меняет то, что показано, а не то, что умеет Hermes.',
+    hint: 'Меняет то, что показано, а не то, что умеет Beyond.',
     sessionNote:
       'Задано простым режимом. Изменение здесь действует до конца сеанса; переключитесь в расширенный, чтобы сделать его своим.',
     simple: {
       label: 'Простой',
-      description: 'Для общения с Hermes. Боковая панель и чат; без терминала, файлов и панелей diff.'
+      description: 'Для общения с Beyond. Боковая панель и чат; без терминала, файлов и панелей diff.'
     },
     advanced: {
       label: 'Расширенный',
@@ -3548,7 +3548,7 @@ export const ruOverrides = {
       errorOpenBillingSettings: 'Открыть настройки оплаты',
       loadingSession: 'Загрузка сеанса',
       showEarlier: 'Показать ранние сообщения',
-      loadingResponse: 'Hermes загружает ответ',
+      loadingResponse: 'Beyond загружает ответ',
       resumeWhenBackgroundDone: count =>
         count === 1
           ? 'Продолжится, когда фоновая задача завершится'
@@ -3591,7 +3591,7 @@ export const ruOverrides = {
       attachingFile: 'Прикрепление…'
     },
     approval: {
-      gatewayDisconnected: 'Шлюз Hermes не подключён',
+      gatewayDisconnected: 'Шлюз Beyond не подключён',
       sendFailed: 'Не удалось отправить ответ на подтверждение',
       run: 'Выполнить',
       command: 'Команда',
@@ -3602,7 +3602,7 @@ export const ruOverrides = {
       reject: 'Отклонить',
       alwaysTitle: 'Всегда разрешать эту команду?',
       alwaysDescription: pattern =>
-        `Это добавит паттерн «${pattern}» в ваш постоянный список разрешений (~/.hermes/config.yaml). Hermes больше не будет спрашивать о подобных командах — ни в этом сеансе, ни в будущем.`,
+        `Это добавит паттерн «${pattern}» в ваш постоянный список разрешений (~/.beyond/config.yaml). Beyond больше не будет спрашивать о подобных командах — ни в этом сеансе, ни в будущем.`,
       alwaysAllow: 'Всегда разрешать'
     },
     clarify: ruClarify,
@@ -3645,7 +3645,7 @@ export const ruOverrides = {
       envRequired: 'Сначала заполните обязательные учётные данные',
       sendFailed: 'Не удалось отправить ответ на настройку MCP',
       reloadFailed: 'Сервер сохранён, но перезагрузка MCP-инструментов не удалась — они загрузятся в следующем сеансе',
-      gatewayDisconnected: 'Шлюз Hermes не подключён'
+      gatewayDisconnected: 'Шлюз Beyond не подключён'
     },
     tool: {
       copyCode: 'Копировать код',
@@ -3763,7 +3763,7 @@ export const ruOverrides = {
     }
   },
   prompts: {
-    gatewayDisconnected: 'Шлюз Hermes не подключён',
+    gatewayDisconnected: 'Шлюз Beyond не подключён',
     sudoSendFailed: 'Не удалось отправить пароль sudo',
     secretSendFailed: 'Не удалось отправить секрет',
     sudoTitle: 'Пароль администратора',
@@ -3771,10 +3771,10 @@ export const ruOverrides = {
       'Проверьте команду перед вводом пароля sudo. Пароль отправляется агенту, который её выполняет, и кэшируется на время сеанса.',
     sudoCommandUnavailable: 'Агент не предоставил команду. Отмените запрос, если не можете проверить её в разговоре.',
     sudoInstallDesc:
-      'Hermes нужен ваш пароль sudo, чтобы установить пакеты Bot Screen (TigerVNC + Xfce) на хосте шлюза. Он отправляется только на этот хост.',
+      'Beyond нужен ваш пароль sudo, чтобы установить пакеты Bot Screen (TigerVNC + Xfce) на хосте шлюза. Он отправляется только на этот хост.',
     sudoPlaceholder: 'пароль sudo',
     secretTitle: 'Требуется секрет',
-    secretDesc: 'Hermes нужны учётные данные, чтобы продолжить.',
+    secretDesc: 'Beyond нужны учётные данные, чтобы продолжить.',
     secretPlaceholder: 'значение секрета'
   },
   desktop: {
@@ -3838,8 +3838,8 @@ export const ruOverrides = {
     sessionExportFailed: 'Не удалось экспортировать сеанс',
     imageSaved: 'Изображение сохранено',
     downloadStarted: 'Загрузка началась',
-    restartToUseSaveImage: 'Перезапустите Hermes Desktop, чтобы использовать «Сохранить изображение».',
-    restartToSaveImages: 'Перезапустите Hermes Desktop, чтобы сохранять изображения',
+    restartToUseSaveImage: 'Перезапустите Beyond Desktop, чтобы использовать «Сохранить изображение».',
+    restartToSaveImages: 'Перезапустите Beyond Desktop, чтобы сохранять изображения',
     imageDownloadFailed: 'Загрузка изображения не удалась',
     openImage: 'Открыть изображение',
     downloadImage: 'Скачать изображение',
@@ -3858,7 +3858,7 @@ export const ruOverrides = {
       success: platform => `Передаём в ${platform}. Возобновите здесь в любой момент.`,
       systemNote: platform => `↻ Передано в ${platform} — возобновите здесь в любой момент.`,
       failed: error => `Передача не удалась: ${error}`,
-      timedOut: 'Превышено время ожидания шлюза. Выполняется ли `hermes gateway`?'
+      timedOut: 'Превышено время ожидания шлюза. Выполняется ли `beyond gateway`?'
     }
   },
   errors: {
@@ -3893,8 +3893,8 @@ export const ruOverrides = {
   },
   freeTier: {
     offer: {
-      heading: 'Продолжайте с Hermes',
-      body: 'Вы пользуетесь бесплатным лимитом. Если продолжите работать с Hermes, скоро начнёте упираться в ограничения. Войдите с бесплатной учётной записью Nous, чтобы получить больший лимит.',
+      heading: 'Продолжайте с Beyond',
+      body: 'Вы пользуетесь бесплатным лимитом. Если продолжите работать с Beyond, скоро начнёте упираться в ограничения. Войдите с бесплатной учётной записью Beyond, чтобы получить больший лимит.',
       signIn: 'Войти',
       notNow: 'Не сейчас'
     }

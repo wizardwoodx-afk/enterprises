@@ -21,7 +21,7 @@ import net from 'node:net'
 
 import type { EnumeratedWindow } from './window-below'
 
-// Hyprland evaluates this socket synchronously and freezes for a five-second
+// Hyprland evaluates this socket synchrobeyondly and freezes for a five-second
 // timeout on an unclosed connection, so every path below destroys the socket.
 // One request per tool call, never polled.
 const REQUEST_TIMEOUT_MS = 1000

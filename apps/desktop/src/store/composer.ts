@@ -72,7 +72,7 @@ export interface ComposerAttachment {
   path?: string
   /** Validated MIME returned by canonical owner staging. */
   mime?: string
-  /** Bounded source text from a Hermes-generated large paste, sent only to the title path. */
+  /** Bounded source text from a Beyond-generated large paste, sent only to the title path. */
   titlePreview?: string
   attachedSessionId?: string
   /** Set while the file/image bytes are being staged into the session
@@ -237,7 +237,7 @@ export const mainComposerScope = createComposerAttachmentScope($composerAttachme
 // Per-thread draft stash for the decoupled composer. Session lifecycle never
 // touches this — only ChatBar's scope swap reads/writes it. Text mirrors to
 // localStorage; attachments are memory-only (blobs, upload state).
-export const SESSION_DRAFTS_STORAGE_KEY = 'hermes:composer-drafts:v3'
+export const SESSION_DRAFTS_STORAGE_KEY = 'beyond:composer-drafts:v3'
 
 export const NEW_SESSION_DRAFT_KEY = '__new__'
 const MAX_PERSISTED_DRAFTS = 50
@@ -254,7 +254,7 @@ export interface SessionDraft {
 // the key (rather than just its text) lets a reload restore that exact fresh
 // draft; starting another new chat rotates the key so abandoned unsent drafts
 // cannot bleed into the next lifecycle.
-const FRESH_DRAFT_STORAGE_KEY = 'hermes.desktop.freshDraftKey'
+const FRESH_DRAFT_STORAGE_KEY = 'beyond.desktop.freshDraftKey'
 
 const createFreshDraftKey = (): string =>
   `__new__:${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`}`
@@ -319,7 +319,7 @@ function loadPersistedDraftTexts(): [string, SessionDraft][] {
 const draftsBySession = new Map<string, SessionDraft>(loadPersistedDraftTexts())
 
 /**
- * Patch one asynchronous attachment occurrence wherever the main composer owns
+ * Patch one asynchrobeyond attachment occurrence wherever the main composer owns
  * it. During a session switch the occurrence moves from the live atom into the
  * per-session in-memory draft stash; a preview may finish on either side of
  * that handoff. Updating both stores is safe because occurrence ids are unique,
@@ -442,10 +442,10 @@ if (typeof window !== 'undefined') {
  * repaint the app's editor from whatever the HUD left behind (usually empty,
  * because the HUD sent it).
  *
- * Dispatched synchronously, unlike the focus bus: the flush must complete
+ * Dispatched synchrobeyondly, unlike the focus bus: the flush must complete
  * before the HUD window is created.
  */
-const DRAFT_SYNC_EVENT = 'hermes:composer-draft-sync'
+const DRAFT_SYNC_EVENT = 'beyond:composer-draft-sync'
 
 export type ComposerDraftSyncMode = 'flush' | 'reload'
 

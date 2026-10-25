@@ -141,8 +141,8 @@ function oauthExpiredMessage(): ThreadMessage {
           authKind: 'oauth',
           code: 'auth',
           layer: 'auth',
-          provider: 'nous',
-          providerLabel: 'Nous Portal',
+          provider: 'beyond',
+          providerLabel: 'Beyond Portal',
           retryable: false
         }
       }
@@ -398,13 +398,13 @@ describe("a window plan's limit: one-click switch and credits (no silent switch)
         code: 'usage_window',
         layer: 'billing',
         message: "You've hit your daily limit · resets 15:56",
-        provider: 'nous',
+        provider: 'beyond',
         retryable: true,
         // The parsed surface (lib/error-surface.ts parseUsageLimit), as chat-runtime stores it.
         usageLimit: {
           credits,
           suggestions: suggestions
-            ? [{ label: 'Model Free', model: 'example/model-free:free', note: 'free', provider: 'nous' }]
+            ? [{ label: 'Model Free', model: 'example/model-free:free', note: 'free', provider: 'beyond' }]
             : []
         }
       },
@@ -430,7 +430,7 @@ describe("a window plan's limit: one-click switch and credits (no silent switch)
     fireEvent.click(await screen.findByRole('button', { name: 'Switch to Model Free (free)' }))
 
     await waitFor(() => expect(onReload).toHaveBeenCalledTimes(1))
-    expect(switchSessionModel).toHaveBeenCalledWith('rt-1', 'example/model-free:free', 'nous')
+    expect(switchSessionModel).toHaveBeenCalledWith('rt-1', 'example/model-free:free', 'beyond')
     // No balance: the credits way on is Billing, labelled for what it does.
     expect(screen.getByRole('button', { name: 'Open billing settings' })).toBeTruthy()
     expect(screen.queryByRole('button', { name: 'Turn on Keep going on credits' })).toBeNull()
@@ -558,12 +558,12 @@ describe('expired OAuth grant recovery', () => {
   it('explains the expiry and re-runs that provider sign-in in one click', async () => {
     render(<Harness assistant={oauthExpiredMessage()} />)
 
-    expect(await screen.findByText(/Nous Portal sign-in has expired/)).toBeTruthy()
+    expect(await screen.findByText(/Beyond Portal sign-in has expired/)).toBeTruthy()
     // Signing in changes the outcome, so Retry stays as the follow-up click.
     expect(screen.getByRole('button', { name: 'Retry' })).toBeTruthy()
 
-    screen.getByRole('button', { name: 'Sign in to Nous Portal again' }).click()
-    expect(startManualProviderOAuth).toHaveBeenCalledWith('nous', undefined)
+    screen.getByRole('button', { name: 'Sign in to Beyond Portal again' }).click()
+    expect(startManualProviderOAuth).toHaveBeenCalledWith('beyond', undefined)
   })
 })
 

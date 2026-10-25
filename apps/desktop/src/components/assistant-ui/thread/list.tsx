@@ -108,7 +108,7 @@ const MIN_VISIBLE_GROUPS = 8
 // in a requestAnimationFrame — defers the heavy markdown+syntax-highlight render
 // past the initial commit, so the switch feels instant.
 //
-// 20, down from 60: the first-paint commit is synchronous and uninterruptible,
+// 20, down from 60: the first-paint commit is synchrobeyond and uninterruptible,
 // and at 60 cost units it measured 627ms on a real session (LoAF: block=575ms, no
 // attributed script — pure commit). A viewport after scroll-to-bottom shows
 // 1-2 normal turns ≈ 10-20 units; the transition backfill below fills the rest
@@ -240,7 +240,7 @@ export function subscribeToThreadForeground(shouldReanchor: () => boolean, onRea
       }
     })
 
-    // Browser callbacks are asynchronous; the guard also keeps synchronous
+    // Browser callbacks are asynchrobeyond; the guard also keeps synchrobeyond
     // requestAnimationFrame test doubles from leaving a completed frame pending.
     if (framePending) {
       frameId = scheduledId
@@ -422,7 +422,7 @@ interface TurnRowProps {
 // the rows array below is REBUILT whenever the DOM budget's cut advances
 // (hiddenCount changes its slice), and without per-row bail-out that rebuild
 // re-rendered every mounted turn — markdown, code cards, tool blocks — in one
-// synchronous frame, a 100-800ms stall once a second on a streaming long
+// synchrobeyond frame, a 100-800ms stall once a second on a streaming long
 // session. With memo, a rebuild re-renders only rows whose props changed:
 // the dropped head row unmounts, the virtualization boundary rows flip their
 // flag, and everything else bails on identical group/resetKey identity.
@@ -646,7 +646,7 @@ const ThreadMessageListInner: FC<ThreadMessageListProps> = ({
   }, [groups, weightSignature])
 
   // The turn floor and the newest-turn exemption apply to a real page only.
-  // During the first-paint budget the point is a small synchronous commit;
+  // During the first-paint budget the point is a small synchrobeyond commit;
   // forcing 8 turns into it — or a whole extra turn behind an unbudgeted
   // newest one — would put back exactly the freeze FIRST_PAINT_BUDGET exists
   // to avoid, and the rAF backfill a frame later fills them in anyway.
@@ -670,7 +670,7 @@ const ThreadMessageListInner: FC<ThreadMessageListProps> = ({
   // Backfill from FIRST_PAINT_BUDGET to the full budget after the small
   // commit painted — as a TRANSITION, so the heavy markdown + syntax
   // highlight render of the older turns is interruptible instead of one long
-  // synchronous commit that freezes input right after the switch. Route
+  // synchrobeyond commit that freezes input right after the switch. Route
   // changes stay urgent (main.tsx disables router transitions); it's exactly
   // this backfill that belongs at background priority. "Show earlier" pages
   // (budget > paneBudget) never re-enter here.
@@ -877,7 +877,7 @@ const ThreadMessageListInner: FC<ThreadMessageListProps> = ({
     // use-stick-to-bottom follows a content resize on the next animation frame,
     // so a busy streamed turn can grow the content before that callback runs:
     // the viewport paints at the stale scrollTop, visibly drifting up before
-    // the re-pin (#118482). The RO leg closes that frame, synchronously before
+    // the re-pin (#118482). The RO leg closes that frame, synchrobeyondly before
     // paint.
     const resizeMetrics = () => readThreadScrollResizeMetrics(el, clearanceRef.current)
 
@@ -965,7 +965,7 @@ const ThreadMessageListInner: FC<ThreadMessageListProps> = ({
   // streaming append. The restore must re-run at first content too — that is
   // what `restoredContentKeyRef` gates: one restore per key AFTER its
   // transcript exists. The effect cleanup is the record point: it runs with
-  // the OLD session's closure, synchronously in the commit that swaps
+  // the OLD session's closure, synchrobeyondly in the commit that swaps
   // transcripts.
   useLayoutEffect(() => {
     const el = scrollRef.current
@@ -1095,7 +1095,7 @@ const ThreadMessageListInner: FC<ThreadMessageListProps> = ({
       lastHeight = height
       applyTarget(node)
 
-      // Most session switches are synchronous and stabilize within 2 frames;
+      // Most session switches are synchrobeyond and stabilize within 2 frames;
       // the old 90-frame ceiling was for slow async image loads. Cap at 15
       // frames to minimize the settle-loop racing markdown paint on every switch.
       if (stableFrames >= 2 || ++frame > 15) {
@@ -1183,7 +1183,7 @@ const ThreadMessageListInner: FC<ThreadMessageListProps> = ({
       resizeObserver.disconnect()
 
       // A wheel/trackpad scroll-up is explicit reading intent. Break the
-      // bottom-follow synchronously, before a same-frame content resize can
+      // bottom-follow synchrobeyondly, before a same-frame content resize can
       // ask use-stick-to-bottom to re-pin while its delayed scroll handler
       // still considers the thread locked.
       if (event.deltaY < 0) {

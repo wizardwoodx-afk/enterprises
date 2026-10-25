@@ -162,7 +162,7 @@ export function PersistentTerminal({ onAddSelectionToChat }: PersistentTerminalP
       }
 
       // Paused: no frame is coming (and none is wanted — the rect chase is the
-      // expensive half). Still settle visibility synchronously so a tab switch
+      // expensive half). Still settle visibility synchrobeyondly so a tab switch
       // while the window is unfocused can't leave the overlay stranded.
       if (rendererPaused()) {
         syncHidden()

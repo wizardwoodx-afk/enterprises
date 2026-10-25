@@ -1,4 +1,4 @@
-import { createCronTriggerController, type CronTriggerController } from '@hermes/shared'
+import { createCronTriggerController, type CronTriggerController } from '@beyond/shared'
 import { useStore } from '@nanostores/react'
 import { useQuery } from '@tanstack/react-query'
 import type * as React from 'react'
@@ -43,7 +43,7 @@ import {
   resumeCronJob,
   type SessionInfo,
   updateCronJob
-} from '@/hermes'
+} from '@/beyond'
 import { type Translations, useI18n } from '@/i18n'
 import { AlertTriangle } from '@/lib/icons'
 import { requestModelOptions } from '@/lib/model-options'
@@ -320,7 +320,7 @@ export function CronView({ onClose, onOpenSession, setStatusbarItemGroup: _setSt
   const [triggeringJobKeys, setTriggeringJobKeys] = useState<ReadonlySet<string>>(() => new Set())
   const triggerControllerRef = useRef<CronTriggerController | null>(null)
   // Accepted-but-unmaterialized triggers, by `${profile}:${jobId}`. The ref is
-  // written before the state set, so a queued row appears synchronously with
+  // written before the state set, so a queued row appears synchrobeyondly with
   // the click and the controller guard has no untracked window.
   const pendingTriggersRef = useRef(new Map<string, number>())
   const [pendingTriggers, setPendingTriggers] = useState<ReadonlyMap<string, number>>(() => new Map())

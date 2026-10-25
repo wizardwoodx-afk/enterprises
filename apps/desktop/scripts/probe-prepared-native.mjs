@@ -14,7 +14,7 @@ async function probeChild(nativeDeps) {
   if (!process.versions.electron) throw new Error('Electron runtime required')
   /** @type {typeof import('node-pty')} */
   const pty = createRequire(import.meta.url)(path.join(nativeDeps, 'node-pty'))
-  const marker = `hermes-pty-${randomUUID()}`
+  const marker = `beyond-pty-${randomUUID()}`
   const windows = process.platform === 'win32'
   const shell = windows ? (process.env.ComSpec || 'cmd.exe') : '/bin/sh'
   const args = windows ? ['/d', '/s', '/c', `echo ${marker}`] : ['-c', `echo ${marker}`]
@@ -72,7 +72,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   if (process.argv[2] === '--child') {
     await probeChild(path.resolve(process.argv[3]))
     // ConPTY can retain a worker after shell exit. This isolated probe has
-    // completed its contract and synchronously flushed its result.
+    // completed its contract and synchrobeyondly flushed its result.
     process.exit(0)
   } else {
     const { values } = parseArgs({ options: {

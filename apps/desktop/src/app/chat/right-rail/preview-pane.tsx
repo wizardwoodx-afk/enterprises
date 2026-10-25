@@ -195,12 +195,12 @@ function isModuleMimeError(message: string): boolean {
  * segfaults inside PrintCore — the whole app dies before any dialog
  * appears. Stub `print` in the guest so the native panel is never built;
  * the warn surfaces in the preview console via the existing pipe. The
- * `__hermesPrintGuard` flag keeps re-arms idempotent. Full print-to-PDF
+ * `__beyondPrintGuard` flag keeps re-arms idempotent. Full print-to-PDF
  * routing is the follow-up; this stops the crash.
  */
 const PREVIEW_PRINT_GUARD_SCRIPT =
-  '(function(){if(window.__hermesPrintGuard)return;window.__hermesPrintGuard=true;' +
-  'window.print=function(){console.warn("[Hermes] Printing is disabled in the in-app preview. ' +
+  '(function(){if(window.__beyondPrintGuard)return;window.__beyondPrintGuard=true;' +
+  'window.print=function(){console.warn("[Beyond] Printing is disabled in the in-app preview. ' +
   'Open the page in your browser to print.");};})()'
 
 function PreviewLoadError({
@@ -228,7 +228,7 @@ function PreviewLoadError({
             href={error.url}
             onClick={event => {
               event.preventDefault()
-              void window.hermesDesktop?.openExternal(error.url)
+              void window.beyondDesktop?.openExternal(error.url)
             }}
           >
             {compactUrl(error.url)}
@@ -461,7 +461,7 @@ export function PreviewPane({
           '({ width: window.innerWidth, height: window.innerHeight })'
         )) as { height: number; width: number }
 
-        const dataUrl = await window.hermesDesktop.capturePreview?.({ rect, viewport, webContentsId })
+        const dataUrl = await window.beyondDesktop.capturePreview?.({ rect, viewport, webContentsId })
 
         if (!dataUrl) {
           throw new Error('preview capture is unavailable')
@@ -702,7 +702,7 @@ export function PreviewPane({
 
     // Auto-open the preview console so the user can see progress events
     // streaming back from the background agent. Without this, clicking
-    // "Ask Hermes to restart the server" looked like it did nothing —
+    // "Ask Beyond to restart the server" looked like it did nothing —
     // the work was happening, but in a collapsed pane.
     consoleState.setOpen(true)
 
@@ -1013,8 +1013,8 @@ export function PreviewPane({
     if (
       target.kind !== 'file' ||
       isDesktopFsRemoteMode() ||
-      !window.hermesDesktop?.watchPreviewFile ||
-      !window.hermesDesktop?.onPreviewFileChanged
+      !window.beyondDesktop?.watchPreviewFile ||
+      !window.beyondDesktop?.onPreviewFileChanged
     ) {
       return
     }
@@ -1047,7 +1047,7 @@ export function PreviewPane({
       reloadPreview()
     }
 
-    const unsubscribe = window.hermesDesktop.onPreviewFileChanged(payload => {
+    const unsubscribe = window.beyondDesktop.onPreviewFileChanged(payload => {
       if (!active || payload.id !== watchId) {
         return
       }
@@ -1065,7 +1065,7 @@ export function PreviewPane({
       }, FILE_RELOAD_DEBOUNCE_MS)
     })
 
-    void window.hermesDesktop
+    void window.beyondDesktop
       .watchPreviewFile(target.url)
       .then(watch => {
         // The file was already gone when the watch was requested (a restored
@@ -1076,7 +1076,7 @@ export function PreviewPane({
         }
 
         if (!active) {
-          void window.hermesDesktop?.stopPreviewFileWatch?.(watch.id)
+          void window.beyondDesktop?.stopPreviewFileWatch?.(watch.id)
 
           return
         }
@@ -1099,7 +1099,7 @@ export function PreviewPane({
       }
 
       if (watchId) {
-        void window.hermesDesktop?.stopPreviewFileWatch?.(watchId)
+        void window.beyondDesktop?.stopPreviewFileWatch?.(watchId)
       }
     }
   }, [appendConsoleEntry, copy, reloadPreview, target.kind, target.url])
@@ -1136,7 +1136,7 @@ export function PreviewPane({
     const webview = document.createElement('webview') as PreviewWebview
     // A page with no background of its own shows white, as in a browser and the remote HTML frame below.
     webview.className = 'flex h-full w-full flex-1 bg-white'
-    webview.setAttribute('partition', 'persist:hermes-preview')
+    webview.setAttribute('partition', 'persist:beyond-preview')
     webview.setAttribute('src', initialUrl)
     webview.setAttribute('webpreferences', 'contextIsolation=yes,nodeIntegration=no,sandbox=yes')
 
@@ -1144,7 +1144,7 @@ export function PreviewPane({
     // clicked `_blank` anchor here. Admission is our side of the contract —
     // http/https only, so a guest page can never reach the local-file
     // opener — and the open itself goes through the audited
-    // `hermes:openExternal` channel, never a popup side effect.
+    // `beyond:openExternal` channel, never a popup side effect.
     const onGuestExternal = (event: Event) => {
       const detail = event as Event & { args?: unknown[]; channel?: string }
 
@@ -1155,7 +1155,7 @@ export function PreviewPane({
       const url = String(detail.args?.[0] ?? '')
 
       if (admitPreviewExternalUrl(url)) {
-        void window.hermesDesktop?.openExternal?.(url)
+        void window.beyondDesktop?.openExternal?.(url)
       }
     }
 
@@ -1296,7 +1296,7 @@ export function PreviewPane({
         return
       }
 
-      const zoom = window.hermesDesktop?.zoom?.factor?.() || 1
+      const zoom = window.beyondDesktop?.zoom?.factor?.() || 1
       // Window CSS point of the click (the menu anchors here).
       const windowX = params.x / zoom
       const windowY = params.y / zoom
@@ -1332,10 +1332,10 @@ export function PreviewPane({
             const webContentsId = webview.getWebContentsId?.()
 
             if (typeof webContentsId === 'number') {
-              void window.hermesDesktop?.contextMenuGuestAddWord?.({ webContentsId, word })
+              void window.beyondDesktop?.contextMenuGuestAddWord?.({ webContentsId, word })
             }
           },
-          copyImage: () => void window.hermesDesktop?.contextMenuCopyImage?.(),
+          copyImage: () => void window.beyondDesktop?.contextMenuCopyImage?.(),
           // The tag's edit commands act on the focused webContents, and the
           // menu click just parked focus on the HOST body — measured live:
           // selectAll() with host focus selected the address bar + chat
@@ -1507,7 +1507,7 @@ export function PreviewPane({
             onNavigate={navigateTo}
             onOpenExternal={
               !isBrowserWindow() && !canOpenBrowserWindow()
-                ? () => void window.hermesDesktop?.openExternal(currentUrl)
+                ? () => void window.beyondDesktop?.openExternal(currentUrl)
                 : undefined
             }
             onPopIn={isBrowserWindow() ? () => window.close() : undefined}

@@ -46,7 +46,7 @@ test('shutdown joins a removed start and prevents its late spawn', async () => {
   await assert.rejects(lifecycle.start(async () => {}))
 })
 
-test('shutdown retains a child before asynchronous claim and joins an earlier stop', async () => {
+test('shutdown retains a child before asynchrobeyond claim and joins an earlier stop', async () => {
   const exit = deferred()
   const stopChild = vi.fn()
   const lifecycle = createLocalBackendLifecycle({ stopChild, waitForExit: () => exit.promise, cancelSetup: () => {} })
@@ -192,5 +192,5 @@ test('the quit abort sentinel is marked as an expected shutdown transition', asy
 
   assert.equal(lifecycle.signal.aborted, true)
   assert.equal(isExpectedTransition(lifecycle.signal.reason), true)
-  assert.equal((lifecycle.signal.reason as Error).message, 'Hermes Desktop is quitting.')
+  assert.equal((lifecycle.signal.reason as Error).message, 'Beyond Desktop is quitting.')
 })

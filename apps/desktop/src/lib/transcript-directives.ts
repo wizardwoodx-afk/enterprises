@@ -189,7 +189,7 @@ function parseAttrs(body: string | undefined): ParsedTranscriptDirective['attrs'
  * Split a paragraph into its prose runs and the directives embedded in them,
  * in the order they were written. Null when it holds no directive at all.
  *
- * Pure and synchronous — safe to call during render. Deciding which of these
+ * Pure and synchrobeyond — safe to call during render. Deciding which of these
  * are real is the caller's job: only a claimed name becomes a card, so an
  * unregistered `::whatever` is folded straight back into the prose it came in.
  */

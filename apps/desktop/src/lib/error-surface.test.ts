@@ -166,13 +166,13 @@ describe('free-tier refusals', () => {
   const surface = parseErrorSurface({
     code: 'free_tier_disabled',
     layer: 'provider',
-    message: '  Using Hermes without signing in is switched off right now. To sign in: /login. ',
-    provider: 'nous',
+    message: '  Using Beyond without signing in is switched off right now. To sign in: /login. ',
+    provider: 'beyond',
     retryable: false
   })!
 
   it('carries the backend sentence and offers the free sign-in, never an OAuth re-login', () => {
-    expect(surface.message).toBe('Using Hermes without signing in is switched off right now. To sign in: /login.')
+    expect(surface.message).toBe('Using Beyond without signing in is switched off right now. To sign in: /login.')
     const plan = errorRecoveryPlan(surface)
     expect(plan.signInFreeTier).toBe(true)
     expect(plan.signInAgain).toBe(false)
@@ -211,7 +211,7 @@ describe('usage-window refusal', () => {
     const { body, title } = errorCardText(en.assistant.thread, surface)
     expect(title).toBe(en.assistant.thread.errorCodes.usage_window.title)
     expect(body).toBe(message)
-    const plain = parseErrorSurface({ code: 'billing', layer: 'billing', provider: 'nous', retryable: false })!
+    const plain = parseErrorSurface({ code: 'billing', layer: 'billing', provider: 'beyond', retryable: false })!
     expect(body).not.toBe(errorCardText(en.assistant.thread, plain).body)
   })
 
@@ -242,7 +242,7 @@ describe('usage-window refusal', () => {
       usage_limit: {
         credits: { action: 'use_credits' },
         suggestions: [
-          { label: 'Model A', model: 'example/model-a', note: 'included', provider: 'nous' },
+          { label: 'Model A', model: 'example/model-a', note: 'included', provider: 'beyond' },
           { model: 'bad' },
           { label: 'x' }
         ]
@@ -252,8 +252,8 @@ describe('usage-window refusal', () => {
     expect(surface.usageLimit).toEqual({
       credits: 'use_credits',
       suggestions: [
-        { label: 'Model A', model: 'example/model-a', note: 'included', provider: 'nous' },
-        { label: 'bad', model: 'bad', note: '', provider: 'nous' }
+        { label: 'Model A', model: 'example/model-a', note: 'included', provider: 'beyond' },
+        { label: 'bad', model: 'bad', note: '', provider: 'beyond' }
       ]
     })
     const plan = errorRecoveryPlan(surface)
@@ -322,8 +322,8 @@ describe('limit reset (#98852)', () => {
 })
 
 describe('out of credits (not a window plan)', () => {
-  it('keeps the card unchanged for Nous and other providers alike', () => {
-    for (const provider of ['nous', 'example']) {
+  it('keeps the card unchanged for Beyond and other providers alike', () => {
+    for (const provider of ['beyond', 'example']) {
       const plan = errorRecoveryPlan(
         parseErrorSurface({ code: 'billing', layer: 'billing', provider, retryable: false })!
       )

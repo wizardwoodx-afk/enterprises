@@ -1,4 +1,4 @@
-import { gaugeScope, gaugeTitle, PAYMENT_PAUSE_REASON } from '@hermes/shared'
+import { gaugeScope, gaugeTitle, PAYMENT_PAUSE_REASON } from '@beyond/shared'
 import { useStore } from '@nanostores/react'
 import { useQuery } from '@tanstack/react-query'
 
@@ -22,11 +22,11 @@ import type {
 import { $stepUpInFlight } from './use-step-up'
 
 export const EMPTY_BILLING_VALUE = '—'
-export const FALLBACK_PORTAL_BILLING_URL = 'https://portal.nousresearch.com/billing'
-export const FALLBACK_PORTAL_URL = 'https://portal.nousresearch.com'
+export const FALLBACK_PORTAL_BILLING_URL = 'https://portal.beyond.app/billing'
+export const FALLBACK_PORTAL_URL = 'https://portal.beyond.app'
 
 // The billing endpoint is the authoritative source of truth for balance / cap /
-// plan — the inference `x-nous-credits-*` headers are best-effort and can drift
+// plan — the inference `x-beyond-credits-*` headers are best-effort and can drift
 // out of sync (notably in team/org accounts where another member's spend moves
 // the shared balance without ever touching THIS client's headers). So the page
 // never trusts a cache: `staleTime: 0` + `refetchOnMount: 'always'` force a

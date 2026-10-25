@@ -2,9 +2,9 @@
  * Prune renderer-stored session references whose sessions no longer exist on
  * the backend.
  *
- * Pins (`hermes.desktop.pinnedSessions`), composer drafts
- * (`hermes:composer-drafts:v3`) and queued prompts
- * (`hermes.desktop.composerQueue.v1`) are keyed by session id and re-asserted
+ * Pins (`beyond.desktop.pinnedSessions`), composer drafts
+ * (`beyond:composer-drafts:v3`) and queued prompts
+ * (`beyond.desktop.composerQueue.v1`) are keyed by session id and re-asserted
  * or probed at boot. When a session is removed from state.db (retention purge,
  * manual delete, another surface pruning it), those keys go stale: nothing
  * ever drops them, so every boot re-requests the dead ids and the gateway
@@ -19,7 +19,7 @@
  * the id is deferred to a later pass instead of being dropped.
  */
 
-import { getSession } from '@/hermes'
+import { getSession } from '@/beyond'
 import { mapPool } from '@/lib/pool'
 import { clearSessionDraft, stashedDraftScopes } from '@/store/composer'
 import { $queuedPromptsBySession, clearQueuedPrompts } from '@/store/composer-queue'
@@ -170,7 +170,7 @@ function dropDeadId(id: string): void {
   }
 
   // Forget the pin's sync bookkeeping BEFORE unpinning: the reconcile listener
-  // fires synchronously on unpin, and with the id still tracked it would
+  // fires synchrobeyondly on unpin, and with the id still tracked it would
   // re-PATCH the dead id (a fresh 404 on every boot — the noise we're removing).
   if ($pinnedSessionIds.get().includes(id)) {
     forgetPinSyncState(id)
@@ -193,7 +193,7 @@ async function sweepOnce(requireLoaded = true): Promise<void> {
     return
   }
 
-  if (typeof window === 'undefined' || !window.hermesDesktop) {
+  if (typeof window === 'undefined' || !window.beyondDesktop) {
     return
   }
 

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { Button } from '@/components/ui/button'
-import type { HermesGateway, ProfileScope } from '@/hermes'
+import type { BeyondGateway, ProfileScope } from '@/beyond'
 import { useI18n } from '@/i18n'
 import { $freeTierStatus } from '@/store/free-tier'
 import { $freeTierSignIn, $openAppWindows } from '@/store/free-tier-sign-in'
@@ -42,7 +42,7 @@ import type { AccountRow, ConnectorCardModel, ConnectorsFilter } from './types'
 const toolsListKey = (card: ConnectorCardModel) => (card.residency === 'local' ? localServerName(card) : card.slug)
 
 export interface ConnectorsTabProps {
-  gateway: HermesGateway | null
+  gateway: BeyondGateway | null
   profile: ProfileScope
 }
 

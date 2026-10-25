@@ -8,20 +8,20 @@ import { expect, test } from 'vitest'
 import { desktopMainProcesses, type InstallFacts, installProcesses, releaseDir } from './harness'
 
 // Electron 44 zeroes its processes' /proc/<pid>/environ, so the installed app shows no
-// HERMES_HOME. A copy of node under the install's release dir, started with an empty
+// BEYOND_HOME. A copy of node under the install's release dir, started with an empty
 // environment, is that process.
 test.skipIf(process.platform !== 'linux')(
-  'the install census still sees the packaged app when its environment names no HERMES_HOME',
+  'the install census still sees the packaged app when its environment names no BEYOND_HOME',
   async () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'update census '))
 
     const facts = {
-      hermesHome: path.join(root, 'home', '.hermes'),
+      beyondHome: path.join(root, 'home', '.beyond'),
       checkout: path.join(root, 'checkout')
     } as InstallFacts
 
     fs.mkdirSync(releaseDir(facts), { recursive: true })
-    const exe = path.join(releaseDir(facts), 'Hermes')
+    const exe = path.join(releaseDir(facts), 'Beyond')
     fs.copyFileSync(process.execPath, exe)
     const app = spawn(exe, ['-e', 'setTimeout(() => {}, 60_000)'], { env: {}, stdio: 'ignore' })
 

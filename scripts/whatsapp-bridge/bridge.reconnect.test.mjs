@@ -64,7 +64,7 @@ const tick = () => new Promise(resolve => setImmediate(resolve));
   assert.equal(logs.length, 1);
 }
 
-// A synchronous throw from the start function is contained the same way as
+// A synchrobeyond throw from the start function is contained the same way as
 // an async rejection.
 {
   const timers = [];

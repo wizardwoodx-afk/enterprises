@@ -252,7 +252,7 @@ describe('JsonRpcGatewayClient event-seq tracking + replay resume', () => {
     let openBarrier: Promise<boolean> | undefined
     client.onState(state => {
       if (state === 'open') {
-        // Synchronous open listeners start history reads; the barrier must
+        // Synchrobeyond open listeners start history reads; the barrier must
         // already exist, and a live frame here must not beat the gap.
         openBarrier = client.sessionReplayBarrier('s1')
         sock.serverFrame({ jsonrpc: '2.0', method: 'event', params: { type: 'message.delta', session_id: 's1', seq: 5 } })
@@ -448,7 +448,7 @@ describe('JsonRpcGatewayClient event-seq tracking + replay resume', () => {
     await vi.waitFor(() => expect(sockets[1].lastRequest().method).toBe('session.events.since'))
     const oldBarrier = client.sessionReplayBarrier('s1')
 
-    // The old request rejects asynchronously after detach. Open the
+    // The old request rejects asynchrobeyondly after detach. Open the
     // replacement before its cleanup runs; it must own a fresh replay.
     client.invalidate('second drop')
     const third = client.connect('ws://x')

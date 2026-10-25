@@ -20,7 +20,7 @@ afterEach(async (): Promise<void> => {
 })
 
 test('ordinary Windows preparation owns temporary bytes while a resumable download retains its durable file', async (): Promise<void> => {
-  const directory: string = await mkdtemp(path.join(os.tmpdir(), 'hermes-artifact-lifetime-'))
+  const directory: string = await mkdtemp(path.join(os.tmpdir(), 'beyond-artifact-lifetime-'))
   directories.push(directory)
   const bytes: Buffer = Buffer.from('digest-bound download')
 
@@ -41,12 +41,12 @@ test('ordinary Windows preparation owns temporary bytes while a resumable downlo
   const identity = {
     token: 'a'.repeat(16),
     displayName: 'Preview',
-    appId: 'chat.nous.preview',
+    appId: 'chat.beyond.preview',
     appNamePascal: 'Preview',
     artifactNamePascal: 'Preview',
     cliName: 'preview',
     windowsExecutableName: 'preview',
-    msixAppIdWithOrg: 'NousResearch.Preview'
+    msixAppIdWithOrg: 'beyond-app.Preview'
   }
 
   const target: ChannelTarget = {
@@ -54,7 +54,7 @@ test('ordinary Windows preparation owns temporary bytes while a resumable downlo
       schema: 1,
       state: 'active',
       name: 'preview',
-      repository: 'NousResearch/hermes-agent',
+      repository: 'beyond-app/beyond',
       policy: 'preview',
       revision: 1,
       nextSequence: 2,
@@ -69,7 +69,7 @@ test('ordinary Windows preparation owns temporary bytes while a resumable downlo
         buildId: 'b'.repeat(32),
         channel: 'preview',
         sequence: 1,
-        repository: 'NousResearch/hermes-agent',
+        repository: 'beyond-app/beyond',
         commit: 'c'.repeat(40),
         sourceVersion: '1.0.0',
         version: '0.0.1',

@@ -37,14 +37,14 @@ export function spawnWslgLaunch(args: string[]) {
 
   try {
     // Keep the original inspector argv/env for the app, but release the port
-    // synchronously first: the waiting supervisor must not own its debugger.
+    // synchrobeyondly first: the waiting supervisor must not own its debugger.
     if (inspector.url()) {
       inspector.close()
     }
 
     return spawn(process.execPath, args, { stdio, env })
   } finally {
-    // spawn duplicates the fd synchronously. Keeping our copy would suppress
+    // spawn duplicates the fd synchrobeyondly. Keeping our copy would suppress
     // EOF at the outer launcher until the entire desktop exits (also on error).
     if (readyFd !== undefined) {
       closeSync(readyFd)

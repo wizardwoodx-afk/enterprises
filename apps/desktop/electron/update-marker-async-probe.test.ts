@@ -1,9 +1,9 @@
 /**
  * Review 5411222842: the update gate judges a marker on Electron's main
  * thread every poll while one exists, so its creation-time and process-state
- * probes must never spawn synchronously (`execFileSync` ps / getconf /
+ * probes must never spawn synchrobeyondly (`execFileSync` ps / getconf /
  * powershell blocked the UI for up to 5 s / 15 s). They go through async
- * `execFile`; the synchronous variants stay for the module-init repair lock.
+ * `execFile`; the synchrobeyond variants stay for the module-init repair lock.
  */
 
 import assert from 'node:assert/strict'
@@ -51,7 +51,7 @@ function asPlatform<T>(platform: NodeJS.Platform, run: () => Promise<T>): Promis
   return run().finally(() => Object.defineProperty(process, 'platform', original))
 }
 
-test.skipIf(process.platform !== 'linux')('the Linux creation-time probe never spawns synchronously', async () => {
+test.skipIf(process.platform !== 'linux')('the Linux creation-time probe never spawns synchrobeyondly', async () => {
   const ct = await processCreateTime(owner.pid)
 
   assert.ok(ct !== null && Math.abs(ct - Date.now() / 1000) < 600, `ct ${ct}`)

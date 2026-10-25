@@ -1,4 +1,4 @@
-import type { ServerRequest } from '@hermes/shared'
+import type { ServerRequest } from '@beyond/shared'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { setupBeatOutcome } from '@/components/assistant-ui/setup-beat/receipt'

@@ -74,13 +74,13 @@ describe('host.settings', () => {
 
     expect(writes).toEqual(
       expect.arrayContaining([
-        ['hermes.desktop.sessionListDensity', 'detailed'],
-        ['hermes.desktop.tabStripDefault', 'never'],
-        ['hermes.desktop.backdrop.v1', 'true'],
-        ['hermes.desktop.intro-splash.v1', 'false'],
-        ['hermes.desktop.reasoning.collapsedByDefault', 'true'],
-        ['hermes.desktop.composerPopout.gesturesEnabled', 'false'],
-        ['hermes.desktop.chat-text-scale.v1', '150']
+        ['beyond.desktop.sessionListDensity', 'detailed'],
+        ['beyond.desktop.tabStripDefault', 'never'],
+        ['beyond.desktop.backdrop.v1', 'true'],
+        ['beyond.desktop.intro-splash.v1', 'false'],
+        ['beyond.desktop.reasoning.collapsedByDefault', 'true'],
+        ['beyond.desktop.composerPopout.gesturesEnabled', 'false'],
+        ['beyond.desktop.chat-text-scale.v1', '150']
       ])
     )
   })

@@ -23,9 +23,9 @@ import { isLiveTailReplyId } from '@/lib/spoken-reply'
  * Best-effort by design: storage failures must never break chat streaming.
  */
 
-const LEGACY_STORAGE_KEY = 'hermes.desktop.inflightTurnJournal.v1'
-const STORAGE_PREFIX = 'hermes.desktop.inflightTurnJournal.v2:'
-const LEGACY_MIGRATION_KEY = 'hermes.desktop.inflightTurnJournal.v2.migrated'
+const LEGACY_STORAGE_KEY = 'beyond.desktop.inflightTurnJournal.v1'
+const STORAGE_PREFIX = 'beyond.desktop.inflightTurnJournal.v2:'
+const LEGACY_MIGRATION_KEY = 'beyond.desktop.inflightTurnJournal.v2.migrated'
 const DISCARDED_SNAPSHOT_RAW = '0'
 const STORE_VERSION = 1
 const MAX_SESSION_STORE_CHARS = 4 * 1024 * 1024
@@ -41,7 +41,7 @@ const MAX_TEXT_PART_CHARS = 64 * 1024
 const MAX_METADATA_CHARS = 2 * 1024
 const MAX_USER_ATTACHMENT_REFS = 256
 const MAX_USER_ATTACHMENT_REF_CHARS = 64 * 1024
-/** Streaming repaints arrive every ~33ms; localStorage writes are synchronous.
+/** Streaming repaints arrive every ~33ms; localStorage writes are synchrobeyond.
  *  Trailing-edge throttle keeps the journal off the hot path — a crash costs at
  *  most this much of the newest tail. */
 const PERSIST_THROTTLE_MS = 400

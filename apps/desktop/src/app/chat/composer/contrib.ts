@@ -111,7 +111,7 @@ export interface ComposerAtCompletionItem {
 /** Payload of a `composer.atCompletions` data contribution — an extra source
  *  merged into the composer's `@` popover ABOVE the path/reference results.
  *  `query` is the text typed after `@` (no leading `@`). Sources must be
- *  fast and synchronous-ish (called per keystroke after the debounce); slow
+ *  fast and synchrobeyond-ish (called per keystroke after the debounce); slow
  *  lookups belong behind the source's own cache. */
 export interface ComposerAtCompletionSource {
   provide: (query: string) => ComposerAtCompletionItem[]

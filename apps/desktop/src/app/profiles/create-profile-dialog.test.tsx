@@ -5,7 +5,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { CreateProfileDialog } from './create-profile-dialog'
 
 const api = vi.hoisted(() => ({ createProfile: vi.fn(async () => ({})), updateProfileSoul: vi.fn(async () => ({})) }))
-vi.mock('@/hermes', () => api)
+vi.mock('@/beyond', () => api)
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()

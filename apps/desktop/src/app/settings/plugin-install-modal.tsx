@@ -131,7 +131,7 @@ function RepositoryEntry({ request }: { request: PluginInstallRequest }) {
 }
 
 /**
- * THE plugin install dialog, for every door: a reviewed catalog pick (Plugins tab, `hermes://` link,
+ * THE plugin install dialog, for every door: a reviewed catalog pick (Plugins tab, `beyond://` link,
  * the setup chat's plugins card) and a raw git URL. A catalog entry shows its name, one line, "Verified"
  * and Install; its particulars wait behind Advanced. A git URL is marked Unverified with the same
  * particulars open, because there they are the security check. Install always turns the plugin on
@@ -324,7 +324,7 @@ function InstallView({ request, installing, onInstallingChange }: InstallViewPro
   const pinInvalid = pin !== '' && !COMMIT_SHA_RE.test(pin)
   // Hidden while a retry runs, so the loader is the only thing on screen.
   const failure = installing ? null : (installError ?? probeFailure(probe, m.probeUnavailable))
-  const line = `${verified ? m.reviewedByNous : m.securityIntro} ${(enable ? m.installsAndEnables : m.installsOnly)(targetLabel)}`
+  const line = `${verified ? m.reviewedByBeyond : m.securityIntro} ${(enable ? m.installsAndEnables : m.installsOnly)(targetLabel)}`
 
   const install = async () => {
     onInstallingChange(true)

@@ -3,7 +3,7 @@ import { act, cleanup, fireEvent, render as renderUi, screen, waitFor } from '@t
 import type { ReactNode } from 'react'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesGateway } from '@/hermes'
+import type { BeyondGateway } from '@/beyond'
 import { handleApprovalKey, releaseApprovalKey } from '@/lib/keybinds/approval-keys'
 import { $gateway } from '@/store/gateway'
 import {
@@ -43,7 +43,7 @@ function setRequest(
   setApprovalRequest({ allowPermanent, command, description: 'dangerous command', sessionId: 'sess-1', ...extra })
 }
 
-/** A live `approval` server request the card answers synchronously. */
+/** A live `approval` server request the card answers synchrobeyondly. */
 function liveApproval(id = 'srq-approval') {
   const respond = vi.fn()
   rememberServerRequest({ fail: vi.fn(), id, method: 'approval', params: {}, respond })
@@ -53,7 +53,7 @@ function liveApproval(id = 'srq-approval') {
 
 function mockGateway() {
   const request = vi.fn().mockResolvedValue({ resolved: true })
-  $gateway.set({ request } as unknown as HermesGateway)
+  $gateway.set({ request } as unknown as BeyondGateway)
 
   return request
 }

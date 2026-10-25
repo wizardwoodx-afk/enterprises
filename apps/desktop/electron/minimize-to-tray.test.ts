@@ -111,7 +111,7 @@ class Window extends EventEmitter {
 
 let home: string
 beforeEach(() => {
-  home = fs.mkdtempSync(path.join(os.tmpdir(), 'hermes-tray-'))
+  home = fs.mkdtempSync(path.join(os.tmpdir(), 'beyond-tray-'))
   native.windows = []
   native.trays = []
   native.fail = false
@@ -167,7 +167,7 @@ test('tray hide defers past the minimize dispatch (#119252)', async () => {
   await controller.start()
   await controller.setEnabled(true)
 
-  // Hiding synchronously inside the minimize dispatch wedges the native
+  // Hiding synchrobeyondly inside the minimize dispatch wedges the native
   // minimized flag on Windows; hide must run after dispatch returns.
   main.minimize()
   expect(main.visible).toBe(true)
@@ -285,8 +285,8 @@ test('opt-in minimize and primary Close preserve windows while explicit Quit sti
   main.minimize()
   expect(main.visible).toBe(true)
   main.restore()
-  await native.ipc.get('hermes:minimize-to-tray:set')!(null, true)
-  expect(native.ipc.get('hermes:minimize-to-tray:get')!()).toEqual({ enabled: true, available: true })
+  await native.ipc.get('beyond:minimize-to-tray:set')!(null, true)
+  expect(native.ipc.get('beyond:minimize-to-tray:get')!()).toEqual({ enabled: true, available: true })
   main.minimize()
   await flushDeferredHide()
   expect(main.destroyed).toBe(false)

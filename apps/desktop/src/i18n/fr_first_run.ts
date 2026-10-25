@@ -38,8 +38,8 @@ export const frFirstRun: FirstRunCopy = {
     notNow: 'Pas maintenant'
   },
   intro: {
-    greeting: 'Bonjour, je suis Hermes.',
-    plan: 'Configurons tout pour vous. Ensuite, nous ferons quelque chose de génial.'
+    greeting: 'Bonjour, je suis Beyond.',
+    plan: 'Configurons tout pour vous. Ensuite, beyond ferons quelque chose de génial.'
   },
   rerun: {
     title: "Relancer l'accueil",

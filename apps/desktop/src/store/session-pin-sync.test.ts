@@ -1,12 +1,12 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/beyond'
 
 const patch = vi.fn<(id: string, pinned: boolean, profile?: null | string) => Promise<{ ok: boolean }>>(() =>
   Promise.resolve({ ok: true })
 )
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/beyond', () => ({
   // The layout store reaches the profile store, which sets the request profile
   // at import time; this suite only cares about the pin call.
   setApiRequestProfile: () => {},
@@ -26,7 +26,7 @@ const flush = () => Promise.resolve()
 
 beforeAll(() => {
   ;(globalThis as { window?: unknown }).window ??= {}
-  ;(window as unknown as { hermesDesktop: unknown }).hermesDesktop = {}
+  ;(window as unknown as { beyondDesktop: unknown }).beyondDesktop = {}
   // Attach the listeners once — module state is process-global.
   watchSessionPins()
 })
@@ -212,7 +212,7 @@ describe('watchSessionPins remote pull', () => {
 
   it('does not revert a fresh local pin while the loaded row is still stale (#74570)', async () => {
     // The row is already loaded and says pinned=false when the user pins.
-    // The pin listener fires reconcile synchronously — before any PATCH — and
+    // The pin listener fires reconcile synchrobeyondly — before any PATCH — and
     // the stale row must not win over the local intent.
     $sessions.set([row('fresh', { pinned: false })])
     await flush()

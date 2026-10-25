@@ -1,4 +1,4 @@
-import { GatewayReauthRequiredError } from '@hermes/shared'
+import { GatewayReauthRequiredError } from '@beyond/shared'
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -59,9 +59,9 @@ const localConnection = {
 beforeEach(() => {
   getConnectionConfig.mockResolvedValue(localConnection)
   saveConnectionConfig.mockResolvedValue(localConnection)
-  cloudStatus.mockResolvedValue({ portalBaseUrl: 'https://portal.nousresearch.com', signedIn: true })
+  cloudStatus.mockResolvedValue({ portalBaseUrl: 'https://portal.beyond.app', signedIn: true })
   cloudDiscover.mockResolvedValue({ agents: [], org: null })
-  Object.defineProperty(window, 'hermesDesktop', {
+  Object.defineProperty(window, 'beyondDesktop', {
     configurable: true,
     value: {
       cloud: {
@@ -88,7 +88,7 @@ describe('GatewaySettings', () => {
     saveConnectionConfig.mockReturnValueOnce(pendingSave.promise)
     const probeConnectionConfig = vi.fn().mockReturnValue(pendingProbe.promise)
 
-    Object.assign(window.hermesDesktop, { probeConnectionConfig })
+    Object.assign(window.beyondDesktop, { probeConnectionConfig })
     render(<GatewaySettings />)
     const saveButton = (await screen.findByRole('button', { name: 'Save for next restart' })) as HTMLButtonElement
     await waitFor(() => expect(probeConnectionConfig).toHaveBeenCalledWith('https://a.example'))
@@ -114,7 +114,7 @@ describe('GatewaySettings', () => {
     const oauthLoginConnectionConfig = vi.fn().mockResolvedValue({ connected: true })
     const applyConnectionConfig = vi.fn().mockResolvedValue(localConnection)
     const testConnectionConfig = vi.fn()
-    Object.assign(window.hermesDesktop, {
+    Object.assign(window.beyondDesktop, {
       oauthLoginConnectionConfig,
       applyConnectionConfig,
       testConnectionConfig,
@@ -162,7 +162,7 @@ describe('GatewaySettings', () => {
     saveConnectionConfig.mockResolvedValue(saved)
     const pendingSave = deferred<typeof saved>()
     saveConnectionConfig.mockReturnValueOnce(pendingSave.promise)
-    Object.assign(window.hermesDesktop, {
+    Object.assign(window.beyondDesktop, {
       probeConnectionConfig: vi.fn().mockResolvedValue({ reachable: true, authMode: 'token', providers: [] })
     })
     render(<GatewaySettings />)
@@ -202,7 +202,7 @@ describe('GatewaySettings', () => {
     const pendingTest = deferred<{ ok: boolean; baseUrl: string }>()
     const testConnectionConfig = vi.fn().mockReturnValue(pendingTest.promise)
 
-    Object.assign(window.hermesDesktop, { probeConnectionConfig, testConnectionConfig })
+    Object.assign(window.beyondDesktop, { probeConnectionConfig, testConnectionConfig })
     render(<GatewaySettings />)
     const token = await screen.findByPlaceholderText('Paste session token')
     fireEvent.change(token, { target: { value: 'old-token' } })
@@ -266,7 +266,7 @@ describe('GatewaySettings', () => {
       orgs: [{ id: 'new-team', name: 'New team', role: 'OWNER' }]
     })
 
-    Object.assign(window.hermesDesktop, {
+    Object.assign(window.beyondDesktop, {
       oauthLogoutConnectionConfig,
       connections: { save },
       cloud: { status: vi.fn().mockResolvedValue({ signedIn: true }), discover, agentSignIn }
@@ -298,7 +298,7 @@ describe('GatewaySettings', () => {
     }
     const agentSignIn = vi.fn()
     const applyConnectionConfig = vi.fn()
-    Object.assign(window.hermesDesktop, {
+    Object.assign(window.beyondDesktop, {
       applyConnectionConfig,
       cloud: {
         status: vi.fn().mockResolvedValue({ signedIn: false }),
@@ -320,7 +320,7 @@ describe('GatewaySettings', () => {
     getConnectionConfig.mockResolvedValue({ ...localConnection, mode: 'cloud' })
     const agentSignIn = vi.fn().mockResolvedValue({ connected: true })
     const applyConnectionConfig = vi.fn().mockResolvedValue({ ...localConnection, mode: 'cloud' })
-    Object.assign(window.hermesDesktop, {
+    Object.assign(window.beyondDesktop, {
       applyConnectionConfig,
       cloud: {
         status: vi.fn().mockResolvedValue({ signedIn: true }),
@@ -351,7 +351,7 @@ describe('GatewaySettings', () => {
     expect(agentSignIn).toHaveBeenCalledExactlyOnceWith('https://new-a.example')
     expect(applyConnectionConfig).toHaveBeenCalledTimes(1)
   })
-  // #114856: an env-pinned remote (HERMES_DESKTOP_REMOTE_URL) whose session
+  // #114856: an env-pinned remote (BEYOND_DESKTOP_REMOTE_URL) whose session
   // lapsed could not be re-authenticated from Settings → Gateway at all — the
   // whole remote block (URL + probe + Authentication) was hidden behind
   // `!state.envOverride`, so the recovery card's "Gateway settings" escape led
@@ -372,7 +372,7 @@ describe('GatewaySettings', () => {
 
     const oauthProbe = {
       authMode: 'oauth',
-      providers: [{ displayName: 'Nous Research', name: 'nous', supportsPassword: false }],
+      providers: [{ displayName: 'Beyond', name: 'beyond', supportsPassword: false }],
       reachable: true
     }
 
@@ -384,14 +384,14 @@ describe('GatewaySettings', () => {
       // Sign-in persists the URL + oauth mode before opening the login window;
       // the saved echo must stay remote or the signing sequence resets.
       saveConnectionConfig.mockResolvedValue({ ...envRemote, remoteAuthMode: 'oauth' })
-      Object.assign(window.hermesDesktop, { oauthLoginConnectionConfig, probeConnectionConfig })
+      Object.assign(window.beyondDesktop, { oauthLoginConnectionConfig, probeConnectionConfig })
 
       render(<GatewaySettings embedded />)
 
       // The env override still owns the URL: the editor stays read-only.
       expect(((await screen.findByDisplayValue(envUrl)) as HTMLInputElement).disabled).toBe(true)
 
-      fireEvent.click(await screen.findByRole('button', { name: 'Sign in with Nous Research' }))
+      fireEvent.click(await screen.findByRole('button', { name: 'Sign in with Beyond' }))
 
       await waitFor(() => expect(oauthLoginConnectionConfig).toHaveBeenCalledWith(envUrl))
     })
@@ -400,7 +400,7 @@ describe('GatewaySettings', () => {
       const oauthLoginConnectionConfig = vi.fn()
 
       getConnectionConfig.mockResolvedValue({ ...envRemote, envOverride: false, remoteOauthConnected: false })
-      Object.assign(window.hermesDesktop, {
+      Object.assign(window.beyondDesktop, {
         oauthLoginConnectionConfig,
         probeConnectionConfig: vi.fn().mockResolvedValue(oauthProbe)
       })
@@ -408,7 +408,7 @@ describe('GatewaySettings', () => {
       render(<GatewaySettings embedded />)
 
       expect(((await screen.findByDisplayValue(envUrl)) as HTMLInputElement).disabled).toBe(false)
-      expect(await screen.findByRole('button', { name: 'Sign in with Nous Research' })).toBeTruthy()
+      expect(await screen.findByRole('button', { name: 'Sign in with Beyond' })).toBeTruthy()
       expect(oauthLoginConnectionConfig).not.toHaveBeenCalled()
     })
   })
@@ -449,7 +449,7 @@ describe('GatewaySettings', () => {
     const mountCloudPanelWith = (cloud: Record<string, unknown>) => {
       getConnectionConfig.mockResolvedValue({ ...localConnection, mode: 'cloud', remoteUrl: saved.url })
       registry.value = { connections: [saved] }
-      Object.assign(window.hermesDesktop, { cloud })
+      Object.assign(window.beyondDesktop, { cloud })
     }
 
     it('re-signs a lapsed saved gateway session via the portal cascade and retries the switch', async () => {
@@ -459,7 +459,7 @@ describe('GatewaySettings', () => {
         agentSignIn: vi.fn().mockResolvedValue({ connected: true })
       })
       const oauthLogoutConnectionConfig = vi.fn().mockResolvedValue({ ok: true })
-      Object.assign(window.hermesDesktop, { oauthLogoutConnectionConfig })
+      Object.assign(window.beyondDesktop, { oauthLogoutConnectionConfig })
       selectConnection.mockRejectedValueOnce(reauthError).mockResolvedValueOnce(undefined)
 
       render(<GatewaySettings embedded />)
@@ -470,9 +470,9 @@ describe('GatewaySettings', () => {
       expect(selectConnection).toHaveBeenNthCalledWith(1, saved.id)
       expect(selectConnection).toHaveBeenNthCalledWith(2, saved.id)
       expect(oauthLogoutConnectionConfig).toHaveBeenCalledWith(saved.url)
-      expect(window.hermesDesktop!.cloud!.agentSignIn).toHaveBeenCalledWith(saved.url)
+      expect(window.beyondDesktop!.cloud!.agentSignIn).toHaveBeenCalledWith(saved.url)
       // The portal session was already live: no interactive portal login.
-      expect(window.hermesDesktop!.cloud!.login).not.toHaveBeenCalled()
+      expect(window.beyondDesktop!.cloud!.login).not.toHaveBeenCalled()
       registry.value = null
     })
 
@@ -488,7 +488,7 @@ describe('GatewaySettings', () => {
       registry.value = { connections: [savedWithoutUrl] }
       const agentSignIn = vi.fn()
       const oauthLogoutConnectionConfig = vi.fn()
-      Object.assign(window.hermesDesktop, {
+      Object.assign(window.beyondDesktop, {
         oauthLogoutConnectionConfig,
         cloud: {
           status: vi.fn().mockResolvedValue({ signedIn: true }),
@@ -515,7 +515,7 @@ describe('GatewaySettings', () => {
         agentSignIn: vi.fn()
       })
       const oauthLogoutConnectionConfig = vi.fn()
-      Object.assign(window.hermesDesktop, { oauthLogoutConnectionConfig })
+      Object.assign(window.beyondDesktop, { oauthLogoutConnectionConfig })
       selectConnection.mockRejectedValueOnce(new Error('Timed out connecting to "Research".'))
 
       render(<GatewaySettings embedded />)
@@ -524,7 +524,7 @@ describe('GatewaySettings', () => {
 
       await waitFor(() => expect(selectConnection).toHaveBeenCalledTimes(1))
       expect(oauthLogoutConnectionConfig).not.toHaveBeenCalled()
-      expect(window.hermesDesktop!.cloud!.agentSignIn).not.toHaveBeenCalled()
+      expect(window.beyondDesktop!.cloud!.agentSignIn).not.toHaveBeenCalled()
       registry.value = null
     })
 
@@ -535,7 +535,7 @@ describe('GatewaySettings', () => {
         agentSignIn: vi.fn().mockResolvedValue({ connected: true })
       })
       const oauthLogoutConnectionConfig = vi.fn().mockResolvedValue({ ok: true })
-      Object.assign(window.hermesDesktop, { oauthLogoutConnectionConfig })
+      Object.assign(window.beyondDesktop, { oauthLogoutConnectionConfig })
       selectConnection.mockRejectedValueOnce(reauthError).mockResolvedValueOnce(undefined)
 
       render(<GatewaySettings embedded />)
@@ -543,8 +543,8 @@ describe('GatewaySettings', () => {
       fireEvent.click(within(row).getByRole('button', { name: 'Use gateway' }))
 
       await waitFor(() => expect(selectConnection).toHaveBeenCalledTimes(2))
-      expect(window.hermesDesktop!.cloud!.login).toHaveBeenCalledTimes(1)
-      expect(window.hermesDesktop!.cloud!.agentSignIn).toHaveBeenCalledWith(saved.url)
+      expect(window.beyondDesktop!.cloud!.login).toHaveBeenCalledTimes(1)
+      expect(window.beyondDesktop!.cloud!.agentSignIn).toHaveBeenCalledWith(saved.url)
       registry.value = null
     })
   })
@@ -557,12 +557,12 @@ describe('GatewaySettings', () => {
       sshUser: '',
       sshPort: 22,
       sshKeyPath: '',
-      sshRemoteHermesPath: '',
+      sshRemoteBeyondPath: '',
       sshRemoteProfile: ''
     })
     const cause = 'The Windows remote probe failed. (probe: Path was not found: C:\\h\\bin\\python.exe)'
     const testConnectionConfig = vi.fn().mockResolvedValue({ reachable: false, sshError: 'unknown', error: cause })
-    Object.assign(window.hermesDesktop, { testConnectionConfig })
+    Object.assign(window.beyondDesktop, { testConnectionConfig })
 
     render(<GatewaySettings />)
     fireEvent.click(await screen.findByRole('button', { name: 'Test SSH' }))
@@ -589,11 +589,11 @@ describe('GatewaySettings', () => {
       sshUser: '',
       sshPort: 22,
       sshKeyPath: '',
-      sshRemoteHermesPath: '',
+      sshRemoteBeyondPath: '',
       sshRemoteProfile: ''
     })
     const testConnectionConfig = vi.fn().mockResolvedValue({ reachable: false, sshError: 'interactive-auth' })
-    Object.assign(window.hermesDesktop, { testConnectionConfig })
+    Object.assign(window.beyondDesktop, { testConnectionConfig })
 
     render(<GatewaySettings />)
     fireEvent.click(await screen.findByRole('button', { name: 'Test SSH' }))
@@ -623,11 +623,11 @@ describe('GatewaySettings', () => {
       sshUser: '',
       sshPort: 22,
       sshKeyPath: '',
-      sshRemoteHermesPath: '',
+      sshRemoteBeyondPath: '',
       sshRemoteProfile: ''
     })
     const sshConfigHosts = vi.fn().mockResolvedValue({ hosts: ['github.com'] })
-    Object.assign(window.hermesDesktop, { sshConfigHosts })
+    Object.assign(window.beyondDesktop, { sshConfigHosts })
 
     render(<GatewaySettings />)
 
@@ -667,7 +667,7 @@ describe('GatewaySettings', () => {
     getConnectionConfig.mockResolvedValue({
       ...localConnection,
       mode: 'cloud',
-      remoteUrl: 'https://portal.nousresearch.com'
+      remoteUrl: 'https://portal.beyond.app'
     })
 
     render(<GatewaySettings />)
@@ -692,7 +692,7 @@ describe('GatewaySettings', () => {
     getConnectionConfig.mockResolvedValue({
       ...localConnection,
       mode: 'cloud',
-      remoteUrl: 'https://portal.nousresearch.com'
+      remoteUrl: 'https://portal.beyond.app'
     })
 
     render(<GatewaySettings />)
@@ -717,7 +717,7 @@ describe('GatewaySettings', () => {
     getConnectionConfig.mockResolvedValue({
       ...localConnection,
       mode: 'cloud',
-      remoteUrl: 'https://portal.nousresearch.com'
+      remoteUrl: 'https://portal.beyond.app'
     })
 
     render(<GatewaySettings />)

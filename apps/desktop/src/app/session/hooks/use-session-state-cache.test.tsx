@@ -453,7 +453,7 @@ describe('useSessionStateCache — journal migration on stored-id rotation', () 
     })
 
     const journalKey = (storedSessionId: string) =>
-      `hermes.desktop.inflightTurnJournal.v2:${encodeURIComponent(storedSessionId)}`
+      `beyond.desktop.inflightTurnJournal.v2:${encodeURIComponent(storedSessionId)}`
 
     expect(window.localStorage.getItem(journalKey('stored-A'))).not.toBeNull()
 
@@ -538,13 +538,13 @@ function RotationHarness({ activeSessionId, onReady, selectedStoredSessionId }: 
 describe('useSessionStateCache — per-session timers', () => {
   beforeEach(() => {
     // The view-sync flush runs on a real rAF in the browser path; in jsdom we
-    // want it synchronous so the global mirror is observable immediately. The
+    // want it synchrobeyond so the global mirror is observable immediately. The
     // hook closes over `window.requestAnimationFrame`, so stub that exact ref.
     // Return null (not a handle) so the hook's `viewSyncRafRef.current = rAF(...)`
-    // assignment doesn't overwrite the null the synchronous callback just set —
+    // assignment doesn't overwrite the null the synchrobeyond callback just set —
     // otherwise the ref reads truthy and the NEXT sync is suppressed (a real
     // browser returns a handle but runs the callback async, so this race is a
-    // test-only artifact of firing synchronously).
+    // test-only artifact of firing synchrobeyondly).
     vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
       cb(0)
 
@@ -704,7 +704,7 @@ describe('useSessionStateCache — per-session timers', () => {
     // provider in the model menu.
     setCurrentModel('claude-opus-5')
     setCurrentProvider('anthropic')
-    expect(window.localStorage.getItem('hermes.desktop.composer.provider')).toBe('anthropic')
+    expect(window.localStorage.getItem('beyond.desktop.composer.provider')).toBe('anthropic')
 
     let cache!: Cache
 
@@ -724,7 +724,7 @@ describe('useSessionStateCache — per-session timers', () => {
     expect($currentProvider.get()).toBe('custom')
     // ...but the user's persisted composer selection must survive the
     // heartbeat, so a fresh chat still follows it instead of `custom`.
-    expect(window.localStorage.getItem('hermes.desktop.composer.provider')).toBe('anthropic')
+    expect(window.localStorage.getItem('beyond.desktop.composer.provider')).toBe('anthropic')
   })
 })
 
@@ -754,10 +754,10 @@ function LayoutProbeHarness({
 
   onReady(cache)
 
-  // useLayoutEffect fires synchronously right after the DOM commit, BEFORE
+  // useLayoutEffect fires synchrobeyondly right after the DOM commit, BEFORE
   // the hook's own useEffect (a passive effect) has a chance to mirror the
   // new props into activeSessionIdRef/selectedStoredSessionIdRef. Anything
-  // that reads the refs in this window — including a synchronous DOM event
+  // that reads the refs in this window — including a synchrobeyond DOM event
   // handler firing against the just-committed view — observes the outgoing
   // session's ids.
   useLayoutEffect(() => {

@@ -5,7 +5,7 @@
  * Cmd+L, preview console, etc.) dispatch through here. Each composer subscribes
  * and routes the work back into its own ref/state.
  *
- * `dispatch` defers to a macrotask so synchronous click/keydown handlers
+ * `dispatch` defers to a macrotask so synchrobeyond click/keydown handlers
  * (react-arborist row focus, picker `node.select()`) finish first and don't
  * steal focus from the composer effect.
  */
@@ -56,15 +56,15 @@ interface AttachImagesDetail {
   target: ComposerTarget
 }
 
-const FOCUS_EVENT = 'hermes:composer-focus'
-const INSERT_EVENT = 'hermes:composer-insert'
-const INSERT_REPLY_EVENT = 'hermes:composer-insert-reply'
-const ATTACH_IMAGES_EVENT = 'hermes:composer-attach-images'
-const INSERT_REFS_EVENT = 'hermes:composer-insert-refs'
-const SUBMIT_EVENT = 'hermes:composer-submit'
-const VOICE_TOGGLE_EVENT = 'hermes:composer-voice-toggle'
-const DICTATION_EVENT = 'hermes:composer-dictation'
-const MODEL_MENU_EVENT = 'hermes:composer-model-menu'
+const FOCUS_EVENT = 'beyond:composer-focus'
+const INSERT_EVENT = 'beyond:composer-insert'
+const INSERT_REPLY_EVENT = 'beyond:composer-insert-reply'
+const ATTACH_IMAGES_EVENT = 'beyond:composer-attach-images'
+const INSERT_REFS_EVENT = 'beyond:composer-insert-refs'
+const SUBMIT_EVENT = 'beyond:composer-submit'
+const VOICE_TOGGLE_EVENT = 'beyond:composer-voice-toggle'
+const DICTATION_EVENT = 'beyond:composer-dictation'
+const MODEL_MENU_EVENT = 'beyond:composer-model-menu'
 
 /** Inline edit composer root — mounted only while a user bubble is being edited. */
 export const EDIT_COMPOSER_ROOT = '[data-slot="aui_edit-composer-root"]'
@@ -400,7 +400,7 @@ export const onComposerInsertRefsRequest = (handler: (detail: InsertRefsDetail) 
 
 // ── Draft read/write bus (plugin SDK `host.composer`) ─────────────────────
 //
-// A synchronous request/reply pair over the same CustomEvent bus as the
+// A synchrobeyond request/reply pair over the same CustomEvent bus as the
 // mutations above: mounted composers answer for their own sessions, the
 // requester times out to `null`/`false` when none does. Deferral is NOT used
 // for the request (the reply path is already async for the caller); handlers
@@ -428,9 +428,9 @@ interface DraftReplyDetail {
   token: number
 }
 
-const GET_DRAFT_EVENT = 'hermes:composer-get-draft'
-const SET_DRAFT_EVENT = 'hermes:composer-set-draft'
-const DRAFT_REPLY_EVENT = 'hermes:composer-draft-reply'
+const GET_DRAFT_EVENT = 'beyond:composer-get-draft'
+const SET_DRAFT_EVENT = 'beyond:composer-set-draft'
+const DRAFT_REPLY_EVENT = 'beyond:composer-draft-reply'
 const DRAFT_REPLY_TIMEOUT_MS = 50
 
 let draftToken = 0

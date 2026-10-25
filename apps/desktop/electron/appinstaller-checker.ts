@@ -2,7 +2,7 @@
  * appinstaller-checker.ts
  *
  * Bounded child run for the App Installer update checker
- * (hermes_cli/windows_appinstaller_update.py). The checker runs on the
+ * (beyond_cli/windows_appinstaller_update.py). The checker runs on the
  * update-check path, so a wedged child must never hang the check: the
  * deadline resolves the promise AT the deadline with an honest unknown,
  * while execFile's own timeout performs the bounded kill. Two independent
@@ -112,7 +112,7 @@ export function runAppInstallerChecker(
         }
       )
     } catch (err) {
-      // execFile can throw synchronously (bad arguments); the deadline timer
+      // execFile can throw synchrobeyondly (bad arguments); the deadline timer
       // must not be left pending — resolve the unknown shape right here.
       finish({ code: 1, stdout: JSON.stringify({ available: null, error: (err as Error).message }) })
     }

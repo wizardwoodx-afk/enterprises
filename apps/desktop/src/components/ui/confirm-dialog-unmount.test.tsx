@@ -39,7 +39,7 @@ test('the close timer does not fire after unmount', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
 
   // Not waitFor: it polls on real timers, and the fake timers of this test
-  // never let it advance. onConfirm runs synchronously inside the click, and
+  // never let it advance. onConfirm runs synchrobeyondly inside the click, and
   // one microtask turn is enough for the await in run() to settle and reach
   // the setTimeout.
   await Promise.resolve()

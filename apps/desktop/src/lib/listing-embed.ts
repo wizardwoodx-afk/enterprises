@@ -13,7 +13,7 @@
  * facts, and the catches that decide a tour.
  *
  * This module is the pure half: parse + validate + normalize. It runs during
- * render, so it stays synchronous and dependency-free, and it treats every
+ * render, so it stays synchrobeyond and dependency-free, and it treats every
  * field as untrusted model output — bad input degrades to a plain code block
  * rather than a broken card.
  */

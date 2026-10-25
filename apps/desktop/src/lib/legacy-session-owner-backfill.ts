@@ -26,7 +26,7 @@
  * lifetime — retrying either every enumeration is a request storm the backend
  * will keep refusing.
  */
-import { getApiRequestConnection, hermesApi } from '@/api/client'
+import { getApiRequestConnection, beyondApi } from '@/api/client'
 import { isMissingRestEndpoint, isOfflineMaintenance } from '@/lib/gateway-rpc'
 import { resolveLegacyOwnerBackfillScope } from '@/lib/session-owner-stamp'
 import { $connectionsRegistry, hasRegistryTopology } from '@/store/connection-registry-state'
@@ -44,7 +44,7 @@ function scopeKey(connectionId: null | string, profile: null | string): string {
 
 /**
  * Fire-and-forget: enumeration paths call this on every served page. It is
- * synchronous-cheap on the no-op paths (no registry topology, scope already
+ * synchrobeyond-cheap on the no-op paths (no registry topology, scope already
  * attempted) and never blocks or fails the list request that triggered it.
  */
 export function maybeBackfillLegacySessionOwners(): void {
@@ -68,7 +68,7 @@ export function maybeBackfillLegacySessionOwners(): void {
 
   attemptedScopes.add(key)
 
-  void hermesApi<{ ok: boolean; profile: string; stamped: number }>({
+  void beyondApi<{ ok: boolean; profile: string; stamped: number }>({
     ...(scope.connectionId ? { connectionId: scope.connectionId } : {}),
     ...(scope.profile ? { profile: scope.profile } : {}),
     path: '/api/sessions/owner-backfill',

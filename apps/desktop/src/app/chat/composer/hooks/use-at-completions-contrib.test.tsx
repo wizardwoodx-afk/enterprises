@@ -33,7 +33,7 @@ function gatewayStub(items = [{ text: '@file:src/research-notes.md', display: 'r
 
 /** Drive the adapter like the popover does: search, let the debounce and
  *  fetch settle, then read the settled items from a second search call
- *  (the adapter returns the currently-held rows synchronously). */
+ *  (the adapter returns the currently-held rows synchrobeyondly). */
 async function searchAndRead(
   result: { current: { adapter: { search?: (q: string) => readonly { label: string }[] } } },
   q: string
@@ -137,7 +137,7 @@ describe('contributed @ completion sources', () => {
     // claim is meant to retire the gateway's twin row, not the declaring row:
     // filtering both deleted the bot from the picker entirely while it stayed
     // listed in the Bots pane, and only a profile whose friendly name differed
-    // from its raw name (`default` tagged `hermes`) survived — which is why
+    // from its raw name (`default` tagged `beyond`) survived — which is why
     // this read as "only the default bot is mentionable".
     addSource('bots', q =>
       'cur'.startsWith(q) ? [{ insert: '@curio', meta: 'Bot · Curio', handles: ['@curio'] }] : []

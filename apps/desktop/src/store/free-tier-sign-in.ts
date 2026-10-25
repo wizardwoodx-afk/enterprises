@@ -1,21 +1,21 @@
-import type { FreeTierClaimNudgeResult } from '@hermes/shared'
+import type { FreeTierClaimNudgeResult } from '@beyond/shared'
 import { atom } from 'nanostores'
 
 import { invalidateAllConnectors } from '@/app/capabilities/connectors/data/keys'
 import {
   cancelOAuthSession,
-  getNousHandoffStatus,
+  getBeyondHandoffStatus,
   listOAuthProviders,
   OAUTH_LONG_POLL_SECONDS,
   pollOAuthSession,
   type ProfileScope,
   startOAuthLogin
-} from '@/hermes'
+} from '@/beyond'
 import { LONG_POLL_MIN_GAP_MS, pause, restOfLongPollGap } from '@/lib/long-poll'
 import { gatewayActivationEpoch } from '@/store/gateway'
-import type { AppHandoffStatus, FreeTierStatus, OAuthPollResponse } from '@/types/hermes'
+import type { AppHandoffStatus, FreeTierStatus, OAuthPollResponse } from '@/types/beyond'
 
-import { type FreeTierRequester, NOUS_PROVIDER_ID, refreshFreeTierStatus } from './free-tier'
+import { type FreeTierRequester, BEYOND_PROVIDER_ID, refreshFreeTierStatus } from './free-tier'
 import { $localModelOfferPending } from './local-model-offer'
 import { onboardingSurfaceActive } from './onboarding-presence'
 
@@ -266,7 +266,7 @@ export function closeFreeTierSignIn() {
 
 // The reasons the backend names on a non-approved terminal poll: an expired
 // code, and the account service's `anon_*` verdicts when it was busy,
-// unreachable or refused mid sign-in (`hermes_cli/anon_sign_in.py`). Anything
+// unreachable or refused mid sign-in (`beyond_cli/anon_sign_in.py`). Anything
 // else falls through to the generic error screen, which shows the backend's
 // own message.
 const FAILURE_BY_REASON: Record<string, FreeTierSignInFailure> = {
@@ -289,9 +289,9 @@ export function signInFailureKind(reason: null | string | undefined): FreeTierSi
 // when the bridge isn't there (dev preview, tests) so the flow never strands in
 // a waiting state. Same contract as the onboarding store's opener.
 async function openSignInUrl(url: string) {
-  if (window.hermesDesktop?.openExternal) {
+  if (window.beyondDesktop?.openExternal) {
     try {
-      await window.hermesDesktop.openExternal(url)
+      await window.beyondDesktop.openExternal(url)
 
       return
     } catch {
@@ -303,7 +303,7 @@ async function openSignInUrl(url: string) {
 }
 
 /**
- * Drive one sign-in attempt end to end: resolve what identity this Hermes is
+ * Drive one sign-in attempt end to end: resolve what identity this Beyond is
  * on, start the device-code sign-in, open its page, then long-poll until it
  * resolves. Safe to call again from a "Try again" button — it clears any
  * previous timers first.
@@ -321,7 +321,7 @@ export async function beginFreeTierSignIn(requestGateway: FreeTierRequester) {
 
   const minting = !status?.has_guest
 
-  // No free-tier identity AND a real Nous account already connected: there is
+  // No free-tier identity AND a real Beyond account already connected: there is
   // nothing to transfer. Say so instead of minting a guest the user does not
   // need. A failed provider read is not proof either way — fall through and let
   // the start call be the authority.
@@ -333,9 +333,9 @@ export async function beginFreeTierSignIn(requestGateway: FreeTierRequester) {
         return
       }
 
-      const nous = providers.find(provider => provider.id === NOUS_PROVIDER_ID)
+      const beyond = providers.find(provider => provider.id === BEYOND_PROVIDER_ID)
 
-      if (nous?.status.logged_in && nous.status.free_tier !== true) {
+      if (beyond?.status.logged_in && beyond.status.free_tier !== true) {
         set({ status: 'already_signed_in' })
 
         return
@@ -348,7 +348,7 @@ export async function beginFreeTierSignIn(requestGateway: FreeTierRequester) {
   set({ minting, status: 'setting_up' })
 
   try {
-    const start = await startOAuthLogin(NOUS_PROVIDER_ID)
+    const start = await startOAuthLogin(BEYOND_PROVIDER_ID)
 
     if (stale()) {
       // The user closed the dialog while the start call was out: do not leave the backend
@@ -399,7 +399,7 @@ async function pollUntilDone(sessionId: string, requestGateway: FreeTierRequeste
   try {
     for (;;) {
       const askedAt = Date.now()
-      const result = await pollOAuthSession(NOUS_PROVIDER_ID, sessionId, undefined, OAUTH_LONG_POLL_SECONDS)
+      const result = await pollOAuthSession(BEYOND_PROVIDER_ID, sessionId, undefined, OAUTH_LONG_POLL_SECONDS)
 
       if (stale()) {
         return
@@ -487,7 +487,7 @@ export async function followHandoff(
     const askedAt = Date.now()
 
     try {
-      current = await getNousHandoffStatus(current.updated_at ?? null, scope)
+      current = await getBeyondHandoffStatus(current.updated_at ?? null, scope)
       failures = 0
     } catch {
       if (++failures > HANDOFF_READ_RETRIES) {

@@ -133,7 +133,7 @@ describe('runAppInstallerChecker', () => {
     expect(onStderr).toHaveBeenCalledWith('some warning')
   })
 
-  it('a synchronously throwing execFile resolves unknown and leaves no pending timer', async () => {
+  it('a synchrobeyondly throwing execFile resolves unknown and leaves no pending timer', async () => {
     const impl = (() => {
       throw new Error('bad arguments')
     }) as unknown as ExecFileImpl

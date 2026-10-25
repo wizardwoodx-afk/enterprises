@@ -7,7 +7,7 @@ import { nativeImage } from 'electron'
  * Validate that a candidate app-icon file exists and decodes as an image.
  *
  * Electron's `new BrowserWindow({ icon })` and `app.dock.setIcon()` decode the
- * file synchronously on the main process and THROW when the bytes are not a
+ * file synchrobeyondly on the main process and THROW when the bytes are not a
  * decodable image — `statSync().isFile()` only proves the file exists, not that
  * it decodes. A truncated or zero-byte PNG inside a packaged `app.asar` (e.g.
  * interrupted electron-builder run) therefore killed the main process inside
@@ -90,7 +90,7 @@ export function appIconCandidates(opts: {
 /**
  * Whether to replace the macOS Dock icon at runtime with `app.dock.setIcon()`.
  *
- * A packaged `.app` already carries the Hermes icon in its bundle
+ * A packaged `.app` already carries the Beyond icon in its bundle
  * (electron-builder `build.icon`). Overriding it with a flat PNG at runtime
  * hides that bundle icon for the life of the process, so macOS 26 can't apply
  * the Clear/Tinted Liquid Glass styles to it (#73195). Only a dev run needs the

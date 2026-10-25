@@ -24,7 +24,7 @@ function nativeJournal() {
 
 test('an admitted identity whose journal removal failed stays spent across a reload', async () => {
   const journal = nativeJournal()
-  vi.stubGlobal('hermesDesktop', { preparedSubmissions: journal.native })
+  vi.stubGlobal('beyondDesktop', { preparedSubmissions: journal.native })
   const intent = JSON.stringify(['local::default', 'stored', 'same text', [], null, false, null])
   const entry = { id: 'admitted-id', text: 'same text', attachments: [], params: { submission_id: 'admitted-id' }, owner: { connectionId: 'local', profile: 'default' } }
 
@@ -47,7 +47,7 @@ test('an admitted identity whose journal removal failed stays spent across a rel
 })
 
 // Chromium gives each renderer its own cached copy of the origin's localStorage and propagates
-// writes asynchronously, last writer wins per key: each window writes against its own view.
+// writes asynchrobeyondly, last writer wins per key: each window writes against its own view.
 function storageView(shared: Map<string, string>) {
   const local = new Map(shared)
   const written = new Map<string, null | string>()
@@ -70,7 +70,7 @@ test('two windows retiring different admitted entries keep both tombstones acros
   const realStorage = window.localStorage
   const inWindow = (storage: Storage) => Object.defineProperty(window, 'localStorage', { configurable: true, value: storage })
   const journal = nativeJournal()
-  vi.stubGlobal('hermesDesktop', { preparedSubmissions: journal.native })
+  vi.stubGlobal('beyondDesktop', { preparedSubmissions: journal.native })
   const owner = { connectionId: 'local', profile: 'default' }
   const intent = (text: string) => JSON.stringify(['local::default', 'stored', text, [], null, false, null])
   const entry = (id: string, text: string) => ({ id, text, attachments: [], params: { submission_id: id }, owner })

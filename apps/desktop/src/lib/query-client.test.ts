@@ -1,7 +1,7 @@
-import type { ModelOptionsResult } from '@hermes/shared'
+import type { ModelOptionsResult } from '@beyond/shared'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { invalidateProfileScopedQueries, keepWarmNousRow, queryClient } from './query-client'
+import { invalidateProfileScopedQueries, keepWarmBeyondRow, queryClient } from './query-client'
 
 function invalidated(key: unknown[]): boolean {
   return queryClient.getQueryState(key)?.isInvalidated ?? false
@@ -14,8 +14,8 @@ describe('invalidateProfileScopedQueries', () => {
 
   it('invalidates profile-scoped caches and leaves account/global caches intact', () => {
     const profileScoped = [
-      ['hermes-config-record'],
-      ['hermes-config-schema'],
+      ['beyond-config-record'],
+      ['beyond-config-schema'],
       ['skills-list'],
       ['toolsets-list'],
       ['model-options', 'global'],
@@ -62,8 +62,8 @@ const warm: ModelOptionsResult = {
   providers: [
     {
       models: ['example/model-a', 'example/model-free:free'],
-      name: 'Nous Portal',
-      slug: 'nous',
+      name: 'Beyond Portal',
+      slug: 'beyond',
       unavailable_models: [],
       usage_levels: { 'example/model-a': 'top_tier', 'example/model-free:free': 'free' }
     }
@@ -75,16 +75,16 @@ const pending: ModelOptionsResult = {
     {
       free_tier_pending: true,
       models: ['example/model-a', 'example/model-free:free'],
-      name: 'Nous Portal',
-      slug: 'nous',
+      name: 'Beyond Portal',
+      slug: 'beyond',
       unavailable_models: ['example/model-a', 'example/model-free:free']
     }
   ]
 }
 
-describe('keepWarmNousRow', () => {
+describe('keepWarmBeyondRow', () => {
   it('keeps the last warm Large / Free tags while a cache-only read is still pending', () => {
-    const merged = keepWarmNousRow(warm, pending) as ModelOptionsResult
+    const merged = keepWarmBeyondRow(warm, pending) as ModelOptionsResult
     const row = merged.providers?.[0]
 
     expect(row?.usage_levels).toEqual(warm.providers?.[0].usage_levels)
@@ -94,13 +94,13 @@ describe('keepWarmNousRow', () => {
   })
 
   it('takes a warm reply as is, and leaves a first pending reply alone', () => {
-    expect(keepWarmNousRow(pending, warm)).toEqual(warm)
-    expect(keepWarmNousRow(undefined, pending)).toEqual(pending)
+    expect(keepWarmBeyondRow(pending, warm)).toEqual(warm)
+    expect(keepWarmBeyondRow(undefined, pending)).toEqual(pending)
   })
 
   it('keeps the warm tags across several pending replies in a row', () => {
-    const once = keepWarmNousRow(warm, pending)
-    const twice = keepWarmNousRow(once, structuredClone(pending)) as ModelOptionsResult
+    const once = keepWarmBeyondRow(warm, pending)
+    const twice = keepWarmBeyondRow(once, structuredClone(pending)) as ModelOptionsResult
     const row = twice.providers?.[0]
 
     expect(row?.usage_levels).toEqual(warm.providers?.[0].usage_levels)

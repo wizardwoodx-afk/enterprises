@@ -1,4 +1,4 @@
-import { skillInvocationText } from '@hermes/shared'
+import { skillInvocationText } from '@beyond/shared'
 
 import { formatRefValue } from '@/components/assistant-ui/directive-text'
 import { splitLeadingAttachmentRefs } from '@/components/assistant-ui/reference-kinds'
@@ -6,7 +6,7 @@ import { extractImageRefs } from '@/lib/embedded-images'
 import { parseErrorSurface } from '@/lib/error-surface'
 import { dedupeGeneratedImageEchoesInParts } from '@/lib/generated-images'
 import { isTodoToolName } from '@/lib/todos'
-import type { MessageReaction, SessionMessage } from '@/types/hermes'
+import type { MessageReaction, SessionMessage } from '@/types/beyond'
 
 import {
   assistantTextPart,
@@ -181,7 +181,7 @@ const NOTICE_DISPLAY_KINDS = [
   'process_complete',
   'auto_continue',
   'personality_switch',
-  // Hermes closing a failed turn, not the model speaking.
+  // Beyond closing a failed turn, not the model speaking.
   'failed_turn'
 ] as const
 
@@ -567,7 +567,7 @@ export function toChatMessages(messages: SessionMessage[]): ChatMessage[] {
     let pendingAbsorbedRows = 0
 
     // A machine notice stored as an assistant row (the failed-turn boundary) is
-    // Hermes speaking: it must not join the tool-call reply it follows.
+    // Beyond speaking: it must not join the tool-call reply it follows.
     if (displayRole === 'assistant') {
       if (pendingToolParts.length) {
         if (!appendPartsToActiveAssistant(pendingToolParts, message.timestamp ?? pendingToolTimestamp)) {

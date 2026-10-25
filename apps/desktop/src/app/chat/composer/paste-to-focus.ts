@@ -5,7 +5,7 @@
  * attach, text inserts (links/paths chipping exactly like a focused paste),
  * and the composer takes focus so the user keeps typing.
  *
- * Clipboard data is only readable synchronously inside the paste event, so the
+ * Clipboard data is only readable synchrobeyondly inside the paste event, so the
  * window listener extracts everything here and the payload rides the composer
  * bus. Editable targets keep their own paste handlers, and the same surfaces
  * that block type-to-focus (dialogs, menus, terminal, full pages) block this.

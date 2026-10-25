@@ -17,7 +17,7 @@ const STREAMABLE_MEDIA_EXTENSIONS = [
 
 const FORWARDED_MEDIA_REQUEST_HEADERS = ['accept', 'if-modified-since', 'if-none-match', 'if-range', 'range'] as const
 
-export const MEDIA_PROTOCOL = 'hermes-media'
+export const MEDIA_PROTOCOL = 'beyond-media'
 
 type MediaProtocolMode = 'remote' | 'stream'
 
@@ -74,7 +74,7 @@ function parseMediaProtocolTarget(rawUrl: string): MediaProtocolTarget {
 }
 
 /**
- * The file name a native save of a `hermes-media://` URL should offer. The
+ * The file name a native save of a `beyond-media://` URL should offer. The
  * media path rides percent-encoded in the URL, so Chromium's own guess flattens
  * the whole path into the name (`C__Users_me_Videos_clip.mp4`). Returns null
  * for any other URL so ordinary downloads keep Chromium's name.
@@ -121,7 +121,7 @@ export function remoteMediaEndpoint(baseUrl: string, filePath: string, profile?:
   const url = new URL(`${normalizedBase}/api/files/stream`)
 
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-    throw new Error(`Unsupported Hermes backend URL protocol: ${url.protocol}`)
+    throw new Error(`Unsupported Beyond backend URL protocol: ${url.protocol}`)
   }
 
   url.searchParams.set('path', filePath)
@@ -222,7 +222,7 @@ export function createMediaProtocolHandler(dependencies: MediaProtocolDependenci
         return new Response('Remote media authentication unavailable', { status: 401 })
       }
 
-      headers.set('x-hermes-session-token', connection.token)
+      headers.set('x-beyond-session-token', connection.token)
 
       return await dependencies.fetchRemote(endpoint, headers, method)
     } catch (error) {

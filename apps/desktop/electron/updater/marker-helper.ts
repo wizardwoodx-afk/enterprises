@@ -32,7 +32,7 @@ export type MarkerHelperVerdict =
 export const MARKER_HELPER_TIMEOUT_MS = 20_000
 
 /** The protocol line a hand-off script advertises (SPEC 4). */
-const PROTOCOL_RE = /^# hermes-handoff-protocol: (\d+)\s*$/m
+const PROTOCOL_RE = /^# beyond-handoff-protocol: (\d+)\s*$/m
 
 export interface HelperSpawnResult {
   /** Exit code; null when killed (timeout) or the spawn failed. */
@@ -48,7 +48,7 @@ export type HelperSpawn = (
 
 export interface MarkerHelperOptions {
   updateRoot: string
-  hermesHome: string
+  beyondHome: string
   desktopPid?: number | null
   runId?: string | null
   isWindows: boolean
@@ -235,13 +235,13 @@ function scriptLine(text: string, isWindows: boolean): string {
 
 /**
  * The checkout lock exactly as marker.sh `checkout_lock_path` / marker.ps1
- * `Get-CheckoutLockPath` resolve it (hermes_cli/update_lock.py::checkout_lock_path):
- * `<git common dir>/hermes-update.lock`, else `<root>/.hermes-update.lock`.
+ * `Get-CheckoutLockPath` resolve it (beyond_cli/update_lock.py::checkout_lock_path):
+ * `<git common dir>/beyond-update.lock`, else `<root>/.beyond-update.lock`.
  * Throws when `.git` or `commondir` exists but cannot be read.
  */
 export function checkoutLockPath(updateRoot: string, isWindows: boolean): string {
   const dot = path.join(updateRoot, '.git')
-  const plain = path.join(updateRoot, '.hermes-update.lock')
+  const plain = path.join(updateRoot, '.beyond-update.lock')
   const kind = statSync(dot, { throwIfNoEntry: false })
   let gitdir = dot
 
@@ -272,7 +272,7 @@ export function checkoutLockPath(updateRoot: string, isWindows: boolean): string
     gitdir = common ? path.resolve(gitdir, common) : gitdir
   }
 
-  return path.join(gitdir, 'hermes-update.lock')
+  return path.join(gitdir, 'beyond-update.lock')
 }
 
 /**
@@ -306,7 +306,7 @@ export async function runMarkerHelper(op: MarkerHelperOp, options: MarkerHelperO
 
   try {
     const result = await (options.spawn ?? defaultSpawn)(command, args, {
-      env: { ...process.env, HERMES_HOME: options.hermesHome },
+      env: { ...process.env, BEYOND_HOME: options.beyondHome },
       timeout: options.timeoutMs ?? MARKER_HELPER_TIMEOUT_MS,
       windowsHide: true
     })

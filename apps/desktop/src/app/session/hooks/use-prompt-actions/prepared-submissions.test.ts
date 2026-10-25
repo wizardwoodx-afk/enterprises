@@ -6,7 +6,7 @@ import type { SubmissionDestination } from './submission-destination'
 afterEach(() => { vi.unstubAllGlobals(); localStorage.clear() })
 
 test('image recovery never offers expanded slash intent as an ordinary draft and leaves its exact journal intact', async () => {
-  vi.stubGlobal('hermesDesktop', undefined)
+  vi.stubGlobal('beyondDesktop', undefined)
   const destination = { scopeKey: 'local::default' } as SubmissionDestination
   const attachments: PreparedSubmission['attachments'] = [{ id: '/cache/a.png', occurrenceId: 'image-occurrence', kind: 'image', label: 'a.png' }]
   const ordinary = preparedSubmissionKey('stored', destination, 'caption', attachments)
@@ -16,10 +16,10 @@ test('image recovery never offers expanded slash intent as an ordinary draft and
     await writePreparedSubmission(key, { id: key, text, attachments, params: { submission_id: key }, owner: { connectionId: 'local', profile: 'default' } })
   }
 
-  const before = localStorage.getItem('hermes.desktop.preparedSubmissions.v1')
+  const before = localStorage.getItem('beyond.desktop.preparedSubmissions.v1')
   expect((await listPreparedImageDrafts('stored', destination.scopeKey)).map(entry => entry.key)).toEqual([ordinary])
   expect(await listPreparedImageDrafts('another', destination.scopeKey)).toEqual([])
-  expect(localStorage.getItem('hermes.desktop.preparedSubmissions.v1')).toBe(before)
+  expect(localStorage.getItem('beyond.desktop.preparedSubmissions.v1')).toBe(before)
   expect((await readPreparedSubmission(slash))?.text).toBe('expanded skill instructions')
 })
 
@@ -28,7 +28,7 @@ test('native preparation waits for acknowledgement and never downgrades a write 
   const gate = new Promise<void>(resolve => { ack = resolve })
   const entry = { id: 'a', text: 'Ω\n  exact', attachments: [], params: { session_id: 'live' } } as unknown as PreparedSubmission
   const native = { read: vi.fn(async () => JSON.stringify({ key: entry })), update: vi.fn(() => gate) }
-  vi.stubGlobal('hermesDesktop', { preparedSubmissions: native })
+  vi.stubGlobal('beyondDesktop', { preparedSubmissions: native })
   let finished = false
   const writing = writePreparedSubmission('key', entry).then(() => { finished = true })
   await Promise.resolve()
@@ -41,7 +41,7 @@ test('native preparation waits for acknowledgement and never downgrades a write 
   expect(localStorage.length).toBe(0)
   await removePreparedSubmission('key', 'a')
   expect(native.update).toHaveBeenLastCalledWith('key', null)
-  vi.stubGlobal('hermesDesktop', undefined)
+  vi.stubGlobal('beyondDesktop', undefined)
   await writePreparedSubmission('key', entry)
   expect(await readPreparedSubmission('key')).toEqual(entry)
   await removePreparedSubmission('key', 'a')

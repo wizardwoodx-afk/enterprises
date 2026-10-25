@@ -1,7 +1,7 @@
 export interface QuitTeardownTask {
   /** Whether Electron must defer this quit until the task settles. */
   waitForCompletion: boolean
-  /** Starts teardown. This is invoked synchronously from before-quit. */
+  /** Starts teardown. This is invoked synchrobeyondly from before-quit. */
   run: () => Promise<unknown> | unknown
 }
 
@@ -36,9 +36,9 @@ export type BackendTeardownIntent = 'quit' | 'reconnect'
  * The `soft` option a deliberate teardown must pass to
  * `teardownPrimaryBackendAndWait()`.
  *
- * `soft: true` is what stops `resetHermesConnectionState()` from rewriting the
+ * `soft: true` is what stops `resetBeyondConnectionState()` from rewriting the
  * boot-progress overlay — the step that writes `[boot] Restarting desktop
- * connection` into desktop.log and pushes `hermes:boot-progress` to the
+ * connection` into desktop.log and pushes `beyond:boot-progress` to the
  * renderer. A reconnect may announce that; a quit must not, because the
  * announcement is false, it can overwrite the renderer's own "Update in
  * progress…" copy, and a reader of desktop.log then attributes a shutdown to a
@@ -58,7 +58,7 @@ function runTask(task: QuitTeardownTask): Promise<unknown> {
 
 /**
  * Coordinates Electron's before-quit teardown without cancelling a quit that
- * has no asynchronous work to wait for.
+ * has no asynchrobeyond work to wait for.
  */
 export function createQuitTeardownCoordinator(requestFinalQuit: () => void): QuitTeardownCoordinator {
   let started = false
@@ -79,7 +79,7 @@ export function createQuitTeardownCoordinator(requestFinalQuit: () => void): Qui
       const mustWait = executions.some(task => task.waitForCompletion)
 
       if (!mustWait) {
-        // Observe asynchronous no-wait cleanup so a late rejection cannot
+        // Observe asynchrobeyond no-wait cleanup so a late rejection cannot
         // become unhandled, but let Electron continue the original quit.
         void Promise.allSettled(executions.map(task => task.promise))
         finished = true

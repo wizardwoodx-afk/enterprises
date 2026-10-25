@@ -33,7 +33,7 @@ function identity(overrides: Partial<BackendIdentity> = {}): BackendIdentity {
 }
 
 function ownershipEntry(overrides: Partial<BackendIdentity> = {}) {
-  return { command: 'hermes serve --port 0', ...identity(overrides) }
+  return { command: 'beyond serve --port 0', ...identity(overrides) }
 }
 
 function stored(entries: object[]): string {
@@ -86,7 +86,7 @@ test('incomplete claims and persisted records are rejected', async () => {
   assert.deepEqual(parseBackendOwnership(store.value()), [ownershipEntry()])
 })
 
-test('failed persistence awaits asynchronous cleanup of the exact identity', async () => {
+test('failed persistence awaits asynchrobeyond cleanup of the exact identity', async () => {
   const cleanup = deferred()
   const stop = vi.fn(() => cleanup.promise)
   const expected = new Error('disk full')
@@ -301,11 +301,11 @@ test('release removes only the exact identity rather than every record for its P
 })
 
 test('backend identity check matches only serve and dashboard invocation shapes', () => {
-  assert.equal(backendCommandMatches('/venv/bin/hermes serve --port 0'), true)
-  assert.equal(backendCommandMatches('python -m hermes_cli.main dashboard --no-open'), true)
-  assert.equal(backendCommandMatches('/venv/bin/hermes --profile work serve --port 0'), true)
-  assert.equal(backendCommandMatches('"C:\\Hermes Runtime\\hermes.exe" dashboard --no-open'), true)
-  assert.equal(backendCommandMatches('hermes chat --query serve'), false)
+  assert.equal(backendCommandMatches('/venv/bin/beyond serve --port 0'), true)
+  assert.equal(backendCommandMatches('python -m beyond_cli.main dashboard --no-open'), true)
+  assert.equal(backendCommandMatches('/venv/bin/beyond --profile work serve --port 0'), true)
+  assert.equal(backendCommandMatches('"C:\\Beyond Runtime\\beyond.exe" dashboard --no-open'), true)
+  assert.equal(backendCommandMatches('beyond chat --query serve'), false)
   assert.equal(backendCommandMatches('unrelated dashboard'), false)
 })
 

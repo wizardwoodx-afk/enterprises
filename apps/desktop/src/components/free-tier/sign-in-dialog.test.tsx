@@ -2,11 +2,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type * as HermesApi from '@/hermes'
+import type * as BeyondApi from '@/beyond'
 import { $freeTierStatus } from '@/store/free-tier'
 import { $freeTierSignIn, noteFreeTierTurnComplete, openFreeTierSignIn } from '@/store/free-tier-sign-in'
 import { markOnboardingDecided, setOnboardingSurfaceActive } from '@/store/onboarding-presence'
-import type { AppHandoffStatus, FreeTierStatus } from '@/types/hermes'
+import type { AppHandoffStatus, FreeTierStatus } from '@/types/beyond'
 
 const pollOAuthSession = vi.fn()
 // The two answers the dialog reads: `free_tier.status` and `free_tier.claim_nudge`.
@@ -17,11 +17,11 @@ const requestGateway = vi.fn(async (_method?: string): Promise<GatewayAnswer> =>
 // Only the two calls this flow makes are replaced; everything else keeps its
 // real implementation so the modules the dialog pulls in (the onboarding
 // DeviceCode cell, the model picker) still resolve their imports.
-vi.mock('@/hermes', async importOriginal => ({
-  ...(await importOriginal<typeof HermesApi>()),
+vi.mock('@/beyond', async importOriginal => ({
+  ...(await importOriginal<typeof BeyondApi>()),
   pollOAuthSession: (providerId: string, sessionId: string) => pollOAuthSession(providerId, sessionId),
   getGlobalModelOptions: async () => ({ providers: [] }),
-  getNousHandoffStatus: async () => ({ lines: [], state: 'idle' }),
+  getBeyondHandoffStatus: async () => ({ lines: [], state: 'idle' }),
   startOAuthLogin: async () => ({
     expires_in: 900,
     flow: 'device_code' as const,
@@ -57,7 +57,7 @@ describe('FreeTierSignInDialog', () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     pollOAuthSession.mockResolvedValueOnce({ session_id: 'session-1', status: 'pending' }).mockResolvedValue({
       account_email: 'someone@example.com',
-      model: 'Hermes-4-405B',
+      model: 'Beyond-4-405B',
       reason: null,
       session_id: 'session-1',
       status: 'approved'
@@ -88,7 +88,7 @@ describe('FreeTierSignInDialog', () => {
     await waitFor(() => expect(screen.getByText('Signed in as')).toBeTruthy())
     expect(screen.getByText('someone@example.com')).toBeTruthy()
     expect(screen.getByText('Your account now carries inference and tools.')).toBeTruthy()
-    expect(screen.getByText('Hermes-4-405B')).toBeTruthy()
+    expect(screen.getByText('Beyond-4-405B')).toBeTruthy()
   })
 
   describe('result screen', () => {
@@ -180,7 +180,7 @@ describe('FreeTierSignInDialog', () => {
         setOnboardingSurfaceActive('onboarding', false)
       })
 
-      await waitFor(() => expect(screen.getByText('Keep going with Hermes')).toBeTruthy())
+      await waitFor(() => expect(screen.getByText('Keep going with Beyond')).toBeTruthy())
       expect(requestGateway).toHaveBeenCalledWith('free_tier.claim_nudge', undefined)
     })
 
@@ -196,7 +196,7 @@ describe('FreeTierSignInDialog', () => {
 
       await act(async () => noteFreeTierTurnComplete())
 
-      await waitFor(() => expect(screen.getByText('Keep going with Hermes')).toBeTruthy())
+      await waitFor(() => expect(screen.getByText('Keep going with Beyond')).toBeTruthy())
     })
 
     it('Sign in continues into the normal sign-in flow', async () => {
@@ -215,7 +215,7 @@ describe('FreeTierSignInDialog', () => {
       await act(async () => screen.getByRole('button', { name: 'Not now' }).click())
 
       expect($freeTierSignIn.get()).toEqual({ status: 'closed' })
-      expect(screen.queryByText('Keep going with Hermes')).toBeNull()
+      expect(screen.queryByText('Keep going with Beyond')).toBeNull()
     })
 
     it('an app connected without the trial: claims the connector offer and shows its copy', async () => {
@@ -230,7 +230,7 @@ describe('FreeTierSignInDialog', () => {
 
       await waitFor(() => expect(screen.getByText('Keep your connected apps')).toBeTruthy())
       expect(requestGateway).toHaveBeenCalledWith('free_tier.claim_nudge', { kind: 'connector' })
-      expect(screen.queryByText('Keep going with Hermes')).toBeNull()
+      expect(screen.queryByText('Keep going with Beyond')).toBeNull()
     })
   })
 })

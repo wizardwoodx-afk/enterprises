@@ -76,5 +76,5 @@ it('an exact retry answered `unknown` keeps the bubble, retires the retry identi
   expect(state.messages.filter(message => message.role === 'user')).toHaveLength(1)
   expect(state.busy).toBe(false)
   expect(readPendingSubmissions('stored-a')['lost-1']).toMatchObject({ status: 'unknown', text: 'lost turn' })
-  expect(window.localStorage.getItem('hermes.desktop.preparedSubmissions.v1') ?? '').not.toContain('lost turn')
+  expect(window.localStorage.getItem('beyond.desktop.preparedSubmissions.v1') ?? '').not.toContain('lost turn')
 })

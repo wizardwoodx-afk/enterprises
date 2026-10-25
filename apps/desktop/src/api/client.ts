@@ -4,10 +4,10 @@ import {
   JsonRpcGatewayClient,
   type ServerRequest,
   type ServerRequestHandler
-} from '@hermes/shared'
+} from '@beyond/shared'
 import { map, type MapStore } from 'nanostores'
 
-import type { HermesApiRequest } from '@/global'
+import type { BeyondApiRequest } from '@/global'
 
 import { CANONICAL_GATEWAY_PROTOCOL, CanonicalDesktopProtocol, canonicalProfile, canonicalPromptParams, canonicalSessionKey, recordCanonicalOwner, splitRewindSubmit } from './canonical-protocol'
 
@@ -17,7 +17,7 @@ import { CANONICAL_GATEWAY_PROTOCOL, CanonicalDesktopProtocol, canonicalProfile,
 // /api/profiles runs list_profiles(), which does a recursive skill-tree walk
 // per profile — so the 15s default (DEFAULT_FETCH_TIMEOUT_MS in hardening.ts)
 // times out a backend that is alive-but-busy, surfacing as a spurious
-// "Timed out connecting to Hermes backend" that hangs the UI (#48504).
+// "Timed out connecting to Beyond backend" that hangs the UI (#48504).
 //
 // Give the boot burst a generous per-call timeout instead of raising the
 // global default: interactive/runtime calls and the liveness poll (/api/status)
@@ -34,7 +34,7 @@ const DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS = 30_000
 // ever fires when the turn itself would have been abandoned server-side.
 export const PROMPT_SUBMIT_REQUEST_TIMEOUT_MS = 1_800_000
 
-export const GATEWAY_NOT_CONNECTED_MESSAGE = 'Hermes gateway is not connected'
+export const GATEWAY_NOT_CONNECTED_MESSAGE = 'Beyond gateway is not connected'
 
 // Canonical shared prompts (`gateway/session_pending_controls.py`) travel as
 // `approval.request` / `clarify.request` EVENTS keyed by `prompt_id` and are
@@ -59,7 +59,7 @@ const ATTACH_REQUIRED = new Set([
 // (`session_key`) is the same CAS mutation on a sidebar row.
 const PARENT_ATTACH_REQUIRED = new Set(['session.branch_stored', 'session.branch_whole', 'session.workspace.move'])
 
-// Canonical-only identity keys. The legacy `hermes serve` contract refuses an unknown key as
+// Canonical-only identity keys. The legacy `beyond serve` contract refuses an unknown key as
 // version skew (4000), so they are stripped on a non-canonical dial. `prompt.submit` keeps its
 // `submission_id` on purpose: the submit path retries identityless on that exact refusal and
 // records the send as legacy-attempted, which a silent strip here would hide. A message-level
@@ -92,12 +92,12 @@ function remainingRequestBudget(deadline: number, signal?: AbortSignal): number 
   if (deadline === Number.POSITIVE_INFINITY) { return 0 }
   const remaining = deadline - Date.now()
 
-  if (remaining <= 0) { throw new Error('Hermes gateway request timed out') }
+  if (remaining <= 0) { throw new Error('Beyond gateway request timed out') }
 
   return remaining
 }
 
-export class HermesGateway extends JsonRpcGatewayClient {
+export class BeyondGateway extends JsonRpcGatewayClient {
   private canonical = false
   private readonly protocol = new CanonicalDesktopProtocol()
   private readonly promptHandlers = new Set<ServerRequestHandler>()
@@ -469,7 +469,7 @@ export class HermesGateway extends JsonRpcGatewayClient {
   }
 
   private requireConnectionGeneration(generation: number): void {
-    if (generation !== this.connectionGeneration) { throw new Error('Hermes gateway connection changed; reopen the session') }
+    if (generation !== this.connectionGeneration) { throw new Error('Beyond gateway connection changed; reopen the session') }
   }
 
   // Resume the session (and, for branch-like methods, its parent) on THIS socket before a
@@ -517,8 +517,8 @@ export class HermesGateway extends JsonRpcGatewayClient {
 
   constructor() {
     super({
-      closedErrorMessage: 'Hermes gateway connection closed',
-      connectErrorMessage: 'Could not connect to Hermes gateway',
+      closedErrorMessage: 'Beyond gateway connection closed',
+      connectErrorMessage: 'Could not connect to Beyond gateway',
       createRequestId: nextId => nextId,
       notConnectedErrorMessage: GATEWAY_NOT_CONNECTED_MESSAGE,
       // The channel already answered -32603; surface the crash in devtools like the dial-failure sink.
@@ -526,7 +526,7 @@ export class HermesGateway extends JsonRpcGatewayClient {
         console.error(`[gateway] server request handler crashed for ${request.method} (${request.id}):`, error),
       // The channel already answered -32601; note the missing registry in devtools.
       onUnhandledRequest: request =>
-        console.warn(`[gateway] Hermes Desktop has no server-request registry for ${request.method} (${request.id})`),
+        console.warn(`[gateway] Beyond Desktop has no server-request registry for ${request.method} (${request.id})`),
       requestTimeoutMs: DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS,
       socketFactory: url => {
         const parsed = new URL(url)
@@ -537,7 +537,7 @@ export class HermesGateway extends JsonRpcGatewayClient {
         if (!ticket) {throw new Error('Native gateway requires a fresh private ticket')}
         parsed.searchParams.delete('ticket')
 
-        return new WebSocket(parsed.toString(), [CANONICAL_GATEWAY_PROTOCOL, `hermes-gateway-ticket.${ticket}`])
+        return new WebSocket(parsed.toString(), [CANONICAL_GATEWAY_PROTOCOL, `beyond-gateway-ticket.${ticket}`])
       }
     })
     this.onEvent(event => {
@@ -593,7 +593,7 @@ export function profileScoped(profile?: null | string): { priority?: 'foreground
  *  a Bot on another connection is (its connection, its profile) — never the
  *  active connection with the Bot's profile name. Missing halves fall back to
  *  the ambient scope; an explicit connection — `'local'` included — overrides
- *  the ambient tag `hermesApi` spreads underneath (as capabilityScoped does). */
+ *  the ambient tag `beyondApi` spreads underneath (as capabilityScoped does). */
 export interface OwnerScope {
   connectionId?: null | string
   profile?: null | string
@@ -626,12 +626,12 @@ export function resolveOwnerNow(owner?: OwnerScope): ResolvedOwner {
   }
 }
 
-/** `hermesApi` for a resolved owner: its tags are sent verbatim, with no
+/** `beyondApi` for a resolved owner: its tags are sent verbatim, with no
  *  ambient connection spread underneath. An untagged half stays untagged. A
  *  named profile is always explicit here, so it carries the foreground
  *  priority `profileScoped` gives explicit profiles (voice is user-driven). */
-export function hermesApiAs<T>(owner: ResolvedOwner, request: HermesApiRequest): Promise<T> {
-  return window.hermesDesktop.api<T>({
+export function beyondApiAs<T>(owner: ResolvedOwner, request: BeyondApiRequest): Promise<T> {
+  return window.beyondDesktop.api<T>({
     ...(owner.connectionId ? { connectionId: owner.connectionId } : {}),
     ...(owner.profile ? { priority: 'foreground' as const, profile: owner.profile } : {}),
     ...request
@@ -660,7 +660,7 @@ export function setApiRequestConnection(connectionId: null | string): void {
 // Registry connection scope for a REST request. A registered remote gateway
 // owns its own state.db — cron jobs and their run sessions live THERE — so
 // requests for gateway-owned data must carry the connection id for the main
-// process to route them to that host (hermes:api's registry branch). Null
+// process to route them to that host (beyond:api's registry branch). Null
 // resolves to no tag, keeping single-source users byte-identical; explicit
 // 'local' must remain tagged when the legacy primary points elsewhere.
 export function connectionScoped(): { connectionId?: string } {
@@ -673,7 +673,7 @@ export function connectionScoped(): { connectionId?: string } {
 // store/session's setConnection (same no-store-import contract as profile scope)
 // so api/ helpers can name the backend an UNTAGGED request lands on without
 // importing the heavy session store — which would close a module cycle
-// through @/hermes.
+// through @/beyond.
 let _apiLocalMode = false
 
 export function setApiRequestLocalMode(local: boolean): void {
@@ -697,8 +697,8 @@ export function ambientOwnerConnectionId(): string | undefined {
  *  pin — `'local'` included — so a pin always overrides the ambient tag spread
  *  underneath it. (It used to omit the key for 'local', which made the pin
  *  unable to beat the ambient tag; helpers then had to bypass this wrapper.) */
-export function hermesApi<T>(request: HermesApiRequest): Promise<T> {
-  return window.hermesDesktop.api<T>({ ...connectionScoped(), ...request })
+export function beyondApi<T>(request: BeyondApiRequest): Promise<T> {
+  return window.beyondDesktop.api<T>({ ...connectionScoped(), ...request })
 }
 
 // ── Capability scope: (connection, profile) routing for the Capabilities

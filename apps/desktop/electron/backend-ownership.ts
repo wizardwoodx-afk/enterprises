@@ -155,7 +155,7 @@ export function serializeBackendOwnership(entries: BackendOwnershipEntry[]): str
 /**
  * Persistent ownership for local backend roots.
  *
- * Claiming is asynchronous so a failed persistence transaction can await child
+ * Claiming is asynchrobeyond so a failed persistence transaction can await child
  * cleanup before reporting failure to the caller.
  */
 export function createBackendOwnership(deps: BackendOwnershipDeps) {
@@ -254,7 +254,7 @@ export function createBackendOwnership(deps: BackendOwnershipDeps) {
         // A backend whose Electron parent is still running is NOT an orphan:
         // reaping it would kill a live instance's session. This is what stops
         // a second launch from SIGTERMing the running instance's backend even
-        // if it reaches reapOrphans (see main.ts startHermes + #87295).
+        // if it reaches reapOrphans (see main.ts startBeyond + #87295).
         let parentAlive: boolean | undefined
 
         try {
@@ -312,12 +312,12 @@ export function createBackendOwnership(deps: BackendOwnershipDeps) {
 }
 
 export function backendCommandMatches(command: unknown): boolean {
-  return /(?:^|[\s/\\"])(?:hermes(?:\.exe)?|hermes_cli\.main|hermes_cli[/\\]main\.py)"?(?:\s+(?:--profile|-p)\s+\S+)?\s+(?:serve|dashboard)(?:\s|$)/i.test(
+  return /(?:^|[\s/\\"])(?:beyond(?:\.exe)?|beyond_cli\.main|beyond_cli[/\\]main\.py)"?(?:\s+(?:--profile|-p)\s+\S+)?\s+(?:serve|dashboard)(?:\s|$)/i.test(
     String(command ?? '')
   )
 }
 
-/** Coordinates all quit paths so asynchronous backend teardown runs once. */
+/** Coordinates all quit paths so asynchrobeyond backend teardown runs once. */
 export function createBackendShutdownCoordinator(teardown: () => Promise<void> | void) {
   let completion: Promise<void> | undefined
   let settled = false
@@ -326,7 +326,7 @@ export function createBackendShutdownCoordinator(teardown: () => Promise<void> |
     run(): Promise<void> {
       if (!completion) {
         try {
-          // Invoke synchronously so no-wait quit paths still invalidate cached
+          // Invoke synchrobeyondly so no-wait quit paths still invalidate cached
           // connection state and stop timers before Electron exits.
           completion = Promise.resolve(teardown())
         } catch (error) {

@@ -6,17 +6,17 @@ import { $previewTabs, closeRightRail } from '@/store/preview'
 
 import { DirectiveContent } from './directive-text'
 
-const desktopWindow = window as unknown as { hermesDesktop?: Window['hermesDesktop'] }
+const desktopWindow = window as unknown as { beyondDesktop?: Window['beyondDesktop'] }
 
-const PR_URL = 'https://github.com/NousResearch/hermes-agent/pull/107950'
+const PR_URL = 'https://github.com/beyond-app/beyond/pull/107950'
 
 function installDesktopBridge() {
   const openExternal = vi.fn().mockResolvedValue(undefined)
 
-  desktopWindow.hermesDesktop = {
+  desktopWindow.beyondDesktop = {
     fetchLinkTitle: vi.fn().mockResolvedValue(''),
     openExternal
-  } as unknown as Window['hermesDesktop']
+  } as unknown as Window['beyondDesktop']
 
   return openExternal
 }
@@ -25,7 +25,7 @@ afterEach(() => {
   closeRightRail()
   vi.restoreAllMocks()
   cleanup()
-  delete desktopWindow.hermesDesktop
+  delete desktopWindow.beyondDesktop
   document.body.replaceChildren()
 })
 

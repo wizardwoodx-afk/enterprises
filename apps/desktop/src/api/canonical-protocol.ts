@@ -1,7 +1,7 @@
 // Canonical local authority wire adapter. Remote legacy transports keep their
 // existing protocol; unsupported explicit semantics fail before network admission.
 
-export const CANONICAL_GATEWAY_PROTOCOL = 'hermes-gateway-v1'
+export const CANONICAL_GATEWAY_PROTOCOL = 'beyond-gateway-v1'
 
 export const canonicalProfile = (profile: unknown): string =>
   typeof profile === 'string' && profile ? profile : 'default'
@@ -37,7 +37,7 @@ export const canonicalOwnerProfile = (value: object): string | undefined => cano
 
 export const recordCanonicalOwner = (value: object, profile: string): void => { canonicalOwners.set(value, profile) }
 
-// Mirrors hermes_cli/gateway_mutations.slash_mutation: the typed directives
+// Mirrors beyond_cli/gateway_mutations.slash_mutation: the typed directives
 // that are canonical mutations, not gateway-executed slash commands. Model
 // flags (--global/--once/--refresh) have no canonical mutation and stay on the
 // exec path so the authority refuses them explicitly.
@@ -200,7 +200,7 @@ function canonicalProducerFrame(method: string, params: Record<string, unknown>)
   return method === 'bot_relay.deliver' ? canonicalBotDelivery(params) : params
 }
 
-// The levels `hermes_constants.parse_reasoning_effort` accepts: a session `/reasoning <level>` is the
+// The levels `beyond_constants.parse_reasoning_effort` accepts: a session `/reasoning <level>` is the
 // owner's `reasoning` mutation; the display words (show/hide/full/clamp) are config.yaml writes.
 const REASONING_EFFORTS = new Set(['none', 'false', 'disabled', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'ultra'])
 

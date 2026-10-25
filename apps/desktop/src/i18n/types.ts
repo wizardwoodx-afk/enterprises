@@ -236,7 +236,7 @@ catalog: CatalogTranslations
       turnOffLocal: string
       providedByPlugin: (plugin: string) => string
       openPlugins: string
-      nousLine: string
+      beyondLine: string
       rulesReadOnly: string
       rulesAppOff: (name: string) => string
       rulesSignIn: string
@@ -435,7 +435,7 @@ catalog: CatalogTranslations
     desktopOutOfDateMessage: string
     updateDesktopApp: string
     installMethodUnsupportedTitle: string
-    updateHermes: string
+    updateBeyond: string
     updateReadyTitle: string
     updateReadyMessage: (count: number) => string
     updateReadyMessageUnknown: string
@@ -464,10 +464,10 @@ catalog: CatalogTranslations
       openaiTtsNeedsKey: string
       codeSkewRestartRequired: string
       rpcOutOfSync: string
-      restartHermesFailed: string
+      restartBeyondFailed: string
     }
     actions: {
-      restartHermes: string
+      restartBeyond: string
       openKeys: string
       openGateways: string
       openMaintenance: string
@@ -641,7 +641,7 @@ catalog: CatalogTranslations
         repoLabel: string
         verified: string
         unverified: string
-        reviewedByNous: string
+        reviewedByBeyond: string
         installsAndEnables: (profile: string) => string
         installsOnly: (profile: string) => string
         advanced: string
@@ -1243,9 +1243,9 @@ catalog: CatalogTranslations
       sshPortDesc: string
       sshKeyTitle: string
       sshKeyDesc: string
-      sshHermesPathTitle: string
-      sshHermesPathDesc: string
-      sshHermesPathPlaceholder: string
+      sshBeyondPathTitle: string
+      sshBeyondPathDesc: string
+      sshBeyondPathPlaceholder: string
       sshTestConnection: string
       sshConnect: string
       sshButtonsHint: string
@@ -1751,15 +1751,15 @@ catalog: CatalogTranslations
       activeBackend: string
       activeBackendHint: string
       useBackend: string
-      nousIncluded: string
-      nousAuthNeededTitle: string
-      nousAuthNeededMessage: (provider: string) => string
-      nousAuthSignIn: string
-      nousAuthDoneTitle: string
-      nousAuthDoneMessage: string
-      nousAuthFailed: string
-      nousAuthFailedMessage: string
-      nousAuthTryAgain: string
+      beyondIncluded: string
+      beyondAuthNeededTitle: string
+      beyondAuthNeededMessage: (provider: string) => string
+      beyondAuthSignIn: string
+      beyondAuthDoneTitle: string
+      beyondAuthDoneMessage: string
+      beyondAuthFailed: string
+      beyondAuthFailedMessage: string
+      beyondAuthTryAgain: string
       noApiKeyRequired: string
       postSetupHint: (step: string) => string
       postSetupInstalledHint: string
@@ -1922,7 +1922,7 @@ catalog: CatalogTranslations
       serverStates: {
         connected: string
         app_not_running: string
-        hermes_not_connected: string
+        beyond_not_connected: string
         endpoint_unavailable: string
         no_interactive_session: string
         version_too_old: string
@@ -2177,7 +2177,7 @@ catalog: CatalogTranslations
     noSessions: string
     gatewayRunning: string
     gatewayStopped: string
-    hermesActiveSessions: (version: string, count: number) => string
+    beyondActiveSessions: (version: string, count: number) => string
     restartGateway: string
     openBrowser: string
     toggleBrowser: string
@@ -2186,7 +2186,7 @@ catalog: CatalogTranslations
     sharedGatewayRestartDescription: (bots: string) => string
     sharedGatewayRestartConfirm: string
     sharedGatewayRestarted: (count: number) => string
-    updateHermes: string
+    updateBeyond: string
     reloadWindow: string
     actionRunning: string
     actionDone: string
@@ -3358,7 +3358,7 @@ catalog: CatalogTranslations
   onboarding: OnboardingTranslations
 
   freeTier: {
-    /** Settings › Providers row title while the Nous identity is the free tier. */
+    /** Settings › Providers row title while the Beyond identity is the free tier. */
     providerRowTitle: string
     /** The featured row's pitch while the identity is the free tier: what signing in adds. */
     providerRowPitch: string
@@ -3417,8 +3417,8 @@ catalog: CatalogTranslations
       notNow: string
     }
     // First-launch set-up failure notice: the free tier could not be created at boot.
-    // One sentence per backend code (`hermes_cli/anon_auth.py::ANON_*`); the copy never says
-    // the free MODEL is off — what is unavailable is using Hermes without signing in.
+    // One sentence per backend code (`beyond_cli/anon_auth.py::ANON_*`); the copy never says
+    // the free MODEL is off — what is unavailable is using Beyond without signing in.
     setupFailed: {
       gateClosed: string
       paused: string
@@ -3428,7 +3428,7 @@ catalog: CatalogTranslations
       powRequired: string
       locked: string
       generic: string
-      /** The sign-in door, when the account service is reachable: the Nous row sits right below. */
+      /** The sign-in door, when the account service is reachable: the Beyond row sits right below. */
       signInBelow: string
       tryAgain: string
       retrying: string
@@ -3977,11 +3977,11 @@ catalog: CatalogTranslations
       errorAddCredits: string
       /** Error card button: opens Settings → Billing in-app (Keep going, buy credits). */
       errorOpenBillingSettings: string
-      /** Error card body when a Nous account is out of credits (its button opens Settings → Billing). */
+      /** Error card body when a Beyond account is out of credits (its button opens Settings → Billing). */
       errorCompressConversation: string
       errorCompressFailed: string
-      errorOpenHermesFolder: string
-      errorOpenHermesFolderFailed: string
+      errorOpenBeyondFolder: string
+      errorOpenBeyondFolderFailed: string
       errorUpdateApiKey: string
       /** One-click recovery for an expired/revoked OAuth grant: re-runs that
        *  provider's sign-in flow (auth layer, authKind 'oauth'). */

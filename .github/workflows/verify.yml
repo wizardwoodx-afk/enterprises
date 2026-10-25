@@ -1,8 +1,7 @@
 name: verify
 
-# Guards the two things that can silently rot in a vendored mirror:
-# the source drifting from its pinned upstream commit, and the renderer
-# no longer compiling.
+# Guards what can silently rot: the renderer no longer compiling, and the
+# branded icon set drifting from its generator.
 on:
   push:
     branches: [main]
@@ -10,17 +9,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  drift:
-    name: upstream drift
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Compare tree with the commit pinned in upstream.json
-        run: ./tools/sync-upstream.sh --check
-
   build:
     name: renderer typecheck + build
     runs-on: ubuntu-latest
@@ -39,6 +27,49 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8192
         run: npx tsc -p tsconfig.json --noEmit
+      - name: Typecheck electron
+        working-directory: apps/desktop
+        run: npx tsc -p tsconfig.electron.json --noEmit
       - name: Build renderer
         working-directory: apps/desktop
         run: npx vite build
+
+  icons:
+    name: branded icon set
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pillow
+      - name: Every expected icon is present and generated
+        run: python3 tools/generate-beyond-icons.py --check
+      - name: Generator is reproducible
+        run: |
+          python3 tools/generate-beyond-icons.py
+          git diff --exit-code --quiet apps/desktop/assets apps/desktop/public \
+            || { echo "icon outputs are stale — run: python3 tools/generate-beyond-icons.py"; exit 1; }
+
+  debrand:
+    name: no upstream branding outside the license file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for leftover upstream marks
+        run: |
+          # Allowed: THIRD_PARTY_LICENSES.md (the attribution file), LICENSE (the
+          # MIT notice text), the lockfile (fixed registry names) and this workflow.
+          set +e
+          hits=$(grep -rniE "hermes|nous" \
+            --exclude-dir=node_modules --exclude-dir=.git \
+            --exclude-dir=dist --exclude-dir=build \
+            --exclude=THIRD_PARTY_LICENSES.md --exclude=LICENSE \
+            --exclude=package-lock.json --exclude=verify.yml . \
+            | grep -viE "nous_?e|grammarnous|@nous-research/ui|hermes-(parser|estree)|hermespar|whermes|oyhermes")
+          if [ -n "$hits" ]; then
+            echo "::error::Upstream branding found outside THIRD_PARTY_LICENSES.md"
+            echo "$hits" | head -40
+            exit 1
+          fi
+          echo "clean: no upstream branding outside the license file"

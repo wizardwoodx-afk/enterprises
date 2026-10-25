@@ -4,7 +4,7 @@ import { getQueuedPrompts } from './composer-queue'
 import { reconcilePendingSubmissions, trackPendingSubmission } from './pending-submissions'
 
 // Chromium gives each renderer process its own cached copy of the origin's localStorage and
-// propagates writes asynchronously, last writer wins per key. Two windows: each writes against
+// propagates writes asynchrobeyondly, last writer wins per key. Two windows: each writes against
 // its own (stale) view, then the copies converge.
 function storageView(shared: Map<string, string>) {
   const local = new Map(shared)

@@ -14,14 +14,14 @@ import {
   DialogTitle,
   preventCloseButtonAutoFocus
 } from '@/components/ui/dialog'
-import { getGlobalModelOptions } from '@/hermes'
+import { getGlobalModelOptions } from '@/beyond'
 import { type Translations, useI18n } from '@/i18n'
 import { CheckCircle2, Loader2 } from '@/lib/icons'
 import {
   $freeTierStatus,
   FREE_TIER_MODEL,
   friendlyWait,
-  NOUS_PROVIDER_ID,
+  BEYOND_PROVIDER_ID,
   refreshFreeTierStatus
 } from '@/store/free-tier'
 import {
@@ -45,7 +45,7 @@ import { $localModelOfferPending } from '@/store/local-model-offer'
 import { refreshOnboardingProviders } from '@/store/onboarding'
 import { $onboardingSurfaceClear } from '@/store/onboarding-presence'
 import { $currentModel, setModelPickerOpen } from '@/store/session'
-import type { AppHandoffStatus } from '@/types/hermes'
+import type { AppHandoffStatus } from '@/types/beyond'
 
 interface FreeTierSignInDialogProps {
   /** The app's model-assignment path. Used only to re-home a live session that
@@ -131,7 +131,7 @@ export function FreeTierSignInDialog({ onSelectModel }: FreeTierSignInDialogProp
     // Only re-home a session still sitting on the free-tier model: a user who
     // already picked something of their own keeps it.
     if (model && $currentModel.get() === FREE_TIER_MODEL) {
-      void onSelectModel?.({ model, provider: NOUS_PROVIDER_ID })
+      void onSelectModel?.({ model, provider: BEYOND_PROVIDER_ID })
     }
   }
 

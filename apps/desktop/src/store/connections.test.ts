@@ -40,7 +40,7 @@ const beforeConnectionSwitch = vi.fn()
 const wipeSessionListsForGatewaySwitch = vi.fn(() => $activeSessionId.set(null))
 
 // Test double for the store's commit point with the real one's contract
-// (barrier → machine-context reset → wipe, synchronously; the barrier is
+// (barrier → machine-context reset → wipe, synchrobeyondly; the barrier is
 // owned by the latest token); the real implementation is covered by
 // gateway-switch.test.ts.
 let latestSwitchToken = 0
@@ -129,7 +129,7 @@ beforeEach(() => {
     $connection.set({
       connectionId: connectionId ?? undefined,
       mode: connectionId === 'local' ? 'local' : 'remote',
-      // The primary local descriptor from startHermes() historically carried
+      // The primary local descriptor from startBeyond() historically carried
       // no profile key at all (see the switch-back regression test at the
       // bottom of this file); every other route publishes its profile.
       ...(connectionId === 'local' ? {} : { profile }),
@@ -154,7 +154,7 @@ beforeEach(() => {
   setApiRequestConnection(null)
   setApiRequestProfile(null)
   vi.stubGlobal('window', {
-    hermesDesktop: { api, connections: { list, setLastUsed } },
+    beyondDesktop: { api, connections: { list, setLastUsed } },
     localStorage,
     location: window.location
   })
@@ -726,7 +726,7 @@ describe('selectConnection', () => {
     try {
       setConnectionsRegistry(registry)
       $connection.set({ connectionId: 'local', mode: 'local' })
-      // The socket activates and publishes synchronously; only the trailing
+      // The socket activates and publishes synchrobeyondly; only the trailing
       // descriptor resync (an IPC) stalls.
       ensureGatewayAgent.mockImplementationOnce((connectionId, _profile, options) => {
         options?.beforeActivate?.()
@@ -773,7 +773,7 @@ describe('selectConnection', () => {
         .mockImplementationOnce((connectionId, profile, options) => {
           options?.beforeActivate?.()
 
-          // Low-level activation publishes synchronously. The trailing descriptor
+          // Low-level activation publishes synchrobeyondly. The trailing descriptor
           // promise remains alive beyond selectConnection's commit timeout.
           $activeGatewayProfile.set(profile)
           $connection.set({
@@ -998,12 +998,12 @@ describe('selectConnection', () => {
     $connection.set({ connectionId: 'local', mode: 'local', profile: 'mac', registryScoped: true })
     $activeGatewayProfile.set('mac')
 
-    expect(JSON.parse(localStorage.getItem('hermes.desktop.lastProfileByConnection') || '{}')).toEqual({
+    expect(JSON.parse(localStorage.getItem('beyond.desktop.lastProfileByConnection') || '{}')).toEqual({
       local: 'mac'
     })
 
     // A later resync republishes a profile-less primary descriptor (the
-    // startHermes shape). The remembered pair is the authority for "what was
+    // startBeyond shape). The remembered pair is the authority for "what was
     // last used here" — switching away and back must still restore 'mac',
     // and the commit must not die in targetIsActive() on the descriptor gap.
     await selectConnection('homelab')

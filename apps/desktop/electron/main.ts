@@ -6,7 +6,7 @@ import { closeGatewayTicketBridges, createGatewayTicketResolver } from './local-
 import { createPluginWsUrlHandler } from './plugin-ws-url'
 const localGatewayDials = createLocalGatewayDials()
 configurePythonGatewayTicketClient(createGatewayTicketResolver(
-  async () => ensureRuntime(await resolveHermesBackend([]), () => undefined), resolveHermesCwd))
+  async () => ensureRuntime(await resolveBeyondBackend([]), () => undefined), resolveBeyondCwd))
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import http from 'node:http'
@@ -43,7 +43,7 @@ import {
 import type { Session } from 'electron'
 
 import { type ActiveRuntimeState, classifyActiveRuntime } from './active-runtime-state'
-import { HERMES_API_EXPECTED_404 } from './api-expected-404'
+import { BEYOND_API_EXPECTED_404 } from './api-expected-404'
 import {
   destroyKeepaliveAgents,
   htmlResponseError,
@@ -75,13 +75,13 @@ import { createBackendConnectionState } from './backend-connection-state'
 import { assertDescriptorStillOwned, forgetFailedDescriptor } from './backend-descriptor-cache'
 import { BackendDialClaims } from './backend-dial-claim'
 import { buildDesktopBackendEnv, profileBackendParentEnv } from './backend-env'
-import { isReauthRequiredError, waitForHermesReady } from './backend-health'
+import { isReauthRequiredError, waitForBeyondReady } from './backend-health'
 import {
   backendCommandMatches,
   createBackendOwnership,
   createBackendShutdownCoordinator
 } from './backend-ownership'
-import { canImportHermesCli, PROBE_TIMEOUT_MS, shouldTrustHermesOverride, verifyHermesCli } from './backend-probes'
+import { canImportBeyondCli, PROBE_TIMEOUT_MS, shouldTrustBeyondOverride, verifyBeyondCli } from './backend-probes'
 import { recycleOwnedBackend } from './backend-recycle'
 import { isPidAliveWindows, waitForBackendRelease } from './backend-release-gate'
 import { createInstalledRuntimeGate } from './backend-resolution'
@@ -214,7 +214,7 @@ import type { RosterProfileMetadata } from './connection-registry'
 import { liveWindowState, overlayWindowState } from './connection-window-state'
 import { describeCrashReason, installCrashForensics } from './crash-forensics'
 import { adoptServedDashboardToken } from './dashboard-token'
-import { resolveDesktopHermesHome, resolveDesktopUserData } from './data-paths'
+import { resolveDesktopBeyondHome, resolveDesktopUserData } from './data-paths'
 import { registerDeepLinkProtocol as registerDeepLinkProtocolWith } from './deep-link-protocol'
 import { loadOrCreateInstallationId, sshOwnershipId } from './desktop-installation'
 import { formatDesktopLogLine, formatLogStamp } from './desktop-log-line'
@@ -307,7 +307,7 @@ import {
   writeSecretFileAtomic
 } from './hardening'
 import { assertNotPassiveSpawn } from './host-backend-singleton'
-import { HERMES_HUB_FALLBACK_ORIGIN, HERMES_HUB_ORIGIN, isHermesHubClipboardWrite } from './hub-iframe-policy'
+import { BEYOND_HUB_FALLBACK_ORIGIN, BEYOND_HUB_ORIGIN, isBeyondHubClipboardWrite } from './hub-iframe-policy'
 import { requestHudClose } from './hud-close'
 import { cursorPointInWindow } from './hud-cursor'
 import { startHudGameOverlayWatch } from './hud-game-overlay'
@@ -648,7 +648,7 @@ import {
 import { startUpdateRelaunchWaiter } from './updater/relaunch-waiter'
 import { preflightStateDb } from './updater/state-db-preflight'
 import { createStoreStrategy } from './updater/store-client'
-import { isExternalVenvHolder, isHermesOwnedVenvDaemon } from './venv-holder-select'
+import { isExternalVenvHolder, isBeyondOwnedVenvDaemon } from './venv-holder-select'
 import { fetchMarketplaceThemes, searchMarketplaceThemes } from './vscode-marketplace'
 import { createWakeIndicatorWindowController } from './wake-indicator-window'
 import { guardedWatch } from './watch-storm-breaker'
@@ -678,7 +678,7 @@ import {
   windowSize
 } from './window-state'
 import { hiddenWindowsChildOptions } from './windows-child-options'
-import { buildPathExtCandidates, chooseUpdaterArgs, resolveVenvHermesCommand } from './windows-hermes-path'
+import { buildPathExtCandidates, chooseUpdaterArgs, resolveVenvBeyondCommand } from './windows-beyond-path'
 import {
   connectWindowsRemote,
   detectRemotePlatform,
@@ -705,7 +705,7 @@ import {
   buildDisableGpuRelaunchArgs,
   decideWindowsGpuStackCookieLaunch,
   gpuStackCookieFallbackMarker,
-  isHermesDesktopGpuOverrideOff,
+  isBeyondDesktopGpuOverrideOff,
   markerAfterSuccessfulGpuStackCookieBoot,
   readGpuStackCookieMarker,
   shouldRelaunchForRendererStackCookieCrashLoop,
@@ -718,16 +718,16 @@ import { readWslWindowsClipboardImage } from './wsl-clipboard-image'
 import { resolvePickerDefaultPath, setActiveGatewayProfile, setWslBridgeProfileState } from './wsl-path-bridge'
 
 const IDENTITY_APP_NAME: string | null = applyDesktopIdentity(app)
-const USER_DATA_OVERRIDE: string | undefined = process.env.HERMES_DESKTOP_USER_DATA_DIR
+const USER_DATA_OVERRIDE: string | undefined = process.env.BEYOND_DESKTOP_USER_DATA_DIR
 
-if (USER_DATA_OVERRIDE || process.env.HERMES_DATA_DIR_SUFFIX) {
+if (USER_DATA_OVERRIDE || process.env.BEYOND_DATA_DIR_SUFFIX) {
   const resolvedUserData: string = resolveDesktopUserData(app.getPath('userData'))
   fs.mkdirSync(resolvedUserData, { recursive: true })
   app.setPath('userData', resolvedUserData)
 }
 
-const DEV_SERVER = process.env.HERMES_DESKTOP_DEV_SERVER
-const IS_PACKAGED = app.isPackaged || Boolean(process.env.HERMES_DESKTOP_IS_PACKAGED)
+const DEV_SERVER = process.env.BEYOND_DESKTOP_DEV_SERVER
+const IS_PACKAGED = app.isPackaged || Boolean(process.env.BEYOND_DESKTOP_IS_PACKAGED)
 const IS_MAC = process.platform === 'darwin'
 const IS_WINDOWS = process.platform === 'win32'
 const IS_WSL = isWslEnvironment()
@@ -759,7 +759,7 @@ const PREVIEW_GUEST_PRELOAD_PATH = path.join(APP_ROOT, 'dist', 'preview-guest-pr
 // GPU and never see it. Fall back to software rendering when a remote display
 // is detected; it's rock-steady over the wire and the CPU cost is negligible
 // next to the connection's latency. Must run before app `ready` — these
-// switches only apply pre-launch. Override with HERMES_DESKTOP_DISABLE_GPU
+// switches only apply pre-launch. Override with BEYOND_DESKTOP_DISABLE_GPU
 // (1/true → always disable, 0/false → keep GPU on).
 const REMOTE_DISPLAY_REASON = detectRemoteDisplay()
 
@@ -771,14 +771,14 @@ if (REMOTE_DISPLAY_REASON) {
 
   // #97616: disableHardwareAcceleration() alone does NOT stop a GPU child
   // from spawning (it then dies error_code=1002 on AMD/Mesa). For the explicit
-  // HERMES_DESKTOP_DISABLE_GPU override, fully spawn-block it. Remote-display
+  // BEYOND_DESKTOP_DISABLE_GPU override, fully spawn-block it. Remote-display
   // detections keep their long-standing compositing-only behavior.
   if (disableGpuSwitchNeededForReason(REMOTE_DISPLAY_REASON)) {
     app.commandLine.appendSwitch('disable-gpu')
   }
 
   console.log(
-    `[hermes] remote display detected (${REMOTE_DISPLAY_REASON}); disabling GPU hardware acceleration to prevent flicker`
+    `[beyond] remote display detected (${REMOTE_DISPLAY_REASON}); disabling GPU hardware acceleration to prevent flicker`
   )
 }
 
@@ -814,7 +814,7 @@ if (IS_WINDOWS) {
     app.disableHardwareAcceleration()
     app.commandLine.appendSwitch('disable-gpu-compositing')
     console.log(
-      `[hermes] Windows GPU stack-cookie fallback enabled (${gpuStackCookieDecision.reason}); disabling GPU hardware acceleration (0xC0000409 / #108047)`
+      `[beyond] Windows GPU stack-cookie fallback enabled (${gpuStackCookieDecision.reason}); disabling GPU hardware acceleration (0xC0000409 / #108047)`
     )
   }
 }
@@ -831,14 +831,14 @@ if (DEV_CDP.port) {
   // so a future edit can't widen it by omission.
   app.commandLine.appendSwitch('remote-debugging-address', '127.0.0.1')
   console.log(
-    `[hermes] renderer debugging on http://127.0.0.1:${DEV_CDP.port} — anything that can reach it ` +
-      'can run code in the renderer. HERMES_DESKTOP_CDP_PORT=off to disable.'
+    `[beyond] renderer debugging on http://127.0.0.1:${DEV_CDP.port} — anything that can reach it ` +
+      'can run code in the renderer. BEYOND_DESKTOP_CDP_PORT=off to disable.'
   )
 } else {
   const why = describeDevCdpDecision(DEV_CDP)
 
   if (why) {
-    console.warn(`[hermes] ${why}`)
+    console.warn(`[beyond] ${why}`)
   }
 }
 
@@ -855,7 +855,7 @@ if (
   app.commandLine.appendSwitch('ignore-gpu-blocklist')
   app.commandLine.appendSwitch('enable-gpu-rasterization')
   app.commandLine.appendSwitch('enable-zero-copy')
-  console.log('[hermes] WSL GPU passthrough (/dev/dxg) detected; enabling GPU acceleration')
+  console.log('[beyond] WSL GPU passthrough (/dev/dxg) detected; enabling GPU acceleration')
 }
 
 // #40077 / #124255: NVIDIA driver 580.x breaks ANGLE's EGL probing (Invalid
@@ -869,7 +869,7 @@ if (
 // once with SwiftShader. Deliberately NOT disableHardwareAcceleration(): on
 // 580.173.02 + Electron 40 that SIGKILLs the renderer (see the closed #40119).
 // Must run before app `ready` — the switch only applies pre-launch. Override
-// with HERMES_DESKTOP_NVIDIA_SWIFTSHADER (1/true → force on, 0/false → never).
+// with BEYOND_DESKTOP_NVIDIA_SWIFTSHADER (1/true → force on, 0/false → never).
 const NVIDIA_PROC_VERSION = (() => {
   try {
     return fs.readFileSync('/proc/driver/nvidia/version', 'utf8')
@@ -912,9 +912,9 @@ if (NVIDIA_DRIVER_MAJOR !== null) {
 if (NVIDIA_EGL_FALLBACK.enable) {
   app.commandLine.appendSwitch('use-angle', 'swiftshader')
   console.log(
-    `[hermes] NVIDIA EGL fallback enabled (${NVIDIA_EGL_FALLBACK.reason}); routing ANGLE ` +
+    `[beyond] NVIDIA EGL fallback enabled (${NVIDIA_EGL_FALLBACK.reason}); routing ANGLE ` +
       'through SwiftShader. Witnessed GPU-process death probe (#40077, #124255); an app or ' +
-      'driver update re-probes hardware GL once. HERMES_DESKTOP_NVIDIA_SWIFTSHADER=0 to opt out.'
+      'driver update re-probes hardware GL once. BEYOND_DESKTOP_NVIDIA_SWIFTSHADER=0 to opt out.'
   )
 }
 
@@ -947,7 +947,7 @@ if (NVIDIA_DRIVER_MAJOR !== null && process.platform === 'linux') {
     }
 
     console.warn(
-      `[hermes] NVIDIA GPU process died (reason=${details?.reason}, exit=${details?.exitCode}); ` +
+      `[beyond] NVIDIA GPU process died (reason=${details?.reason}, exit=${details?.exitCode}); ` +
         'relaunching once with --use-angle=swiftshader (#40077, #124255)'
     )
 
@@ -957,7 +957,7 @@ if (NVIDIA_DRIVER_MAJOR !== null && process.platform === 'linux') {
       })
       void exitAfterBackendShutdown(0)
     } catch (error) {
-      console.error(`[hermes] NVIDIA SwiftShader relaunch failed: ${error?.message || error}`)
+      console.error(`[beyond] NVIDIA SwiftShader relaunch failed: ${error?.message || error}`)
     }
   })
 }
@@ -967,7 +967,7 @@ if (NVIDIA_DRIVER_MAJOR !== null && process.platform === 'linux') {
 // gpu-process, no crash. Bound it: one relaunch into software rendering,
 // then a sticky per-version marker so the next boot goes straight there.
 // Reactive only — healthy Mesa/Wayland stacks keep full acceleration. Must
-// run before app `ready`. Override with HERMES_DESKTOP_DISABLE_GPU
+// run before app `ready`. Override with BEYOND_DESKTOP_DISABLE_GPU
 // (1/true → always software, 0/false → keep GPU on).
 let linuxGpuFallbackActive = false
 let linuxGpuFallbackSticky = false
@@ -1001,26 +1001,26 @@ if (process.platform === 'linux') {
     app.disableHardwareAcceleration()
     app.commandLine.appendSwitch('disable-gpu-compositing')
     console.log(
-      `[hermes] Linux GPU software fallback enabled (${linuxGpuDecision.reason}); disabling GPU ` +
-        'hardware acceleration after a GPU-child init failure (#124843). HERMES_DESKTOP_DISABLE_GPU=0 to opt out.'
+      `[beyond] Linux GPU software fallback enabled (${linuxGpuDecision.reason}); disabling GPU ` +
+        'hardware acceleration after a GPU-child init failure (#124843). BEYOND_DESKTOP_DISABLE_GPU=0 to opt out.'
     )
   }
 }
 
 // Linux: point Chromium at the session's keychain backend so safeStorage can
 // encrypt remote gateway tokens (hardening.ts refuses to persist them without
-// it). The value arrives via HERMES_DESKTOP_PASSWORD_STORE, bridged by the
-// `hermes desktop` launcher from detection or `desktop.password_store` in
+// it). The value arrives via BEYOND_DESKTOP_PASSWORD_STORE, bridged by the
+// `beyond desktop` launcher from detection or `desktop.password_store` in
 // config.yaml. Must run before app `ready` — the switch only applies pre-launch.
 const PASSWORD_STORE = resolveLinuxPasswordStore()
 
 if (PASSWORD_STORE.warning) {
-  console.warn(`[hermes] ${PASSWORD_STORE.warning}`)
+  console.warn(`[beyond] ${PASSWORD_STORE.warning}`)
 }
 
 if (PASSWORD_STORE.store) {
   app.commandLine.appendSwitch('password-store', PASSWORD_STORE.store)
-  console.log(`[hermes] using password-store backend: ${PASSWORD_STORE.store}`)
+  console.log(`[beyond] using password-store backend: ${PASSWORD_STORE.store}`)
 }
 
 // Windows sandbox / GPU breakpoint crash recovery (#38216).
@@ -1030,7 +1030,7 @@ if (PASSWORD_STORE.store) {
 // 0x80000003. After enough GPU deaths the browser process FATAL-exits before the
 // UI is usable. Must run before app `ready` so `--no-sandbox` applies to child
 // processes. The sticky marker recovers Start Menu / shortcut launches that
-// never go through `hermes desktop`; it is version-scoped so an app update
+// never go through `beyond desktop`; it is version-scoped so an app update
 // re-probes the sandbox instead of degrading forever.
 //
 // `windowsSandboxFallbackActive` = this process runs without the Chromium
@@ -1059,15 +1059,15 @@ if (IS_WINDOWS || process.platform === 'linux') {
   // engaged — icacls /T recurses the whole install tree, so healthy launches
   // skip it (the installer already granted the ACE at install time). Repair
   // targets the install dir only: granting AppContainer read on userData would
-  // expose Hermes sessions/config to every packaged app on the machine.
+  // expose Beyond sessions/config to every packaged app on the machine.
   if (shouldAttemptAclRepair(priorMarker)) {
     const exeDir = path.dirname(process.execPath)
     const acl = grantAllApplicationPackagesAcl(exeDir, { execFileSync })
 
     if (acl.ok) {
-      console.log(`[hermes] granted ALL APPLICATION PACKAGES RX on ${exeDir} (#38216)`)
+      console.log(`[beyond] granted ALL APPLICATION PACKAGES RX on ${exeDir} (#38216)`)
     } else if (acl.error && acl.error !== 'missing-target-or-exec') {
-      console.warn(`[hermes] AppContainer ACL grant failed on ${exeDir}: ${acl.error}`)
+      console.warn(`[beyond] AppContainer ACL grant failed on ${exeDir}: ${acl.error}`)
     }
   }
 
@@ -1089,7 +1089,7 @@ if (IS_WINDOWS || process.platform === 'linux') {
     app.commandLine.appendSwitch('no-sandbox')
     process.env.ELECTRON_DISABLE_SANDBOX = '1'
     console.log(
-      `[hermes] sandbox fallback enabled (${sandboxDecision.reason}); launching with --no-sandbox (#38216, #121954)`
+      `[beyond] sandbox fallback enabled (${sandboxDecision.reason}); launching with --no-sandbox (#38216, #121954)`
     )
   }
 
@@ -1124,14 +1124,14 @@ if (IS_WINDOWS || process.platform === 'linux') {
       }
 
       console.warn(
-        `[hermes] GPU child died with the sandbox signature (exit=${details?.exitCode}); relaunching once with --no-sandbox (#38216)`
+        `[beyond] GPU child died with the sandbox signature (exit=${details?.exitCode}); relaunching once with --no-sandbox (#38216)`
       )
 
       try {
         app.relaunch({ args: buildNoSandboxRelaunchArgs(process.argv.slice(1)) })
         void exitAfterBackendShutdown(0)
       } catch (error) {
-        console.error(`[hermes] --no-sandbox relaunch failed: ${error?.message || error}`)
+        console.error(`[beyond] --no-sandbox relaunch failed: ${error?.message || error}`)
       }
 
       return
@@ -1161,14 +1161,14 @@ if (IS_WINDOWS || process.platform === 'linux') {
       }
 
       console.warn(
-        `[hermes] Linux GPU child died with the sandbox signature (exit=${details?.exitCode}); relaunching once with --no-sandbox (#121954)`
+        `[beyond] Linux GPU child died with the sandbox signature (exit=${details?.exitCode}); relaunching once with --no-sandbox (#121954)`
       )
 
       try {
         app.relaunch({ args: buildNoSandboxRelaunchArgs(process.argv.slice(1)) })
         void exitAfterBackendShutdown(0)
       } catch (error) {
-        console.error(`[hermes] --no-sandbox relaunch failed: ${error?.message || error}`)
+        console.error(`[beyond] --no-sandbox relaunch failed: ${error?.message || error}`)
       }
 
       return
@@ -1189,21 +1189,21 @@ if (IS_WINDOWS || process.platform === 'linux') {
       }
 
       console.warn(
-        `[hermes] Linux GPU child gone (reason=${details?.reason}); relaunching once with --disable-gpu (#124843)`
+        `[beyond] Linux GPU child gone (reason=${details?.reason}); relaunching once with --disable-gpu (#124843)`
       )
 
       try {
         app.relaunch({ args: buildDisableGpuRelaunchArgs(process.argv.slice(1)) })
         void exitAfterBackendShutdown(0)
       } catch (error) {
-        console.error(`[hermes] --disable-gpu relaunch failed: ${error?.message || error}`)
+        console.error(`[beyond] --disable-gpu relaunch failed: ${error?.message || error}`)
       }
     }
   })
 }
 
-ipcMain.handle('hermes:get-remote-display-reason', () => REMOTE_DISPLAY_REASON)
-ipcMain.handle('hermes:embed-host:origin', () => embedHostOrigin())
+ipcMain.handle('beyond:get-remote-display-reason', () => REMOTE_DISPLAY_REASON)
+ipcMain.handle('beyond:embed-host:origin', () => embedHostOrigin())
 
 // Keep the renderer's PROCESS priority normal while its windows are hidden —
 // a deprioritized renderer streams a live answer visibly slower once the
@@ -1216,7 +1216,7 @@ ipcMain.handle('hermes:embed-host:origin', () => embedHostOrigin())
 // `backgroundThrottling: false` on every chat window) pinned every renderer's
 // `document.visibilityState` to 'visible' forever — which silently turned all
 // the renderer's visibility-gated backstop polls and clock ticks into
-// always-on timers. A completely idle, minimized Hermes burned ~20% CPU
+// always-on timers. A completely idle, minimized Beyond burned ~20% CPU
 // around the clock. Throttling is now a runtime dial scoped to streaming:
 // see createStreamThrottle() — chat windows are unthrottled while any turn is
 // in flight (so a live answer keeps painting while blurred, occluded, or
@@ -1229,13 +1229,13 @@ const SOURCE_REPO_ROOT = path.resolve(APP_ROOT, '../..')
 // Runtime identity comes only from the baked artifact stamp. Dev runs have none.
 if (INSTALL_STAMP) {
   console.log(
-    `[hermes] install stamp: ${INSTALL_STAMP.commit ? INSTALL_STAMP.commit.slice(0, 12) : 'no-commit'}${INSTALL_STAMP.branch ? ` (${INSTALL_STAMP.branch})` : ''}${INSTALL_STAMP.dirty ? ' [DIRTY]' : ''} from ${INSTALL_STAMP.source || 'unknown'}`
+    `[beyond] install stamp: ${INSTALL_STAMP.commit ? INSTALL_STAMP.commit.slice(0, 12) : 'no-commit'}${INSTALL_STAMP.branch ? ` (${INSTALL_STAMP.branch})` : ''}${INSTALL_STAMP.dirty ? ' [DIRTY]' : ''} from ${INSTALL_STAMP.source || 'unknown'}`
   )
 } else if (IS_PACKAGED) {
   // Dev builds without a stamp are normal; packaged builds without one
   // mean the bootstrap won't know what to clone. Surface clearly.
   console.error(
-    '[hermes] WARNING: no install-stamp.json found in packaged build. First-launch bootstrap will not have a pinned ref to install.'
+    '[beyond] WARNING: no install-stamp.json found in packaged build. First-launch bootstrap will not have a pinned ref to install.'
   )
 }
 
@@ -1255,7 +1255,7 @@ function acquireSingleInstanceLock(): boolean {
   const stalePid = removeStaleSingletonLock(app.getPath('userData'))
 
   if (stalePid !== null) {
-    console.error(`[hermes] removed stale SingletonLock (owner ${stalePid} dead); retrying launch`)
+    console.error(`[beyond] removed stale SingletonLock (owner ${stalePid} dead); retrying launch`)
 
     return app.requestSingleInstanceLock()
   }
@@ -1266,26 +1266,26 @@ function acquireSingleInstanceLock(): boolean {
 const isPrimaryInstance: boolean = acquireSingleInstanceLock()
 
 if (!isPrimaryInstance) {
-  console.error('[hermes] another Hermes Desktop instance holds the single-instance lock; exiting')
+  console.error('[beyond] another Beyond Desktop instance holds the single-instance lock; exiting')
   app.exit(0)
 }
 
-// `hermes desktop` shortens TMPDIR only so the lock above can bind its socket (#124688). The
+// `beyond desktop` shortens TMPDIR only so the lock above can bind its socket (#124688). The
 // backend and every other child get the real one (the profile scratch dir) back.
-if (process.env.HERMES_DESKTOP_TMPDIR) {
-  process.env.TMPDIR = process.env.HERMES_DESKTOP_TMPDIR
-  delete process.env.HERMES_DESKTOP_TMPDIR
+if (process.env.BEYOND_DESKTOP_TMPDIR) {
+  process.env.TMPDIR = process.env.BEYOND_DESKTOP_TMPDIR
+  delete process.env.BEYOND_DESKTOP_TMPDIR
 }
 
-const HERMES_HOME: string = resolveDesktopHermesHome({
+const BEYOND_HOME: string = resolveDesktopBeyondHome({
   home: app.getPath('home'),
   directoryExists,
-  readWindowsHome: (): string | null => readWindowsUserEnvVar('HERMES_HOME')
+  readWindowsHome: (): string | null => readWindowsUserEnvVar('BEYOND_HOME')
 })
 
 // #77311: `desktop.electron_flags` and the renderer heap ceiling
 // (`desktop.renderer_max_old_space_mb`) used to reach Chromium only through
-// the `hermes desktop` launcher's argv, so a packaged app opened from its
+// the `beyond desktop` launcher's argv, so a packaged app opened from its
 // Start-menu / .desktop entry ran with no `--js-flags` at all. Apply them here
 // from config.yaml, before `ready` — Chromium copies `js-flags` to renderer
 // processes only from the browser's pre-launch command line.
@@ -1297,7 +1297,7 @@ let desktopSshPathOverride = ''
   let desktopLaunchYaml: string = ''
 
   try {
-    desktopLaunchYaml = fs.readFileSync(path.join(HERMES_HOME, 'config.yaml'), 'utf8')
+    desktopLaunchYaml = fs.readFileSync(path.join(BEYOND_HOME, 'config.yaml'), 'utf8')
   } catch {
     void 0 // first run: no config yet → Chromium defaults
   }
@@ -1306,12 +1306,12 @@ let desktopSshPathOverride = ''
   desktopSshPathOverride = desktopLaunchConfig.sshPath || ''
 
   // `desktop.renderer_accessibility: false` must reach packaged launches too,
-  // not only the `hermes desktop` launcher's env bridge (#118271).
+  // not only the `beyond desktop` launcher's env bridge (#118271).
   if (
     desktopLaunchConfig.rendererAccessibility === false &&
-    process.env.HERMES_DESKTOP_RENDERER_ACCESSIBILITY === undefined
+    process.env.BEYOND_DESKTOP_RENDERER_ACCESSIBILITY === undefined
   ) {
-    process.env.HERMES_DESKTOP_RENDERER_ACCESSIBILITY = '0'
+    process.env.BEYOND_DESKTOP_RENDERER_ACCESSIBILITY = '0'
   }
 
   for (const planned of planLaunchSwitches(desktopLaunchConfig, process.argv.slice(1))) {
@@ -1322,30 +1322,30 @@ let desktopSshPathOverride = ''
     }
 
     console.log(
-      `[hermes] desktop launch switch from config.yaml: --${planned.name}${planned.value === undefined ? '' : `=${planned.value}`}`
+      `[beyond] desktop launch switch from config.yaml: --${planned.name}${planned.value === undefined ? '' : `=${planned.value}`}`
     )
   }
 }
 
-// ACTIVE_HERMES_ROOT — the canonical mutable Hermes install. Same path
+// ACTIVE_BEYOND_ROOT — the canonical mutable Beyond install. Same path
 // install.ps1 / install.sh use, so a desktop-only user and a CLI-only user end
 // up with identical layouts and can share one install.
-const ACTIVE_HERMES_ROOT = path.join(HERMES_HOME, 'hermes-agent')
-setNoConsoleGitRoots([!IS_PACKAGED ? SOURCE_REPO_ROOT : null, ACTIVE_HERMES_ROOT])
+const ACTIVE_BEYOND_ROOT = path.join(BEYOND_HOME, 'beyond-agent')
+setNoConsoleGitRoots([!IS_PACKAGED ? SOURCE_REPO_ROOT : null, ACTIVE_BEYOND_ROOT])
 // VENV_ROOT — venv lives inside the repo, exactly like install.ps1 does it.
-const VENV_ROOT = path.join(ACTIVE_HERMES_ROOT, 'venv')
+const VENV_ROOT = path.join(ACTIVE_BEYOND_ROOT, 'venv')
 // BOOTSTRAP_COMPLETE_MARKER — written by the first-launch bootstrap runner
 // (Phase 1D) after install.ps1 has completed all stages and the user has
 // finished initial configuration. Presence of this marker means the install
 // is in a known-good state and we can skip the bootstrap flow on subsequent
-// boots, going straight to `resolveHermesBackend()`. Missing or stale marker
+// boots, going straight to `resolveBeyondBackend()`. Missing or stale marker
 // means we re-run the bootstrap; install.ps1's stages are idempotent so a
 // re-run on an already-good install just discovers everything in place.
 //
-// We deliberately put the marker INSIDE ACTIVE_HERMES_ROOT (not alongside)
+// We deliberately put the marker INSIDE ACTIVE_BEYOND_ROOT (not alongside)
 // so that deleting the checkout to start fresh also deletes the marker --
 // avoids the confusing "marker exists but checkout is gone" state.
-const BOOTSTRAP_COMPLETE_MARKER = path.join(ACTIVE_HERMES_ROOT, '.hermes-bootstrap-complete')
+const BOOTSTRAP_COMPLETE_MARKER = path.join(ACTIVE_BEYOND_ROOT, '.beyond-bootstrap-complete')
 const BOOTSTRAP_MARKER_SCHEMA_VERSION = 1
 
 const DESKTOP_CONNECTION_CONFIG_PATH = path.join(app.getPath('userData'), 'connection.json')
@@ -1359,24 +1359,24 @@ const DESKTOP_UPDATE_CONFIG_PATH = path.join(app.getPath('userData'), 'updates.j
 const DESKTOP_WINDOW_STATE_PATH = path.join(app.getPath('userData'), 'window-state.json')
 const DESKTOP_BACKEND_OWNERSHIP_PATH = path.join(app.getPath('userData'), 'backend-ownership.json')
 const DESKTOP_MANAGED_SSH_RECOVERY_PATH = path.join(app.getPath('userData'), 'managed-ssh-update-recovery.json')
-// active-profile.json records which Hermes profile the desktop launches its
-// local backend as. When set, startHermes() passes `hermes --profile <name>
-// dashboard …`, which deterministically pins HERMES_HOME (see
-// _apply_profile_override in hermes_cli/main.py) and bypasses the sticky
-// ~/.hermes/active_profile file. Unset (null) preserves the legacy behavior:
+// active-profile.json records which Beyond profile the desktop launches its
+// local backend as. When set, startBeyond() passes `beyond --profile <name>
+// dashboard …`, which deterministically pins BEYOND_HOME (see
+// _apply_profile_override in beyond_cli/main.py) and bypasses the sticky
+// ~/.beyond/active_profile file. Unset (null) preserves the legacy behavior:
 // no --profile flag, so the backend honors active_profile / default.
 
-// Mirrors hermes_cli.profiles._PROFILE_ID_RE so we never hand the backend a
+// Mirrors beyond_cli.profiles._PROFILE_ID_RE so we never hand the backend a
 // value its profile resolver would reject and exit on.
 const PROFILE_NAME_RE = DESKTOP_PROFILE_NAME_RE
 // Branch we track for self-update. The GUI work has merged to main, so this
 // tracks main. User can also override at runtime via
-// hermesDesktop.updates.setBranch().
+// beyondDesktop.updates.setBranch().
 const DEFAULT_UPDATE_BRANCH = 'main'
-// desktop.log lives under HERMES_HOME/logs/ so it sits next to agent.log,
-// errors.log, gateway.log produced by hermes_logging.setup_logging — one log
+// desktop.log lives under BEYOND_HOME/logs/ so it sits next to agent.log,
+// errors.log, gateway.log produced by beyond_logging.setup_logging — one log
 // directory per user, regardless of which UI surface produced the line.
-const DESKTOP_LOG_PATH = path.join(HERMES_HOME, 'logs', 'desktop.log')
+const DESKTOP_LOG_PATH = path.join(BEYOND_HOME, 'logs', 'desktop.log')
 const DESKTOP_LOG_FLUSH_MS = 120
 const DESKTOP_LOG_BUFFER_MAX_CHARS = 64 * 1024
 // Bound desktop.log on disk. It is an append-only forensic log, so a boot loop
@@ -1405,15 +1405,15 @@ enableLinuxCrashDiagnostics(CRASH_DIAGNOSTICS, CRASH_DIAGNOSTICS_LOGS_DIR, {
   startCrashReporter: options => crashReporter.start(options)
 })
 
-const BOOT_FAKE_MODE = process.env.HERMES_DESKTOP_BOOT_FAKE === '1'
-const BOOT_FAKE_ERROR = process.env.HERMES_DESKTOP_BOOT_FAKE_ERROR || ''
+const BOOT_FAKE_MODE = process.env.BEYOND_DESKTOP_BOOT_FAKE === '1'
+const BOOT_FAKE_ERROR = process.env.BEYOND_DESKTOP_BOOT_FAKE_ERROR || ''
 // Automated teardown (Playwright's app.close(), harness scripts) quits with
 // nobody to answer a modal, so the active-work confirmation would hang the
 // caller instead of letting the process exit. Force quits set this.
-const SKIP_QUIT_CONFIRM = process.env.HERMES_DESKTOP_SKIP_QUIT_CONFIRM === '1'
+const SKIP_QUIT_CONFIRM = process.env.BEYOND_DESKTOP_SKIP_QUIT_CONFIRM === '1'
 
 const BOOT_FAKE_STEP_MS = (() => {
-  const raw = Number.parseInt(String(process.env.HERMES_DESKTOP_BOOT_FAKE_STEP_MS || ''), 10)
+  const raw = Number.parseInt(String(process.env.BEYOND_DESKTOP_BOOT_FAKE_STEP_MS || ''), 10)
 
   if (!Number.isFinite(raw) || raw <= 0) {
     return 650
@@ -1422,7 +1422,7 @@ const BOOT_FAKE_STEP_MS = (() => {
   return Math.max(120, raw)
 })()
 
-const APP_NAME: string = IDENTITY_APP_NAME || process.env.HERMES_DESKTOP_APP_NAME || 'Hermes'
+const APP_NAME: string = IDENTITY_APP_NAME || process.env.BEYOND_DESKTOP_APP_NAME || 'Beyond'
 const HUD_WINDOW_TITLE = `${APP_NAME} HUD`
 const TITLEBAR_HEIGHT = 34
 const MACOS_TRAFFIC_LIGHTS_HEIGHT = 14
@@ -1459,7 +1459,7 @@ let rendererTitleBarTheme = null
 // tracks the window's effective appearance and ignores `backgroundColor` —
 // so a dark-themed app on a light-mode Mac flashes a white material on every
 // new window until the renderer covers it. The renderer reports its mode via
-// 'hermes:native-theme' ('dark' | 'light' | 'system'); we pin
+// 'beyond:native-theme' ('dark' | 'light' | 'system'); we pin
 // nativeTheme.themeSource to it and persist the value so cold launches paint
 // correctly before the renderer has even loaded.
 const NATIVE_THEME_CONFIG_PATH = path.join(app.getPath('userData'), 'native-theme.json')
@@ -1663,7 +1663,7 @@ const TITLEBAR_OVERLAY_COLOR = 'rgba(1, 0, 0, 0)'
 // WSLg returns false: the RDP host paints nothing for a frameless window and
 // Electron's own overlay drifts its hit-region under RAIL, so the renderer
 // paints its own min/max/close (wslg-window-controls.tsx) over the
-// hermes:window-control IPC channel. See titleBarOverlayOptions.
+// beyond:window-control IPC channel. See titleBarOverlayOptions.
 function getTitleBarOverlayOptions(win?) {
   return titleBarOverlayOptions({
     platform: IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_WSL ? 'wslg' : 'linux',
@@ -1824,24 +1824,24 @@ Menu.setApplicationMenu(null)
 // Windows toast notifications silently no-op unless an AppUserModelID is set:
 // `new Notification().show()` returns without error and nothing appears. The
 // AUMID must match the installed Start Menu shortcut's AUMID, which
-// electron-builder derives from the build `appId` (com.nousresearch.hermes) —
+// electron-builder derives from the build `appId` (app.beyond.beyond) —
 // keep this string in sync with package.json `build.appId`. macOS/Linux don't
 // need this, so gate it on Windows. (Fixes: desktop approval/turn notifications
 // never firing on Windows.)
 if (IS_WINDOWS) {
-  app.setAppUserModelId(IDENTITY_APP_NAME ? PRODUCT_IDENTITY.appId : 'com.nousresearch.hermes')
+  app.setAppUserModelId(IDENTITY_APP_NAME ? PRODUCT_IDENTITY.appId : 'app.beyond.beyond')
 }
 
-// Seed the native About panel with the best-known Hermes version. This is
+// Seed the native About panel with the best-known Beyond version. This is
 // refreshed on every open via showAboutPanelFresh, so an in-place
-// `hermes update` mid-session is reflected without an app restart; the seed
+// `beyond update` mid-session is reflected without an app restart; the seed
 // covers the first open and any non-menu invocation path. Never seed empty:
 // an empty applicationVersion falls back to the bundle version, which is the
 // 0.0.0 placeholder on local builds (#124581).
 app.setAboutPanelOptions({
   applicationName: APP_NAME,
   applicationVersion: nativeAboutVersion(appVersionInfo(INSTALL_STAMP, '', app.getVersion())),
-  copyright: 'Copyright © 2026 Nous Research'
+  copyright: 'Copyright © 2026 Beyond'
 })
 
 // Custom scheme for streaming audio/video into the renderer. Local paths read
@@ -1948,19 +1948,19 @@ const backendDialClaims = new BackendDialClaims()
 let softRehomeInProgress = false
 // Cached connection DESCRIPTORS for every non-primary (connectionId, profile)
 // scope the app has dialed: canonical local gateways reached through
-// `hermes gateway ensure`, registry remotes, per-profile remote overrides.
+// `beyond gateway ensure`, registry remotes, per-profile remote overrides.
 // Never a process — the gateway owns its own lifetime; forgetting an entry only
 // forces the next ensure*() to re-dial. A user with no named profiles never
 // populates this map.
 const backendPool = new Map() // scope key -> { connectionPromise, remoteBaseUrl }
 // Escape hatch: a dedicated, private backend for this app instead of the host's.
-const ISOLATED_BACKEND = process.env.HERMES_DESKTOP_ISOLATED_BACKEND === '1'
+const ISOLATED_BACKEND = process.env.BEYOND_DESKTOP_ISOLATED_BACKEND === '1'
 const profileDeletionGate = new ProfileDeletionGate()
 
 // rememberLog() state. Declared before any top-level caller that logs during
 // module evaluation; declaring these later crashed launch with `undefined.push`
 // in the packaged build (esbuild lowers the TDZ to undefined instead of throwing).
-const hermesLog = []
+const beyondLog = []
 let desktopLogBuffer = ''
 let desktopLogFlushTimer = null
 let desktopLogFlushPromise = Promise.resolve()
@@ -1968,7 +1968,7 @@ let desktopLogFlushPromise = Promise.resolve()
 // Land a spawn failure in desktop.log.
 function logPoolSpawnFailure(label: string, error: unknown): void {
   rememberLog(
-    `Hermes backend for profile ${label} failed to start: ${error instanceof Error ? error.message : String(error)}`
+    `Beyond backend for profile ${label} failed to start: ${error instanceof Error ? error.message : String(error)}`
   )
 }
 
@@ -1983,13 +1983,13 @@ const RENDERER_RELOAD_WINDOW_MS = 60_000
 const RENDERER_RELOAD_MAX = 3
 const rendererReloadTimesRef: { current: number[] } = { current: [] }
 // Latched bootstrap failure: when the first-launch install fails, we hold
-// onto the error so subsequent startHermes() calls (e.g. the renderer's
+// onto the error so subsequent startBeyond() calls (e.g. the renderer's
 // ensureGatewayOpen retrying after the WS won't open) return the same error
 // instead of re-running install.ps1 in a hot loop. Cleared explicitly by
 // the renderer's "Reload and retry" path or by quitting the app.
 let bootstrapFailure = null
 // Latched non-bootstrap backend spawn failure — stops getConnection() from
-// respawning hermes serve backend children in a tight loop while boot is broken.
+// respawning beyond serve backend children in a tight loop while boot is broken.
 let backendStartFailure = null
 // Latched CONFIRMED remote reauth failure. Remote failures deliberately do not
 // latch via backendStartFailure (they're usually transient and must stay
@@ -2030,7 +2030,7 @@ let bootProgressState = {
   error: null,
   fakeMode: BOOT_FAKE_MODE,
   isCloudBackendDown: false,
-  message: 'Waiting to start Hermes backend',
+  message: 'Waiting to start Beyond backend',
   phase: 'idle',
   progress: 0,
   retryable: false,
@@ -2175,10 +2175,10 @@ function rememberLog(chunk) {
   // at the same moment.  Local time, same shape as agent.log/gui.log.
   const stamp = formatLogStamp(new Date())
   const lines = text.split(/\r?\n/).map(line => formatDesktopLogLine(line, stamp))
-  hermesLog.push(...lines)
+  beyondLog.push(...lines)
 
-  if (hermesLog.length > 300) {
-    hermesLog.splice(0, hermesLog.length - 300)
+  if (beyondLog.length > 300) {
+    beyondLog.splice(0, beyondLog.length - 300)
   }
 
   desktopLogBuffer += `${lines.join('\n')}\n`
@@ -2318,10 +2318,10 @@ async function openExternalFile(rawUrl: string) {
   }
 }
 
-// The `hermes:openExternal` route for a BARE local filesystem path — a chat
+// The `beyond:openExternal` route for a BARE local filesystem path — a chat
 // media link, a markdown href, or an artifacts-panel value carrying
 // `C:\…`, `~/…`, `/…` or a UNC path instead of a `file://` URL. `new URL()`
-// cannot express those (hermes-agent 80946): resolve through the same audited
+// cannot express those (beyond-agent 80946): resolve through the same audited
 // `resolveRequestedPathForIpc` the file route uses, then OPEN with the OS
 // handler and fall back to reveal-in-folder, mirroring openExternalFile's
 // missing-file guard so a dead path reports "File not found" instead of a
@@ -2352,7 +2352,7 @@ async function openLocalFilesystemPath(rawPath: string): Promise<boolean> {
       return true
     }
 
-    // Include the path so "Failed to open path" is diagnosable (hermes-agent
+    // Include the path so "Failed to open path" is diagnosable (beyond-agent
     // 84361), then reveal: on Windows archive artifacts have no usable
     // association, and the reveal never re-opens so it can't loop (#53170).
     rememberLog(`[file] openPath failed: ${errorMessage}; path=${localPath}; revealing in folder instead`)
@@ -2384,7 +2384,7 @@ function broadcastOpenFailed(url: string, message: string, code?: 'missing-file'
   rememberLog(`[open-failed] ${url}: ${message}`)
 
   for (const win of BrowserWindow.getAllWindows()) {
-    win.webContents.send('hermes:external-open-failed', { url, message, ...(code ? { code } : {}) })
+    win.webContents.send('beyond:external-open-failed', { url, message, ...(code ? { code } : {}) })
   }
 }
 
@@ -2407,7 +2407,7 @@ function ensureWslWindowsFonts() {
 
   try {
     const confDir = path.join(app.getPath('home'), '.config', 'fontconfig', 'conf.d')
-    const confPath = path.join(confDir, '99-hermes-wsl-windows-fonts.conf')
+    const confPath = path.join(confDir, '99-beyond-wsl-windows-fonts.conf')
     let existing = ''
 
     try {
@@ -2460,7 +2460,7 @@ function broadcastBootProgress() {
     return
   }
 
-  webContents.send('hermes:boot-progress', bootProgressState)
+  webContents.send('beyond:boot-progress', bootProgressState)
 }
 
 // Bootstrap-event broadcast channel + state. The bootstrap runner emits a
@@ -2474,7 +2474,7 @@ function broadcastBootProgress() {
 //   - log:      bounded ring buffer of the last 200 log lines for the
 //               "Show details" affordance in the overlay
 //
-// The snapshot is queryable via the hermes:bootstrap:get IPC handler so a
+// The snapshot is queryable via the beyond:bootstrap:get IPC handler so a
 // reloaded renderer (e.g. devtools reload during dev) recovers state.
 // Bootstrap log ring: bounded buffer so a long install (npm + playwright
 // downloads can emit thousands of lines) doesn't grow unbounded in memory
@@ -2568,7 +2568,7 @@ function broadcastBootstrapEvent(ev) {
     return
   }
 
-  webContents.send('hermes:bootstrap:event', ev)
+  webContents.send('beyond:bootstrap:event', ev)
 }
 
 function getBootstrapState() {
@@ -2594,7 +2594,7 @@ function promptFirstRunSetupChoice(backend) {
     type: 'setup-choice',
     active: true,
     platform: backend.platform || process.platform,
-    activeRoot: backend.activeRoot || ACTIVE_HERMES_ROOT,
+    activeRoot: backend.activeRoot || ACTIVE_BEYOND_ROOT,
     local: backend.local || 'none',
     bundled: installShape() === 'bundled'
   })
@@ -2755,12 +2755,12 @@ function directoryExists(filePath) {
 }
 
 // --- in-app update mutual exclusion (#50238) -------------------------------
-// The Tauri updater writes HERMES_HOME/.hermes-update-in-progress for the whole
+// The Tauri updater writes BEYOND_HOME/.beyond-update-in-progress for the whole
 // duration of an `--update` run (see update.rs UpdateMarkerGuard). If the user
 // relaunches the desktop mid-update — because the window vanished with no
 // progress and looks crashed — a fresh instance must NOT spawn its own local
 // backend: that backend re-locks the venv shim, the updater's straggler cleanup
-// (`force_kill_other_hermes`, taskkill /IM hermes.exe) kills it, the launch
+// (`force_kill_other_beyond`, taskkill /IM beyond.exe) kills it, the launch
 // fails with the 45s "backend didn't come up" error, and the relaunch/kill
 // cycle loops. Instead the fresh instance parks until the update finishes, then
 // brings the backend up itself (it is the surviving instance — the updater's
@@ -2780,7 +2780,7 @@ function directoryExists(filePath) {
 function updateGateDeps(callbacks: MarkerGateCallbacks = {}) {
   return {
     hasLiveMarker: markerGateProbe(
-      { hermesHome: HERMES_HOME, isWindows: IS_WINDOWS, log: rememberLog, updateRoot: resolveUpdateRoot },
+      { beyondHome: BEYOND_HOME, isWindows: IS_WINDOWS, log: rememberLog, updateRoot: resolveUpdateRoot },
       callbacks
     ),
     isUpdateInFlight: () => updateInFlight,
@@ -2790,7 +2790,7 @@ function updateGateDeps(callbacks: MarkerGateCallbacks = {}) {
 
 // The blocked boot screen (R8 D3) every update wait publishes its hold on.
 const updateHoldScreen = createUpdateHoldScreen({
-  hermesHome: HERMES_HOME,
+  beyondHome: BEYOND_HOME,
   log: rememberLog,
   bootHold: () => bootProgressState.updateHold,
   updateBootProgress
@@ -2858,7 +2858,7 @@ async function waitForUpdateToFinish() {
 
         await advanceBootProgress(
           'backend.update-wait',
-          'An update is still running — Hermes will start automatically when it finishes. Its progress is in logs/update.log.',
+          'An update is still running — Beyond will start automatically when it finishes. Its progress is in logs/update.log.',
           12
         )
 
@@ -2867,7 +2867,7 @@ async function waitForUpdateToFinish() {
 
       await advanceBootProgress(
         'backend.update-wait',
-        'An update is finishing — Hermes will start automatically when it completes…',
+        'An update is finishing — Beyond will start automatically when it completes…',
         12
       )
     },
@@ -2880,7 +2880,7 @@ async function waitForUpdateToFinish() {
   // A detached update's result file is the only way the user learns it
   // failed: consumed once, here, where boot passes the update gate.
   parkedRun.report({
-    hermesHome: HERMES_HOME,
+    beyondHome: BEYOND_HOME,
     log: rememberLog,
     dialog,
     shell,
@@ -2911,7 +2911,7 @@ async function waitForUpdateToFinish() {
       log: rememberLog
     })
   ) {
-    await advanceBootProgress('backend.update-restart', 'Restarting Hermes to load the updated app…', 14)
+    await advanceBootProgress('backend.update-restart', 'Restarting Beyond to load the updated app…', 14)
     // Park while the scheduled exit lands so this stale build never starts a
     // backend; the failsafe below only runs if the exit somehow does not.
     await new Promise(resolve => setTimeout(resolve, BUNDLE_SWAP_RELAUNCH_FAILSAFE_MS))
@@ -2953,7 +2953,7 @@ function findOnPath(command) {
   // On Windows, try PATHEXT extensions BEFORE the bare (empty-extension) name.
   // A real command must resolve via its .exe/.cmd (Windows command-resolution
   // semantics consult PATHEXT); an extensionless file — e.g. a Git-Bash
-  // shell-script shim named `hermes` — must not shadow `hermes.cmd`/`hermes.exe`.
+  // shell-script shim named `beyond` — must not shadow `beyond.cmd`/`beyond.exe`.
   // The empty entry is kept LAST so callers that already include the extension
   // (py.exe, pwsh.exe, powershell.exe) still resolve.
   const extensions = buildPathExtCandidates(process.env.PATHEXT, IS_WINDOWS)
@@ -2975,13 +2975,13 @@ function isCommandScript(command) {
   return IS_WINDOWS && /\.(cmd|bat)$/i.test(command || '')
 }
 
-async function unwrapWindowsVenvHermesCommand(command, backendArgs) {
-  return resolveVenvHermesCommand(command, backendArgs, {
+async function unwrapWindowsVenvBeyondCommand(command, backendArgs) {
+  return resolveVenvBeyondCommand(command, backendArgs, {
     isWindows: IS_WINDOWS,
     isCommandScript,
     fileExists,
     directoryExists,
-    canImportHermesCli,
+    canImportBeyondCli,
     getVenvPython,
     buildDesktopBackendEnv,
     resolvePath: (...segments) => path.resolve(...segments),
@@ -3036,13 +3036,13 @@ function looksLikeDesktopAppBinary(commandPath) {
   )
 }
 
-function isHermesSourceRoot(root) {
-  return directoryExists(root) && fileExists(path.join(root, 'hermes_cli', 'main.py'))
+function isBeyondSourceRoot(root) {
+  return directoryExists(root) && fileExists(path.join(root, 'beyond_cli', 'main.py'))
 }
 
 async function findPythonForRoot(root: string): Promise<string | null> {
   return resolveSourcePython(root, {
-    override: process.env.HERMES_DESKTOP_PYTHON,
+    override: process.env.BEYOND_DESKTOP_PYTHON,
     isWindows: IS_WINDOWS,
     fileExists
   })
@@ -3075,7 +3075,7 @@ async function findSystemPython() {
   //      miss real Python 3.13 installs (user-reported case).
   //
   // We also restrict ourselves to Python 3.11–3.13. 3.14 is the latest
-  // CPython but several Hermes deps (notably pywinpty's Rust-built
+  // CPython but several Beyond deps (notably pywinpty's Rust-built
   // windows_x86_64_msvc crate) don't yet publish 3.14 wheels, and
   // `pip install -e .` falls back to source-build, which fails without
   // a Rust toolchain. install.ps1 sidesteps this by pinning to 3.11
@@ -3208,7 +3208,7 @@ function getVenvPython(venvRoot) {
 // This makes "no flashing windows" a property of the one backend launch rather
 // than a flag that has to be remembered at every descendant spawn site. Restoring
 // console python also restores stdout, so the backend announces its port on the
-// normal HERMES_DASHBOARD_READY stdout line and no ready-file side channel is
+// normal BEYOND_DASHBOARD_READY stdout line and no ready-file side channel is
 // needed.
 
 function makeDashboardReadyFile() {
@@ -3219,7 +3219,7 @@ function makeDashboardReadyFile() {
 }
 
 // resolveGitBinary — locate git.exe on Windows. A fresh installer-driven
-// install only has PortableGit under %LOCALAPPDATA%\hermes\git (never on
+// install only has PortableGit under %LOCALAPPDATA%\beyond\git (never on
 // PATH), so a bare spawn('git') ENOENTs and self-update checks fail with
 // "Couldn't check for updates". PortableGit first, then UGit's bundled copy
 // (see ./git-binary-candidates), then standard Git-for-Windows locations,
@@ -3345,11 +3345,11 @@ function resolveGhBinary() {
   return _ghBinaryCache
 }
 
-function recentHermesLog() {
-  return hermesLog.slice(-20).join('\n')
+function recentBeyondLog() {
+  return beyondLog.slice(-20).join('\n')
 }
 
-// ─── Self-update (git-pull against the running backend's hermes root) ──────
+// ─── Self-update (git-pull against the running backend's beyond root) ──────
 
 function readDesktopUpdateConfig(): { branch: string; branchExplicit: boolean } {
   try {
@@ -3445,16 +3445,16 @@ function writeZoomState(zoomLevel) {
 }
 
 // Match the backend's source resolution but bias toward a real git checkout.
-// Dev → SOURCE_REPO_ROOT. Packaged/CLI install → ACTIVE_HERMES_ROOT.
-// HERMES_DESKTOP_HERMES_ROOT always wins so devs can pin a worktree.
+// Dev → SOURCE_REPO_ROOT. Packaged/CLI install → ACTIVE_BEYOND_ROOT.
+// BEYOND_DESKTOP_RUNTIME_ROOT always wins so devs can pin a worktree.
 function resolveUpdateRoot() {
   const candidates = [
-    process.env.HERMES_DESKTOP_HERMES_ROOT && path.resolve(process.env.HERMES_DESKTOP_HERMES_ROOT),
-    !IS_PACKAGED && isHermesSourceRoot(SOURCE_REPO_ROOT) ? SOURCE_REPO_ROOT : null,
-    isHermesSourceRoot(ACTIVE_HERMES_ROOT) ? ACTIVE_HERMES_ROOT : null
+    process.env.BEYOND_DESKTOP_RUNTIME_ROOT && path.resolve(process.env.BEYOND_DESKTOP_RUNTIME_ROOT),
+    !IS_PACKAGED && isBeyondSourceRoot(SOURCE_REPO_ROOT) ? SOURCE_REPO_ROOT : null,
+    isBeyondSourceRoot(ACTIVE_BEYOND_ROOT) ? ACTIVE_BEYOND_ROOT : null
   ].filter(Boolean)
 
-  return candidates.find(isGitCheckout) || candidates[0] || ACTIVE_HERMES_ROOT
+  return candidates.find(isGitCheckout) || candidates[0] || ACTIVE_BEYOND_ROOT
 }
 
 function emitUpdateProgress(payload) {
@@ -3463,7 +3463,7 @@ function emitUpdateProgress(payload) {
   desktopMetrics.noteUpdateProgress(merged.stage)
 
   for (const window of BrowserWindow.getAllWindows()) {
-    window.webContents.send('hermes:updates:progress', merged)
+    window.webContents.send('beyond:updates:progress', merged)
   }
 }
 
@@ -3576,7 +3576,7 @@ function createNativePackagedStrategy(
     const deps: ConstructorParameters<typeof AppInstallerStrategy>[0] = {
       python: payload.storePython,
       // The checker is bundled core code, run with the payload python.
-      module: 'hermes_cli.windows_appinstaller_update',
+      module: 'beyond_cli.windows_appinstaller_update',
       run: (python, module) =>
         runAppInstallerChecker(python, module, {
           env: { ...process.env, PYTHONPATH: payloadPythonPath(payload) },
@@ -3619,7 +3619,7 @@ function createNativePackagedStrategy(
 
     return createStoreStrategy({
       python: payload.storePython,
-      module: 'hermes_cli.windows_store_update',
+      module: 'beyond_cli.windows_store_update',
       pythonPath: payloadPythonPath(payload),
       env: process.env,
       windowHandle: () => (BrowserWindow.getFocusedWindow() ?? mainWindow)?.getNativeWindowHandle() ?? null,
@@ -3653,7 +3653,7 @@ function createNativePackagedStrategy(
  */
 function resolveCheckoutUpdateStrategy(): CheckoutStrategy {
   return createCheckoutStrategy({
-    hermesHome: HERMES_HOME,
+    beyondHome: BEYOND_HOME,
     isWindows: IS_WINDOWS,
     isMac: IS_MAC,
     defaultUpdateBranch: DEFAULT_UPDATE_BRANCH,
@@ -3666,7 +3666,7 @@ function resolveCheckoutUpdateStrategy(): CheckoutStrategy {
         python: await findPythonForRoot(updateRoot),
         git: resolveGitBinary(),
         updateRoot,
-        hermesHome: HERMES_HOME,
+        beyondHome: BEYOND_HOME,
         branchConfigPath: DESKTOP_UPDATE_CONFIG_PATH,
         force: opts.force,
         setChannel: opts.setChannel
@@ -3677,7 +3677,7 @@ function resolveCheckoutUpdateStrategy(): CheckoutStrategy {
 
     emitUpdateProgress,
     rememberLog,
-    startHermes,
+    startBeyond,
     stopBackendsForUpdate,
     repairMacUpdaterHelper: updater => repairMacUpdaterHelper(updater, { isMac: IS_MAC, log: rememberLog }),
     preflightStateDb: async (home: string, log: (message: string) => void): Promise<void> => {
@@ -3688,7 +3688,7 @@ function resolveCheckoutUpdateStrategy(): CheckoutStrategy {
       // too (4de06d1dbf7b). An unreadable answer keeps the snapshot.
       if (
         !(await readPreUpdateBackupEnabled(
-          resolveHermesBackend(['config', 'get', 'updates.pre_update_backup', '--json']),
+          resolveBeyondBackend(['config', 'get', 'updates.pre_update_backup', '--json']),
           home
         ))
       ) {
@@ -3702,7 +3702,7 @@ function resolveCheckoutUpdateStrategy(): CheckoutStrategy {
       // contract as readSourceUpdate and the hand-off script.
       const managed: boolean = directoryExists(path.join(root, 'pm'))
 
-      const launcher: string | null = managed ? resolveInstallationLauncher(root, IS_WINDOWS, HERMES_HOME) : null
+      const launcher: string | null = managed ? resolveInstallationLauncher(root, IS_WINDOWS, BEYOND_HOME) : null
 
       if (managed && !launcher) {
         const message =
@@ -3716,7 +3716,7 @@ function resolveCheckoutUpdateStrategy(): CheckoutStrategy {
       preflightStateDb({
         python: managed ? null : await findPythonForRoot(root),
         launcher,
-        script: path.join(root, 'hermes_cli', 'backup_sqlite.py'),
+        script: path.join(root, 'beyond_cli', 'backup_sqlite.py'),
         home,
         log
       })
@@ -3735,7 +3735,7 @@ function resolveCheckoutUpdateStrategy(): CheckoutStrategy {
  * source.
  */
 function resolveDesktopFeedBaseUrl(): string {
-  return resolveFeedBaseUrl(readUpdatesFeedBaseFromConfig(path.join(HERMES_HOME, 'config.yaml')))
+  return resolveFeedBaseUrl(readUpdatesFeedBaseFromConfig(path.join(BEYOND_HOME, 'config.yaml')))
 }
 
 /** The updater channel from the baked install stamp ('canary' vs 'stable'). */
@@ -3776,7 +3776,7 @@ async function restoreBundledBackend(): Promise<void> {
   }
 
   backendStartFailure = null
-  await startHermes()
+  await startBeyond()
 }
 
 // Set to true when the desktop is about to quit so a detached swap/install/
@@ -3796,22 +3796,22 @@ let quitPromptOpen = false
 let quitConfirmedWithActiveWork = false
 
 // Resolve the staged updater binary the desktop may hand an update to. On
-// Windows that binary owns ALL repo mutation — running `hermes update` +
+// Windows that binary owns ALL repo mutation — running `beyond update` +
 // rebuilding the desktop — so the desktop never touches its own bits while
 // running. macOS/Linux stage the same binary but deliberately do not use it;
 // see resolveStagedUpdaterBinary for the policy and for #74836. Returns null
 // whenever no hand-off applies; callers degrade gracefully.
 function resolveUpdaterBinary() {
-  return resolveStagedUpdaterBinary(HERMES_HOME, { fileExists, isWindows: IS_WINDOWS })
+  return resolveStagedUpdaterBinary(BEYOND_HOME, { fileExists, isWindows: IS_WINDOWS })
 }
 
-// Path to the venv shim whose lock decides whether `hermes update` can write
+// Path to the venv shim whose lock decides whether `beyond update` can write
 // fresh entry points. On Windows this is the file the running backend
-// `hermes.exe` holds open; on POSIX it's never mandatory-locked.
-function venvHermesShimPath(updateRoot) {
+// `beyond.exe` holds open; on POSIX it's never mandatory-locked.
+function venvBeyondShimPath(updateRoot) {
   const venvDir = resolveVenvDir(updateRoot)
 
-  return IS_WINDOWS ? path.join(venvDir, 'Scripts', 'hermes.exe') : path.join(venvDir, 'bin', 'hermes')
+  return IS_WINDOWS ? path.join(venvDir, 'Scripts', 'beyond.exe') : path.join(venvDir, 'bin', 'beyond')
 }
 
 // Best-effort lock probe mirroring the Rust updater's is_locked(): a running
@@ -3844,10 +3844,10 @@ function isShimLocked(shimPath) {
   }
 }
 
-// Kill only Hermes-OWNED venv daemons (the memory plugin's hindsight daemon:
+// Kill only Beyond-OWNED venv daemons (the memory plugin's hindsight daemon:
 // exe under venv\Scripts AND cmdline referencing hindsight_api.main). The
 // daemon is spawned DETACHED, so it outlives the backend tree-kill and keeps
-// venv files mapped. External holders (a user terminal running `hermes`,
+// venv files mapped. External holders (a user terminal running `beyond`,
 // unrelated scripts) are NOT killed. The uninstall lock probe refuses a
 // held installation. Selection lives in the pure
 // venv-holder-select module (ordinal path-prefix, no PowerShell -like
@@ -3868,7 +3868,7 @@ function scanWindowsProcesses(): Array<{ ProcessId?: unknown; ExecutablePath?: s
   return Array.isArray(parsed) ? parsed : [parsed]
 }
 
-function killHermesOwnedVenvDaemons(updateRoot) {
+function killBeyondOwnedVenvDaemons(updateRoot) {
   if (!IS_WINDOWS) {
     return
   }
@@ -3878,7 +3878,7 @@ function killHermesOwnedVenvDaemons(updateRoot) {
   let holders = []
 
   try {
-    holders = scanWindowsProcesses().filter(p => isHermesOwnedVenvDaemon(p?.ExecutablePath, p?.CommandLine, scriptsDir))
+    holders = scanWindowsProcesses().filter(p => isBeyondOwnedVenvDaemon(p?.ExecutablePath, p?.CommandLine, scriptsDir))
   } catch {
     // Best-effort: the uninstall lock probe remains the backstop.
     return
@@ -3888,7 +3888,7 @@ function killHermesOwnedVenvDaemons(updateRoot) {
     const pid = Number(holder?.ProcessId)
 
     if (Number.isInteger(pid) && pid > 0) {
-      rememberLog(`[updates] stopping Hermes-owned venv daemon (hindsight) PID ${pid} before hand-off`)
+      rememberLog(`[updates] stopping Beyond-owned venv daemon (hindsight) PID ${pid} before hand-off`)
 
       try {
         forceKillProcessTree(pid)
@@ -3901,12 +3901,12 @@ function killHermesOwnedVenvDaemons(updateRoot) {
   }
 }
 
-// Kill EXTERNAL Hermes processes that hold this install's venv shim (#62311):
+// Kill EXTERNAL Beyond processes that hold this install's venv shim (#62311):
 // the gateway Startup item and dashboard Scheduled Task are launched outside
 // this app (Task Scheduler / autostart), so the backend teardown above never
 // sees them — yet they map venv files and made every update hand-off abort
 // with "venv shim still locked". Selection is deliberately narrow
-// (isExternalVenvHolder: exe under venv\Scripts AND unambiguously a Hermes
+// (isExternalVenvHolder: exe under venv\Scripts AND unambiguously a Beyond
 // program) — unrelated processes that merely mention the install root or use
 // the venv interpreter for their own scripts are never killed; the shim-lock
 // probe still aborts the hand-off for those. Called before the release gate
@@ -3933,7 +3933,7 @@ function killExternalVenvHolders(updateRoot) {
 
     if (Number.isInteger(pid) && pid > 0) {
       rememberLog(
-        `[updates] stopping external Hermes venv holder (autostart gateway/dashboard) PID ${pid} before hand-off`
+        `[updates] stopping external Beyond venv holder (autostart gateway/dashboard) PID ${pid} before hand-off`
       )
 
       try {
@@ -3946,10 +3946,10 @@ function killExternalVenvHolders(updateRoot) {
 }
 
 // Force-kill the entire process TREE rooted at each PID. Node's child.kill()
-// only signals the direct child, so on Windows a backend `hermes.exe` that
-// spawned its own grandchildren (a `hermes` REPL, a pty terminal session, the
+// only signals the direct child, so on Windows a backend `beyond.exe` that
+// spawned its own grandchildren (a `beyond` REPL, a pty terminal session, the
 // gateway) would survive and keep the venv shim locked. taskkill /T /F reaps
-// the whole tree synchronously. The command is not widened: one owned PID,
+// the whole tree synchrobeyondly. The command is not widened: one owned PID,
 // /T /F, nothing else. Failures propagate — close/stop must not discard them.
 // Windows-only: this is called solely from the Windows shim-unlock and
 // close/stop paths, and the backend is NOT spawned detached (so it's not a
@@ -3996,8 +3996,8 @@ function holderPidsFromLockFile(lockPath: string): Pick<RuntimeLock, 'holderPids
 }
 
 function collectCloseStopLocks(): RuntimeLock[] {
-  const roots = [HERMES_HOME]
-  const profilesRoot = path.join(HERMES_HOME, 'profiles')
+  const roots = [BEYOND_HOME]
+  const profilesRoot = path.join(BEYOND_HOME, 'profiles')
 
   try {
     for (const name of fs.readdirSync(profilesRoot)) {
@@ -4282,7 +4282,7 @@ function reapOrphanedBackendsOnce() {
 
 // Stop app-owned Windows backends before replacing application outputs.
 // PM generations can retain live readers. Gateway draining/restart belongs to
-// `hermes update`; neither venv scans nor a second fleet stop belong here.
+// `beyond update`; neither venv scans nor a second fleet stop belong here.
 async function stopBackendsForUpdate(): Promise<void> {
   closeGatewayTicketBridges()
 
@@ -4300,18 +4300,18 @@ async function releaseBackendLock(updateRoot: string, tag: string): Promise<{ un
     return { unlocked: true }
   }
 
-  const hermesProcess = backendConnectionState.getProcess()
+  const beyondProcess = backendConnectionState.getProcess()
 
   // Seed the release gate with every PID we are about to signal (the
   // supervised primary backend, when one exists). The gate waits for these to
   // actually LEAVE the process table, not just for the shim to unlock — the
-  // shim probe only covers venv\Scripts\hermes.exe, but the backend is
-  // `python.exe -m hermes_cli.main serve`, which need not hold the shim at all
+  // shim probe only covers venv\Scripts\beyond.exe, but the backend is
+  // `python.exe -m beyond_cli.main serve`, which need not hold the shim at all
   // (#74805 first-attempt race).
   const initialPids = []
 
-  if (hermesProcess && Number.isInteger(hermesProcess.pid)) {
-    initialPids.push(hermesProcess.pid)
+  if (beyondProcess && Number.isInteger(beyondProcess.pid)) {
+    initialPids.push(beyondProcess.pid)
   }
 
   // No backend comes back after an uninstall: stay silent, like a quit.
@@ -4319,22 +4319,22 @@ async function releaseBackendLock(updateRoot: string, tag: string): Promise<{ un
 
   // Uninstall deletes the whole runtime. Drain separately-running gateways
   // through the CLI, rather than targeting a gateway worker by PID.
-  stopGatewayBeforeUpdate(venvHermesShimPath(updateRoot), HERMES_HOME)
+  stopGatewayBeforeUpdate(venvBeyondShimPath(updateRoot), BEYOND_HOME)
 
-  // Reap Hermes-OWNED venv daemons the tree-kill above cannot reach: the
+  // Reap Beyond-OWNED venv daemons the tree-kill above cannot reach: the
   // memory plugin's hindsight daemon is spawned DETACHED (it outlives the
   // backend) yet runs off venv\Scripts\pythonw.exe, keeping venv files
   // mapped past the backend teardown (#75477/#75478). Narrowly scoped
   // (venv-holder-select) — external holders are never killed here.
-  killHermesOwnedVenvDaemons(updateRoot)
+  killBeyondOwnedVenvDaemons(updateRoot)
 
-  // External autostart Hermes processes (gateway Startup item, dashboard
+  // External autostart Beyond processes (gateway Startup item, dashboard
   // Scheduled Task) also hold the venv shim and are invisible to the backend
   // teardown (#62311). Kill them before the gate AND re-scan inside each gate
   // pass, so a respawning holder loses the race instead of the update.
   killExternalVenvHolders(updateRoot)
 
-  const shim = venvHermesShimPath(updateRoot)
+  const shim = venvBeyondShimPath(updateRoot)
 
   const gate = await waitForBackendRelease(
     initialPids,
@@ -4347,10 +4347,10 @@ async function releaseBackendLock(updateRoot: string, tag: string): Promise<{ un
         killExternalVenvHolders(updateRoot)
         const stragglers = []
 
-        const currentHermesProcess = backendConnectionState.getProcess()
+        const currentBeyondProcess = backendConnectionState.getProcess()
 
-        if (currentHermesProcess && Number.isInteger(currentHermesProcess.pid)) {
-          stragglers.push(currentHermesProcess.pid)
+        if (currentBeyondProcess && Number.isInteger(currentBeyondProcess.pid)) {
+          stragglers.push(currentBeyondProcess.pid)
         }
 
         return stragglers
@@ -4391,8 +4391,8 @@ async function releaseBackendLock(updateRoot: string, tag: string): Promise<{ un
 //
 // The desktop is a pure consumer: it does NOT git pull / pip install / rebuild
 // itself (the old open-coded git dance lived here and drifted from
-// `hermes update`). Instead we spawn the staged Hermes-Setup binary with
-// --update and quit, so it can run `hermes update` (which refuses while we
+// `beyond update`). Instead we spawn the staged Beyond-Setup binary with
+// --update and quit, so it can run `beyond update` (which refuses while we
 // hold the venv shim) and rebuild the desktop with our exe already gone.
 //
 // Detection (checkUpdates / commit changelog / "N behind") stays in the UI;
@@ -4436,7 +4436,7 @@ async function handOffWindowsBootstrapRecovery(reason) {
     return false
   }
 
-  // A bundled install does not own %LOCALAPPDATA%\hermes — the updater
+  // A bundled install does not own %LOCALAPPDATA%\beyond — the updater
   // would try to heal a tree the app never created. The payload IS the
   // runtime; recovery means reinstalling the app, not spawning the
   // updater. (ensureRuntime's bundled guard also short-circuits before
@@ -4453,7 +4453,7 @@ async function handOffWindowsBootstrapRecovery(reason) {
     return false
   }
 
-  const handoffConflict = await updateHandoffConflict(HERMES_HOME)
+  const handoffConflict = await updateHandoffConflict(BEYOND_HOME)
 
   if (handoffConflict) {
     // Same hazard as applyUpdates (#75778): a live foreign updater already
@@ -4482,11 +4482,11 @@ async function handOffWindowsBootstrapRecovery(reason) {
   await stopBackendsForUpdate()
 
   const child = spawnUpdaterProcess(updater, updaterArgs, {
-    cwd: HERMES_HOME,
+    cwd: BEYOND_HOME,
     env: {
       ...process.env,
-      HERMES_HOME,
-      HERMES_INSTALL_ROOT: updateRoot
+      BEYOND_HOME,
+      BEYOND_INSTALL_ROOT: updateRoot
     },
     detached: true,
     stdio: 'ignore'
@@ -4501,7 +4501,7 @@ async function handOffWindowsBootstrapRecovery(reason) {
   // Exclusive create only (A7 rule 3): over any existing marker the pre-write
   // is skipped — the staged updater claims (and reclaims) for itself.
   if (Number.isInteger(child.pid) && stagedUpdaterSupportsPrewrittenMarker(updater)) {
-    const prewrite = await writeUpdateMarker(HERMES_HOME, child.pid)
+    const prewrite = await writeUpdateMarker(BEYOND_HOME, child.pid)
 
     if (!prewrite.ok) {
       rememberLog(`[bootstrap] skipping marker pre-write: ${describeSkippedPrewrite(prewrite)}`)
@@ -4559,8 +4559,8 @@ function runningAppBundle() {
 
 // macOS/Linux update hand-off: spawn the repo-owned posix orchestrator
 // (scripts/desktop-update/posix.sh) detached and QUIT. The script waits us
-// out, runs `hermes update`, swaps/relaunches the app bundle, and writes
-// .hermes-update-result.json for the relaunched Desktop to surface. It shows
+// out, runs `beyond update`, swaps/relaunches the app bundle, and writes
+// .beyond-update-result.json for the relaunched Desktop to surface. It shows
 // its own tiny shim window (or nothing, headless) — this process only needs
 // to leave. Checkouts that predate the script get the manual card once.
 function readJson(filePath) {
@@ -4589,18 +4589,18 @@ function readBootstrapMarker() {
   return readJson(BOOTSTRAP_COMPLETE_MARKER)
 }
 
-// Marker-independent: is the canonical install at ACTIVE_HERMES_ROOT actually
+// Marker-independent: is the canonical install at ACTIVE_BEYOND_ROOT actually
 // runnable right now? A complete CLI install (`install.sh --include-desktop`)
 // or a DMG launch over a prior CLI install satisfies this WITHOUT the desktop
 // ever having written the bootstrap marker -- so we must be able to recognise
 // "already installed" off the filesystem alone, not just the marker.
 async function isSourceRuntimeUsable(root: string): Promise<boolean> {
-  return (await resolveSourceInstallationBackend(root, [], { hermesHome: HERMES_HOME })) !== null
+  return (await resolveSourceInstallationBackend(root, [], { beyondHome: BEYOND_HOME })) !== null
 }
 
 function activeRuntimeState(backend: SourceBackend | null): ActiveRuntimeState {
   // We DELIBERATELY do NOT verify that the checkout is currently at the
-  // pinned commit -- users update via the in-app update path or `hermes
+  // pinned commit -- users update via the in-app update path or `beyond
   // update`, which moves HEAD legitimately. The marker only attests "a
   // desktop-managed bootstrap ran here at least once"; runtime usability is
   // what decides whether we can actually launch.
@@ -4619,11 +4619,11 @@ function activeRuntimeState(backend: SourceBackend | null): ActiveRuntimeState {
 }
 
 /** Read the checkout-owned install stamp in the canonical runtime root
- *  (`ACTIVE_HERMES_ROOT/install-stamp.json`), written by the Python
+ *  (`ACTIVE_BEYOND_ROOT/install-stamp.json`), written by the Python
  *  completion tail. Returns null when absent or unreadable. */
 function readCanonicalInstallStamp() {
   try {
-    const raw = fs.readFileSync(path.join(ACTIVE_HERMES_ROOT, 'install-stamp.json'), 'utf8')
+    const raw = fs.readFileSync(path.join(ACTIVE_BEYOND_ROOT, 'install-stamp.json'), 'utf8')
     const parsed = JSON.parse(raw)
 
     if (parsed && typeof parsed === 'object' && typeof parsed.source === 'string') {
@@ -4650,7 +4650,7 @@ function writeBootstrapMarker(payload) {
   writeFileAtomic(BOOTSTRAP_COMPLETE_MARKER, JSON.stringify(merged, null, 2) + '\n', 'utf8')
 
   // The checkout's own install stamp is written by the Python completion tail
-  // (hermes_cli/source_completion.py) during the products stage, from the
+  // (beyond_cli/source_completion.py) during the products stage, from the
   // checkout itself. The desktop never synthesizes it: the checkout is the
   // authority for its runtime identity, and a desktop-written copy would
   // clobber the completion tail's richer provenance.
@@ -4659,7 +4659,7 @@ function writeBootstrapMarker(payload) {
 }
 
 function resolveWebDist() {
-  const override = process.env.HERMES_DESKTOP_WEB_DIST
+  const override = process.env.BEYOND_DESKTOP_WEB_DIST
 
   if (override && directoryExists(path.resolve(override))) {
     return path.resolve(override)
@@ -4684,7 +4684,7 @@ function resolveWebDist() {
     rememberLog(
       `[web-dist] dashboard frontend dir resolved to an asar-internal path that ` +
         `is not a real directory: ${fallback}. Static routes will 404. ` +
-        `Ensure dist/** is unpacked (asarUnpack) or set HERMES_DESKTOP_WEB_DIST.`
+        `Ensure dist/** is unpacked (asarUnpack) or set BEYOND_DESKTOP_WEB_DIST.`
     )
   }
 
@@ -4696,7 +4696,7 @@ function resolveWebDist() {
 // needs BOTH, and re-deriving the list means walking the whole renderer
 // generation a second time: missingRendererAssets follows index.html's
 // modulepreload refs and then every chunk's inline __vite__mapDeps table, so
-// on a release build it reads ~28 MiB across ~160 files synchronously on the
+// on a release build it reads ~28 MiB across ~160 files synchrobeyondly on the
 // main thread — measured ~49 ms per walk, twice before loadWindowUrl().
 // Callers that only need the path keep using resolveRendererIndex below.
 function resolveRendererIndexWithMissing(): { index: string; missing: string[] } {
@@ -4752,7 +4752,7 @@ function resolveRendererIndexWithMissing(): { index: string; missing: string[] }
     rememberLog(
       `[renderer] every renderer bundle is incomplete (${present.join(', ')}). ` +
         `The last update replaced the app while its files were locked. ` +
-        `Repair with: hermes desktop --force-build`
+        `Repair with: beyond desktop --force-build`
     )
 
     // present[0]'s own list, captured on the first loop iteration — never the
@@ -4766,7 +4766,7 @@ function resolveRendererIndexWithMissing(): { index: string; missing: string[] }
   rememberLog(
     `[renderer] index.html not found — the desktop app was packaged without a ` +
       `renderer bundle. Tried: ${candidates.join(', ')}. ` +
-      `Rebuild with: hermes desktop --force-build`
+      `Rebuild with: beyond desktop --force-build`
   )
 
   return { index: candidates[0], missing: [] }
@@ -4793,9 +4793,9 @@ function isPackagedInstallPath(dir) {
   })
 }
 
-function resolveHermesCwd() {
+function resolveBeyondCwd() {
   // In a packaged build, `process.cwd()` resolves to the install root (e.g.
-  // `…/win-unpacked` on Windows or `/Applications/Hermes.app/Contents/...`
+  // `…/win-unpacked` on Windows or `/Applications/Beyond.app/Contents/...`
   // on macOS). Sessions spawned there leave files inside the app bundle
   // and bewilder users when "where did my files go?" is the install dir.
   // The user-configurable default project directory wins over everything,
@@ -4803,7 +4803,7 @@ function resolveHermesCwd() {
   // real directory), then the home dir.
   const candidates = [
     readDefaultProjectDir(),
-    process.env.HERMES_DESKTOP_CWD,
+    process.env.BEYOND_DESKTOP_CWD,
     IS_PACKAGED ? null : process.env.INIT_CWD,
     IS_PACKAGED ? null : process.cwd(),
     !IS_PACKAGED ? SOURCE_REPO_ROOT : null,
@@ -4833,7 +4833,7 @@ function sanitizeWorkspaceCwd(cwd) {
   const trimmed = typeof cwd === 'string' ? cwd.trim() : ''
 
   if (!trimmed || isPackagedInstallPath(trimmed)) {
-    return { cwd: resolveHermesCwd(), sanitized: Boolean(trimmed) }
+    return { cwd: resolveBeyondCwd(), sanitized: Boolean(trimmed) }
   }
 
   try {
@@ -4846,7 +4846,7 @@ function sanitizeWorkspaceCwd(cwd) {
     // Fall through to the resolved default.
   }
 
-  return { cwd: resolveHermesCwd(), sanitized: Boolean(trimmed) }
+  return { cwd: resolveBeyondCwd(), sanitized: Boolean(trimmed) }
 }
 
 // Persisted "Default project directory" — surfaced as a setting in the
@@ -4893,7 +4893,7 @@ function writeDefaultProjectDir(dir) {
 
 const installedRuntimeGate = createInstalledRuntimeGate(process.env, rememberLog)
 
-async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHermesBackend> {
+async function resolveBeyondBackend(backendArgs: string[]): Promise<ResolvedBeyondBackend> {
   const payload = bundledPayload(process.resourcesPath)
 
   if (payload) {
@@ -4906,7 +4906,7 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
       label: `bundled payload at ${payload.root}`,
       command: payload.shim,
       args: [...backendArgs],
-      env: { ...buildDesktopBackendEnv(), HERMES_RUNTIME_DIR: payload.toolsDir },
+      env: { ...buildDesktopBackendEnv(), BEYOND_RUNTIME_DIR: payload.toolsDir },
       ...payloadTicketRuntime(payload),
       root: payload.repoDir,
       bootstrap: false,
@@ -4915,12 +4915,12 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
     }
   }
 
-  // 1. Explicit override -- HERMES_DESKTOP_HERMES_ROOT points at a developer
+  // 1. Explicit override -- BEYOND_DESKTOP_RUNTIME_ROOT points at a developer
   //    checkout. Honour it as-is (no bootstrap; the user is driving).
   const overrideRoot: string | undefined =
-    process.env.HERMES_DESKTOP_HERMES_ROOT && path.resolve(process.env.HERMES_DESKTOP_HERMES_ROOT)
+    process.env.BEYOND_DESKTOP_RUNTIME_ROOT && path.resolve(process.env.BEYOND_DESKTOP_RUNTIME_ROOT)
 
-  if (overrideRoot && isHermesSourceRoot(overrideRoot)) {
+  if (overrideRoot && isBeyondSourceRoot(overrideRoot)) {
     const backend: SourceBackend | null = createSourcePythonBackend(
       overrideRoot,
       await findPythonForRoot(overrideRoot),
@@ -4934,9 +4934,9 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
 
   // 2. Development source -- when running `npm run dev` from a checkout, the
   //    cloned repo at SOURCE_REPO_ROOT takes precedence over ACTIVE and any
-  //    installed `hermes` on PATH so local Python edits are actually exercised.
-  //    (In dev with no checkout, SOURCE_REPO_ROOT won't pass isHermesSourceRoot.)
-  if (!IS_PACKAGED && isHermesSourceRoot(SOURCE_REPO_ROOT)) {
+  //    installed `beyond` on PATH so local Python edits are actually exercised.
+  //    (In dev with no checkout, SOURCE_REPO_ROOT won't pass isBeyondSourceRoot.)
+  if (!IS_PACKAGED && isBeyondSourceRoot(SOURCE_REPO_ROOT)) {
     const backend: SourceBackend | null = createSourcePythonBackend(
       SOURCE_REPO_ROOT,
       await findPythonForRoot(SOURCE_REPO_ROOT),
@@ -4948,71 +4948,71 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
     }
   }
 
-  // 3. HERMES_DESKTOP_HERMES — an explicit deployment override (the Nix wrapper), not a PATH
+  // 3. BEYOND_DESKTOP_RUNTIME — an explicit deployment override (the Nix wrapper), not a PATH
   //    candidate; the pinned backend is the only valid runtime there. Resolve it before any
   //    mutable install (older release, other Python env). It carries the root its launcher reports.
-  const hermesOverride: string | undefined = process.env.HERMES_DESKTOP_HERMES
-  let hermesCommand: string | null = null
+  const beyondOverride: string | undefined = process.env.BEYOND_DESKTOP_RUNTIME
+  let beyondCommand: string | null = null
 
-  if (hermesOverride) {
-    const resolvedOverride: string | null = findOnPath(hermesOverride)
+  if (beyondOverride) {
+    const resolvedOverride: string | null = findOnPath(beyondOverride)
 
     if (resolvedOverride) {
-      hermesCommand = resolvedOverride
-    } else if (!isWindowsBinaryPathInWsl(hermesOverride, { isWsl: IS_WSL })) {
-      hermesCommand = hermesOverride
+      beyondCommand = resolvedOverride
+    } else if (!isWindowsBinaryPathInWsl(beyondOverride, { isWsl: IS_WSL })) {
+      beyondCommand = beyondOverride
     } else {
-      rememberLog(`Ignoring Windows Hermes override under WSL: ${hermesOverride}`)
+      rememberLog(`Ignoring Windows Beyond override under WSL: ${beyondOverride}`)
     }
 
-    if (hermesCommand) {
-      if (looksLikeDesktopAppBinary(hermesCommand)) {
-        rememberLog(`Ignoring desktop app executable on PATH while resolving Hermes CLI: ${hermesCommand}`)
-        hermesCommand = null
+    if (beyondCommand) {
+      if (looksLikeDesktopAppBinary(beyondCommand)) {
+        rememberLog(`Ignoring desktop app executable on PATH while resolving Beyond CLI: ${beyondCommand}`)
+        beyondCommand = null
       } else {
-        const unwrapped: Awaited<ReturnType<typeof unwrapWindowsVenvHermesCommand>> =
-          await unwrapWindowsVenvHermesCommand(hermesCommand, backendArgs)
+        const unwrapped: Awaited<ReturnType<typeof unwrapWindowsVenvBeyondCommand>> =
+          await unwrapWindowsVenvBeyondCommand(beyondCommand, backendArgs)
 
         if (unwrapped) {
           return unwrapped
         }
 
-        const shellForProbe: boolean = isCommandScript(hermesCommand)
+        const shellForProbe: boolean = isCommandScript(beyondCommand)
 
         if (
-          shouldTrustHermesOverride(hermesOverride) ||
-          (await verifyHermesCli(hermesCommand, { shell: shellForProbe }))
+          shouldTrustBeyondOverride(beyondOverride) ||
+          (await verifyBeyondCli(beyondCommand, { shell: shellForProbe }))
         ) {
           return {
-            label: `existing Hermes CLI at ${hermesCommand}`,
-            command: hermesCommand,
+            label: `existing Beyond CLI at ${beyondCommand}`,
+            command: beyondCommand,
             args: backendArgs,
             bootstrap: false,
             env: {},
             kind: 'command',
             shell: shellForProbe,
-            local: 'installed', root: await launcherInstallRoot(hermesCommand) // ticket minting needs it (#138774)
+            local: 'installed', root: await launcherInstallRoot(beyondCommand) // ticket minting needs it (#138774)
           }
         }
 
         rememberLog(
-          `Ignoring existing Hermes CLI at ${hermesCommand}: --version probe failed; falling through to bootstrap.`
+          `Ignoring existing Beyond CLI at ${beyondCommand}: --version probe failed; falling through to bootstrap.`
         )
       }
     }
   }
 
-  // 4. ACTIVE_HERMES_ROOT — the canonical install at
-  //    %LOCALAPPDATA%\\hermes\\hermes-agent (Windows) or ~/.hermes/hermes-agent.
+  // 4. ACTIVE_BEYOND_ROOT — the canonical install at
+  //    %LOCALAPPDATA%\\beyond\\beyond-agent (Windows) or ~/.beyond/beyond-agent.
   //    A valid bootstrap marker proves Desktop finished the first-run install
   //    flow, but marker provenance is NOT the same thing as runtime usability:
   //    the CLI can publish the same installation launcher, and older desktop
   //    builds could leave a healthy install behind without the marker. If the
   //    active runtime is usable, launch it directly; only fall through to
   //    bootstrap when the runtime itself is unusable.
-  //    HERMES_DESKTOP_IGNORE_EXISTING=1 skips this rung (see backend-resolution).
-  const activeBackend: SourceBackend | null = await installedRuntimeGate.resolve(ACTIVE_HERMES_ROOT, () =>
-    resolveSourceInstallationBackend(ACTIVE_HERMES_ROOT, backendArgs, { hermesHome: HERMES_HOME })
+  //    BEYOND_DESKTOP_IGNORE_EXISTING=1 skips this rung (see backend-resolution).
+  const activeBackend: SourceBackend | null = await installedRuntimeGate.resolve(ACTIVE_BEYOND_ROOT, () =>
+    resolveSourceInstallationBackend(ACTIVE_BEYOND_ROOT, backendArgs, { beyondHome: BEYOND_HOME })
   )
 
   const activeRuntime: ActiveRuntimeState = activeRuntimeState(activeBackend)
@@ -5020,7 +5020,7 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
   if (activeBackend && !bootstrapRepairRequested) {
     if (!activeRuntime.hasValidMarker) {
       rememberLog(
-        `[bootstrap] Active Hermes runtime at ${ACTIVE_HERMES_ROOT} is usable but the bootstrap marker is missing or stale; skipping first-run bootstrap.`
+        `[bootstrap] Active Beyond runtime at ${ACTIVE_BEYOND_ROOT} is usable but the bootstrap marker is missing or stale; skipping first-run bootstrap.`
       )
     }
 
@@ -5030,27 +5030,27 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
   if (bootstrapRepairRequested) {
     rememberLog('[bootstrap] repair requested; bypassing the usable active runtime to re-run the installer')
   } else {
-    // 5. A source install outside ACTIVE_HERMES_ROOT (install.sh --dir, a
-    //    setup-hermes.sh clone), found through the launcher it published at a
+    // 5. A source install outside ACTIVE_BEYOND_ROOT (install.sh --dir, a
+    //    setup-beyond.sh clone), found through the launcher it published at a
     //    fixed user-bin location: a Finder/Dock launch inherits a PATH without
     //    ~/.local/bin. The reported root is then resolved and probed like any
-    //    installed runtime; HERMES_DESKTOP_IGNORE_EXISTING=1 skips it too.
-    const userInstall: ReturnType<typeof userLauncherInstallRoot> = userLauncherInstallRoot(IS_WINDOWS, HERMES_HOME)
+    //    installed runtime; BEYOND_DESKTOP_IGNORE_EXISTING=1 skips it too.
+    const userInstall: ReturnType<typeof userLauncherInstallRoot> = userLauncherInstallRoot(IS_WINDOWS, BEYOND_HOME)
 
     if (userInstall) {
       const userBackend: SourceBackend | null = await installedRuntimeGate.resolve(userInstall.root, () =>
-        resolveSourceInstallationBackend(userInstall.root, backendArgs, { hermesHome: HERMES_HOME })
+        resolveSourceInstallationBackend(userInstall.root, backendArgs, { beyondHome: BEYOND_HOME })
       )
 
       if (userBackend) {
-        rememberLog(`[boot] Using Hermes install at ${userInstall.root} (published launcher ${userInstall.launcher})`)
+        rememberLog(`[boot] Using Beyond install at ${userInstall.root} (published launcher ${userInstall.launcher})`)
 
         return userBackend
       }
 
-      rememberLog(`[bootstrap] Hermes install at ${userInstall.root} (from ${userInstall.launcher}) is not usable`)
+      rememberLog(`[bootstrap] Beyond install at ${userInstall.root} (from ${userInstall.launcher}) is not usable`)
     } else {
-      rememberLog(`[bootstrap] no usable Hermes install at ${ACTIVE_HERMES_ROOT} and no published user-bin launcher`)
+      rememberLog(`[bootstrap] no usable Beyond install at ${ACTIVE_BEYOND_ROOT} and no published user-bin launcher`)
     }
   }
 
@@ -5061,19 +5061,19 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
   //    explaining what's missing.
   //
   //    We deliberately do NOT throw here -- throwing inside
-  //    resolveHermesBackend was the old "no payload" path and forced the
+  //    resolveBeyondBackend was the old "no payload" path and forced the
   //    user into a dead end. With the bootstrap protocol, "no install yet"
   //    is a recoverable state the GUI can drive through.
   return {
     kind: 'bootstrap-needed',
-    label: 'Hermes Agent not installed yet; bootstrap required',
+    label: 'Beyond Agent not installed yet; bootstrap required',
     command: null,
     args: backendArgs,
     bootstrap: true,
     env: {},
     shell: false,
     // Hints for the bootstrap runner / UI layer:
-    activeRoot: ACTIVE_HERMES_ROOT,
+    activeRoot: ACTIVE_BEYOND_ROOT,
     installStamp: INSTALL_STAMP, // may be null in dev
     isPackaged: IS_PACKAGED,
     platform: process.platform,
@@ -5081,7 +5081,7 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
   }
 }
 
-interface ResolvedHermesBackend {
+interface ResolvedBeyondBackend {
   kind: string
   label: string
   command: string | null
@@ -5101,9 +5101,9 @@ interface ResolvedHermesBackend {
 }
 
 async function ensureRuntime(
-  backend: ResolvedHermesBackend,
+  backend: ResolvedBeyondBackend,
   assertStillOwned: () => void
-): Promise<ResolvedHermesBackend> {
+): Promise<ResolvedBeyondBackend> {
   localBackendLifecycle.assertCanStart()
   assertStillOwned()
 
@@ -5114,7 +5114,7 @@ async function ensureRuntime(
     return backend
   }
 
-  // backend.kind === 'bootstrap-needed' means resolveHermesBackend couldn't
+  // backend.kind === 'bootstrap-needed' means resolveBeyondBackend couldn't
   // find anything to spawn. Hand off to the bootstrap runner which drives the
   // platform installer, writes the bootstrap-complete marker on success, then
   // we re-resolve to get the now-installed backend.
@@ -5129,7 +5129,7 @@ async function ensureRuntime(
     rememberLog('[bootstrap] REFUSING installer on a bundled install; payload missing or damaged — reinstall the app')
 
     const bundledError: Error & { isBootstrapFailure?: boolean } = new Error(
-      'This app bundles its own Hermes runtime, but the runtime files are missing or damaged. Reinstall Hermes Desktop to restore it.'
+      'This app bundles its own Beyond runtime, but the runtime files are missing or damaged. Reinstall Beyond Desktop to restore it.'
     )
 
     bundledError.isBootstrapFailure = true
@@ -5138,11 +5138,11 @@ async function ensureRuntime(
   }
 
   if (backend.kind === 'bootstrap-needed') {
-    rememberLog('[bootstrap] no Hermes install found; starting first-launch bootstrap')
+    rememberLog('[bootstrap] no Beyond install found; starting first-launch bootstrap')
 
     if (await handOffWindowsBootstrapRecovery('bootstrap-needed')) {
       const handoffError: Error & { isBootstrapFailure?: boolean; bootstrapHandedOff?: boolean } = new Error(
-        'Hermes recovery was handed off to Hermes Setup. The desktop will restart when recovery completes.'
+        'Beyond recovery was handed off to Beyond Setup. The desktop will restart when recovery completes.'
       )
 
       handoffError.isBootstrapFailure = true
@@ -5179,8 +5179,8 @@ async function ensureRuntime(
       installStamp: backend.installStamp,
       activeRoot: backend.activeRoot,
       sourceRepoRoot: SOURCE_REPO_ROOT,
-      hermesHome: HERMES_HOME,
-      logRoot: path.join(HERMES_HOME, 'logs'),
+      beyondHome: BEYOND_HOME,
+      logRoot: path.join(BEYOND_HOME, 'logs'),
       abortSignal: bootstrapAbortController.signal,
       onEvent: ev => {
         // Tee every bootstrap event to (a) the desktop log for forensics
@@ -5206,7 +5206,7 @@ async function ensureRuntime(
     bootstrapAbortController = null
 
     if (bootstrapResult.cancelled) {
-      const cancelledError = new Error('Hermes install was cancelled.') as any
+      const cancelledError = new Error('Beyond install was cancelled.') as any
       cancelledError.isBootstrapFailure = true
       cancelledError.bootstrapCancelled = true
       bootstrapFailure = cancelledError
@@ -5222,9 +5222,9 @@ async function ensureRuntime(
 
       bootstrapError.isBootstrapFailure = true
       bootstrapError.failedStage = bootstrapResult.failedStage || null
-      // Latch the failure so subsequent startHermes() calls return this
+      // Latch the failure so subsequent startBeyond() calls return this
       // same error without re-running install.ps1.  Cleared by the
-      // hermes:bootstrap:reset IPC (renderer's "Reload and retry").
+      // beyond:bootstrap:reset IPC (renderer's "Reload and retry").
       bootstrapFailure = bootstrapError
       throw bootstrapError
     }
@@ -5233,7 +5233,7 @@ async function ensureRuntime(
 
     // Resolve the newly published launcher after the installer completes.
     return ensureRuntime(
-      await installedRuntimeGate.afterInstall(() => resolveHermesBackend(backend.args)),
+      await installedRuntimeGate.afterInstall(() => resolveBeyondBackend(backend.args)),
       assertStillOwned
     )
   }
@@ -5245,7 +5245,7 @@ async function ensureRuntime(
 // endpoints, e.g. kanban attachments). Hand-rolled because node's http has no
 // FormData and the payload is one file — a dependency would be overkill.
 function multipartBody(upload) {
-  const boundary = `----hermes-${crypto.randomBytes(12).toString('hex')}`
+  const boundary = `----beyond-${crypto.randomBytes(12).toString('hex')}`
   const filename = String(upload.filename || 'file').replace(/["\r\n]/g, '_')
 
   const body = Buffer.concat([
@@ -5269,7 +5269,7 @@ function fetchJson(url, token, options: any = {}) {
     async (requestState: any) => {
       // Mint inside each retry: a grant authorizes exactly one HTTP request.
       const nativeHeaders = options.gatewayDescriptor
-        ? await nativeGatewayHttpHeaders(options.gatewayDescriptor, url, HERMES_HOME, options.method || 'GET', options.upload ? undefined : options.body)
+        ? await nativeGatewayHttpHeaders(options.gatewayDescriptor, url, BEYOND_HOME, options.method || 'GET', options.upload ? undefined : options.body)
         : null
 
       return new Promise((resolve, reject) => {
@@ -5286,7 +5286,7 @@ function fetchJson(url, token, options: any = {}) {
         const timeoutMs = resolveTimeoutMs(options.timeoutMs, DEFAULT_FETCH_TIMEOUT_MS)
 
         if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-          reject(new Error(`Unsupported Hermes backend URL protocol: ${parsed.protocol}`))
+          reject(new Error(`Unsupported Beyond backend URL protocol: ${parsed.protocol}`))
 
           return
         }
@@ -5300,7 +5300,7 @@ function fetchJson(url, token, options: any = {}) {
               ...headersForRemoteRequest(url),
               ...(options.headers || {}),
               'Content-Type': contentType,
-              ...(nativeHeaders || { 'X-Hermes-Session-Token': token }),
+              ...(nativeHeaders || { 'X-Beyond-Session-Token': token }),
               // RFC 8252 native flow authenticates the gated gateway with a bearer
               // token instead of the loopback session-token header. When
               // ``options.bearer`` is set we send Authorization: Bearer <token>;
@@ -5362,7 +5362,7 @@ function fetchJson(url, token, options: any = {}) {
 
         req.on('error', reject)
         req.setTimeout(timeoutMs, () => {
-          req.destroy(new Error(`Timed out connecting to Hermes backend after ${timeoutMs}ms`))
+          req.destroy(new Error(`Timed out connecting to Beyond backend after ${timeoutMs}ms`))
         })
 
         // From here the request goes on the wire: a later transport error can no
@@ -5384,7 +5384,7 @@ function fetchJson(url, token, options: any = {}) {
 function fetchPublicJson(url, options: any = {}) {
   // Credential-free JSON GET/POST for public gateway endpoints
   // (``/api/status``, ``/api/auth/providers``). Unlike ``fetchJson`` it sends
-  // NO ``X-Hermes-Session-Token`` header — used by the auth-mode probe before
+  // NO ``X-Beyond-Session-Token`` header — used by the auth-mode probe before
   // any credentials exist, and any time we must not leak a token to an
   // endpoint that doesn't need one.
   return withRetry(
@@ -5406,7 +5406,7 @@ function fetchPublicJson(url, options: any = {}) {
         const timeoutMs = resolveTimeoutMs(options.timeoutMs, DEFAULT_FETCH_TIMEOUT_MS)
 
         if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-          reject(new Error(`Unsupported Hermes backend URL protocol: ${parsed.protocol}`))
+          reject(new Error(`Unsupported Beyond backend URL protocol: ${parsed.protocol}`))
 
           return
         }
@@ -5467,7 +5467,7 @@ function fetchPublicJson(url, options: any = {}) {
 
         req.on('error', reject)
         req.setTimeout(timeoutMs, () => {
-          req.destroy(new Error(`Timed out connecting to Hermes backend after ${timeoutMs}ms`))
+          req.destroy(new Error(`Timed out connecting to Beyond backend after ${timeoutMs}ms`))
         })
 
         // Past this point the request is on the wire — see fetchJson.
@@ -5686,7 +5686,7 @@ function decodedPathIfMissing(resolvedPath) {
 
 async function previewFileTarget(rawTarget, baseDir) {
   const raw = String(rawTarget || '').trim()
-  const base = baseDir ? path.resolve(expandUserPath(baseDir)) : resolveHermesCwd()
+  const base = baseDir ? path.resolve(expandUserPath(baseDir)) : resolveBeyondCwd()
 
   // A plain backend target is a WSL/POSIX path; bridge it to a Windows-
   // accessible form before resolving so the existence checks below (and the
@@ -5697,13 +5697,13 @@ async function previewFileTarget(rawTarget, baseDir) {
   })
 
   // Attachment references stored in chat history are frequently HOME-relative
-  // (e.g. "AppData/Local/hermes/attachments/foo.xlsx" on Windows, or
-  // ".hermes/attachments/foo.xlsx" elsewhere) rather than relative to the
+  // (e.g. "AppData/Local/beyond/attachments/foo.xlsx" on Windows, or
+  // ".beyond/attachments/foo.xlsx" elsewhere) rather than relative to the
   // agent's working directory. The primary resolution above only tries
   // `base` (the working dir), so such a ref never exists there and the
   // preview/download 404s even though the file is present on disk (#115609).
   if (!fileExists(resolved) && !directoryExists(resolved)) {
-    for (const candidate of homeRelativeAttachmentCandidates(raw, app.getPath('home'), HERMES_HOME)) {
+    for (const candidate of homeRelativeAttachmentCandidates(raw, app.getPath('home'), BEYOND_HOME)) {
       if (fileExists(candidate)) {
         resolved = candidate
 
@@ -5866,7 +5866,7 @@ async function watchPreviewFile(owner, rawUrl) {
     },
     onPollChange: emit,
     onTrip: ({ events, windowMs }) =>
-      console.warn(`[hermes] fs.watch storm on ${watchDir} (${events} events within ${windowMs}ms); polling instead`)
+      console.warn(`[beyond] fs.watch storm on ${watchDir} (${events} events within ${windowMs}ms); polling instead`)
   })
 
   previewWatchers.set(id, {
@@ -5957,7 +5957,7 @@ function watchDirectory(owner, rawDir) {
     snapshot: () => fs.readdirSync(watchDir).sort().join('\0'),
     onPollChange: emit,
     onTrip: ({ events, windowMs }) =>
-      console.warn(`[hermes] fs.watch storm on ${watchDir} (${events} events within ${windowMs}ms); polling instead`)
+      console.warn(`[beyond] fs.watch storm on ${watchDir} (${events} events within ${windowMs}ms); polling instead`)
   })
 
   previewWatchers.set(id, {
@@ -6018,7 +6018,7 @@ async function gatewayAuthProviders(baseUrl, headers = {}) {
 // an anonymous probe 401s forever against a live session, and it can never
 // see the 404 that identifies a backend predating /api/health (the auth gate
 // answers before the SPA catch-all). `probeIsCredentialed` tells
-// waitForHermesReady how to read a 401 — rejected session vs gated route.
+// waitForBeyondReady how to read a 401 — rejected session vs gated route.
 async function buildReadinessHealthProbe(baseUrl, authMode, token) {
   if (authMode === 'oauth') {
     return {
@@ -6047,16 +6047,16 @@ async function buildReadinessHealthProbe(baseUrl, authMode, token) {
   return { probeHealth: fetchPublicJson, probeIsCredentialed: false }
 }
 
-// Boot-time readiness for a remote connection object. For a Hermes Cloud agent
-// whose own session cookie has expired, `waitForHermes` ends in the terminal
+// Boot-time readiness for a remote connection object. For a Beyond Cloud agent
+// whose own session cookie has expired, `waitForBeyond` ends in the terminal
 // reauth error even though the portal session that can silently re-mint that
 // cookie is still live: the per-agent cascade (`cloudAgentSilentSignIn`) was
 // only ever driven by the settings UI, never by boot, so every relaunch needed
 // a manual "Use gateway" click. Run the cascade once and retry once; anything
 // that is not that exact case surfaces unchanged.
-async function waitForRemoteHermes(remote) {
+async function waitForRemoteBeyond(remote) {
   try {
-    await waitForHermes(remote.baseUrl, remote.token, undefined, remote.authMode, remote.headers)
+    await waitForBeyond(remote.baseUrl, remote.token, undefined, remote.authMode, remote.headers)
   } catch (error) {
     if (!shouldAttemptCloudBootCascade(remote, error)) {
       throw error
@@ -6078,11 +6078,11 @@ async function waitForRemoteHermes(remote) {
       throw error
     }
 
-    await waitForHermes(remote.baseUrl, remote.token, undefined, remote.authMode, remote.headers)
+    await waitForBeyond(remote.baseUrl, remote.token, undefined, remote.authMode, remote.headers)
   }
 }
 
-async function waitForHermes(
+async function waitForBeyond(
   baseUrl: string,
   token: string | null | undefined,
   signal?: AbortSignal,
@@ -6092,7 +6092,7 @@ async function waitForHermes(
 ): Promise<void> {
   const { probeHealth, probeIsCredentialed } = await buildReadinessHealthProbe(baseUrl, authMode, token)
 
-  return waitForHermesReady(baseUrl, {
+  return waitForBeyondReady(baseUrl, {
     token,
     signal,
     fetchPublicJson,
@@ -6152,7 +6152,7 @@ function sendBackendExit(payload) {
     return
   }
 
-  webContents.send('hermes:backend-exit', payload)
+  webContents.send('beyond:backend-exit', payload)
 }
 
 function sendClosePreviewRequested() {
@@ -6166,7 +6166,7 @@ function sendClosePreviewRequested() {
     return
   }
 
-  webContents.send('hermes:close-preview-requested')
+  webContents.send('beyond:close-preview-requested')
 }
 
 /**
@@ -6191,7 +6191,7 @@ function sendPreviewNavCommand(command: 'back' | 'forward' | 'reload') {
     return
   }
 
-  webContents.send('hermes:preview-nav', command)
+  webContents.send('beyond:preview-nav', command)
 }
 
 /**
@@ -6235,12 +6235,12 @@ function sendOpenFolderRequested() {
     return
   }
 
-  webContents.send('hermes:open-folder-requested')
+  webContents.send('beyond:open-folder-requested')
 }
 
 // Tell the renderer the machine just woke. Sleep silently drops the
 // renderer's WebSocket to the local backend; the renderer reconnects on this
-// signal so the chat composer doesn't stay stuck on "Starting Hermes...".
+// signal so the chat composer doesn't stay stuck on "Starting Beyond...".
 function sendPowerResume() {
   if (!mainWindow || mainWindow.isDestroyed()) {
     return
@@ -6252,7 +6252,7 @@ function sendPowerResume() {
     return
   }
 
-  webContents.send('hermes:power-resume')
+  webContents.send('beyond:power-resume')
 }
 
 let powerResumeRegistered = false
@@ -6263,8 +6263,8 @@ let powerResumeRegistered = false
 let onBatteryPower: boolean | null = null
 
 // Renderer-side battery gating seeds from this and stays current via the
-// 'hermes:power-battery' push below.
-ipcMain.handle('hermes:power-battery:get', () => onBatteryPower === true)
+// 'beyond:power-battery' push below.
+ipcMain.handle('beyond:power-battery:get', () => onBatteryPower === true)
 
 function broadcastBatteryState(next: boolean) {
   if (onBatteryPower === next) {
@@ -6277,7 +6277,7 @@ function broadcastBatteryState(next: boolean) {
     const { webContents } = win
 
     if (webContents && !webContents.isDestroyed()) {
-      webContents.send('hermes:power-battery', next)
+      webContents.send('beyond:power-battery', next)
     }
   }
 }
@@ -6328,7 +6328,7 @@ function getAppIconPath() {
 function sendOpenUpdatesRequested() {
   // The renderer mounts its open-updates listener in the same effect pass that
   // signals deep-link readiness. Before that (e.g. a boot-time dialog answered
-  // before the window is up) queue the request; 'hermes:deep-link-ready' flushes it.
+  // before the window is up) queue the request; 'beyond:deep-link-ready' flushes it.
   if (!_rendererReadyForDeepLink || !mainWindow || mainWindow.isDestroyed()) {
     _pendingOpenUpdates = true
 
@@ -6341,7 +6341,7 @@ function sendOpenUpdatesRequested() {
     return
   }
 
-  webContents.send('hermes:open-updates')
+  webContents.send('beyond:open-updates')
 
   // #83998: never pump the Windows foreground from an ambient surface —
   // showInactive + a guarded focus keep the raise from dismissing another
@@ -6375,7 +6375,7 @@ function sendWindowStateChanged(nextIsFullscreen?: boolean, target = mainWindow)
     state.isFullscreen = nextIsFullscreen
   }
 
-  webContents.send('hermes:window-state-changed', state)
+  webContents.send('beyond:window-state-changed', state)
 }
 
 function buildApplicationMenu() {
@@ -6548,7 +6548,7 @@ function installDevToolsShortcut(window) {
       if (decision === 'forward') {
         event.preventDefault()
 
-        window.webContents.send('hermes:f12-shortcut', toF12KeyboardEventPayload(input))
+        window.webContents.send('beyond:f12-shortcut', toF12KeyboardEventPayload(input))
 
         return
       }
@@ -6785,7 +6785,7 @@ function installContextMenuBridge(window: BrowserWindow) {
     const suggestions = Array.isArray(params.dictionarySuggestions) ? params.dictionarySuggestions : []
 
     if (params.isEditable && params.misspelledWord) {
-      window.webContents.send('hermes:context-menu-spellcheck', {
+      window.webContents.send('beyond:context-menu-spellcheck', {
         misspelledWord: params.misspelledWord,
         suggestions
       })
@@ -6796,7 +6796,7 @@ function installContextMenuBridge(window: BrowserWindow) {
 // Chromium-initiated downloads (renderer anchor/blob downloads, drag-outs, a
 // media player's ⋮ Download) land here. Without a handler the OS save dialog
 // opens in the process cwd (win-unpacked in packaged installs) with whatever name
-// the URL carried. Route every download to Downloads, name hermes-media:// saves
+// the URL carried. Route every download to Downloads, name beyond-media:// saves
 // after the file, and guarantee a MIME-derived extension.
 function installDownloadHandling() {
   session.defaultSession.on('will-download', (_event, item) => {
@@ -6830,7 +6830,7 @@ function installMediaPermissions() {
   // and every other frame — artifact previews included — stays denied.
   session.defaultSession.setPermissionRequestHandler((webContents, permission, callback, details) => {
     if ((permission as string) === 'clipboard-sanitized-write') {
-      callback(isHermesHubClipboardWrite(focusedFrameOrigin(webContents)))
+      callback(isBeyondHubClipboardWrite(focusedFrameOrigin(webContents)))
 
       return
     }
@@ -6838,7 +6838,7 @@ function installMediaPermissions() {
     callback(isMediaCapturePermission(permission, details))
   })
 
-  // Synchronous check handler: Chromium consults this for getUserMedia on
+  // Synchrobeyond check handler: Chromium consults this for getUserMedia on
   // Windows in addition to (or instead of) the request handler. Without it,
   // the check defaults to false and capture is denied before the request
   // handler ever runs. The check handler carries no mediaTypes metadata, so
@@ -6847,7 +6847,7 @@ function installMediaPermissions() {
   // the metadata refinement (absent metadata is allowed there too).
   session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
     if ((permission as string) === 'clipboard-sanitized-write') {
-      return isHermesHubClipboardWrite(focusedFrameOrigin(webContents))
+      return isBeyondHubClipboardWrite(focusedFrameOrigin(webContents))
     }
 
     return isMediaCapturePermission(permission, undefined)
@@ -6881,11 +6881,11 @@ function focusedFrameOrigin(
 }
 
 /** The picker embed URL the hub iframe starts on (both deployments). */
-function isHermesHubPickerUrl(url: string): boolean {
+function isBeyondHubPickerUrl(url: string): boolean {
   try {
     const parsed = new URL(url)
-    const isHubOrigin = parsed.origin === HERMES_HUB_ORIGIN || parsed.origin === HERMES_HUB_FALLBACK_ORIGIN
-    const isPickerPath = parsed.pathname === '/hermes-agent/docs/skills' || parsed.pathname === '/docs/skills'
+    const isHubOrigin = parsed.origin === BEYOND_HUB_ORIGIN || parsed.origin === BEYOND_HUB_FALLBACK_ORIGIN
+    const isPickerPath = parsed.pathname === '/beyond-agent/docs/skills' || parsed.pathname === '/docs/skills'
 
     return isHubOrigin && isPickerPath
   } catch {
@@ -6927,11 +6927,11 @@ function safeFrameOrigin(frame: { origin?: string } | null | undefined): string 
 // ---------------------------------------------------------------------------
 // OAuth remote-gateway auth.
 //
-// Hosted Hermes gateways gate the dashboard behind an OAuth provider (e.g.
-// Nous Research) instead of a static session token. The auth model is
+// Hosted Beyond gateways gate the dashboard behind an OAuth provider (e.g.
+// Beyond) instead of a static session token. The auth model is
 // fundamentally different from the token path:
 //
-//   * REST is authed by HttpOnly session cookies (``hermes_session_at``),
+//   * REST is authed by HttpOnly session cookies (``beyond_session_at``),
 //     established by a browser redirect round-trip (/login → IDP →
 //     /auth/callback sets cookies). We cannot read the HttpOnly cookie value
 //     in JS — instead we let an Electron BrowserWindow complete the round
@@ -6941,10 +6941,10 @@ function safeFrameOrigin(frame: { origin?: string } | null | undefined): string 
 //   * WebSocket upgrades require a single-use ``?ticket=`` minted at
 //     ``POST /api/auth/ws-ticket`` (cookie-authed). The legacy ``?token=``
 //     path is unconditionally rejected by gated gateways.
-//   * Nous Portal now issues a 24h ROTATING, reuse-detected refresh token
-//     alongside the ~15-min access token (Portal NAS #293 / hermes #37247).
-//     Both are set as HttpOnly cookies (``hermes_session_at`` ~15 min,
-//     ``hermes_session_rt`` 24h). When the AT cookie lapses but the RT cookie
+//   * Beyond Portal now issues a 24h ROTATING, reuse-detected refresh token
+//     alongside the ~15-min access token (Portal NAS #293 / beyond #37247).
+//     Both are set as HttpOnly cookies (``beyond_session_at`` ~15 min,
+//     ``beyond_session_rt`` 24h). When the AT cookie lapses but the RT cookie
 //     is still alive, the gateway middleware transparently rotates a fresh AT
 //     on the next authenticated request — so connectivity must NOT be gated on
 //     the AT cookie alone. We probe liveness by actually minting a ws-ticket
@@ -7018,8 +7018,8 @@ function getOauthSessionForUrl(url, { connectionId = '', pendingAuthMode = '', p
 // cookies.get() on a fresh cold start can resolve BEFORE the jar has finished
 // hydrating from disk and return an empty array — even though the user is
 // signed in. That false-negative used to make hasLiveOauthSession() report
-// "not signed in", which on the initial boot path (startHermes → the renderer's
-// single-shot boot() with no retry) surfaced as the "Hermes couldn't start"
+// "not signed in", which on the initial boot path (startBeyond → the renderer's
+// single-shot boot() with no retry) surfaced as the "Beyond couldn't start"
 // OAuth overlay that vanishes the instant the user clicks Retry.
 //
 // We force the store to hydrate once, up front: flushStorageData() then a
@@ -7148,7 +7148,7 @@ async function hasLiveOauthSession(baseUrl) {
 
   // Cold-start false-negative guard. A `persist:` partition's cookie store
   // loads lazily, so the FIRST read on a fresh boot can come back empty even
-  // for a signed-in user — the exact race that produced the transient "Hermes
+  // for a signed-in user — the exact race that produced the transient "Beyond
   // couldn't start / not signed in" overlay that Retry always cleared. Before
   // trusting a negative, force the store to hydrate and re-read a couple of
   // times with a short backoff. A genuinely signed-out user still resolves
@@ -7257,7 +7257,7 @@ function openOauthLoginWindow(
 // authed REST against a gated gateway, including minting WS tickets.
 //
 // #61457: the partition's Chromium jar is not a reliable cookie source — it can
-// drop the `hermes_session*` cookies (Windows %3A profile folders, lazy
+// drop the `beyond_session*` cookies (Windows %3A profile folders, lazy
 // hydration, flush races) and `useSessionCookies: true` then intermittently
 // omits the cookie → 401 `no_cookie` right after a successful sign-in. Two
 // mitigations, both keyed by the request's resolved OAuth partition + origin
@@ -7296,7 +7296,7 @@ function fetchJsonViaOauthSession(url, options: any = {}) {
       }
 
       if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-        reject(new Error(`Unsupported Hermes backend URL protocol: ${parsed.protocol}`))
+        reject(new Error(`Unsupported Beyond backend URL protocol: ${parsed.protocol}`))
 
         return
       }
@@ -7339,7 +7339,7 @@ function fetchJsonViaOauthSession(url, options: any = {}) {
           // already finished
         }
 
-        reject(new Error(`Timed out connecting to Hermes backend after ${timeoutMs}ms`))
+        reject(new Error(`Timed out connecting to Beyond backend after ${timeoutMs}ms`))
       }, timeoutMs)
 
       request.on('response', (res: Electron.IncomingMessage): void => {
@@ -7407,7 +7407,7 @@ function fetchJsonViaOauthSession(url, options: any = {}) {
 // involved. Tokens are persisted encrypted at rest via Electron ``safeStorage``
 // (OS keychain) keyed by gateway base URL, and refreshed via
 // ``/auth/native/refresh`` before expiry. This is the desktop half of the
-// feature; the server half lives in hermes_cli/dashboard_auth/native_flow.py.
+// feature; the server half lives in beyond_cli/dashboard_auth/native_flow.py.
 // ---------------------------------------------------------------------------
 
 // In-memory cache of decrypted native tokens, keyed by normalized base URL.
@@ -7678,7 +7678,7 @@ async function freshGatewayWsUrl(profile, webContentsId) {
   const connection = await ensureBackend(profile)
 
   if (connection.gatewayEndpoint) {
-    return localGatewayDial({ ensure: () => ensureBackend(profile), forget: () => forgetLocalGatewayDescriptor(profile), launchHome: HERMES_HOME,
+    return localGatewayDial({ ensure: () => ensureBackend(profile), forget: () => forgetLocalGatewayDescriptor(profile), launchHome: BEYOND_HOME,
       prepare: (baseUrl, ticket) => localGatewayDials.prepare(baseUrl, ticket, webContentsId), profile: String(profile ?? '') })
   }
 
@@ -7697,13 +7697,13 @@ async function freshGatewayWsUrl(profile, webContentsId) {
   return connection.wsUrl
 }
 
-// --- Hermes Cloud discovery + silent per-agent sign-in (cloud-auto-discovery
+// --- Beyond Cloud discovery + silent per-agent sign-in (cloud-auto-discovery
 // Phase 3) ---------------------------------------------------------------
 //
-// The "cloud" connection mode lets a user sign in to the Nous portal ONCE in
+// The "cloud" connection mode lets a user sign in to the Beyond portal ONCE in
 // the OAuth session partition, then (a) discover their hosted agents and (b)
 // connect to any of them with no second interactive sign-in. Both ride the one
-// portal session cookie living in `persist:hermes-remote-oauth`:
+// portal session cookie living in `persist:beyond-remote-oauth`:
 //   - discovery  → GET {portal}/api/agents over the partition-bound net; the
 //     portal session cookie authenticates it (NAS Phase 2.5 accepts the cookie).
 //   - cascade    → opening an agent's own /login in the same partition hits the
@@ -7721,7 +7721,7 @@ const { hasLivePortalSession, hasPortalAccessToken, renewPortalAccessSilently, o
     rememberLog
   })
 
-// Discover the hosted (Hermes Cloud) agents the signed-in user can see. Calls
+// Discover the hosted (Beyond Cloud) agents the signed-in user can see. Calls
 // the NAS trimmed-summary endpoint over the partition-bound net, so the portal
 // session cookie is attached automatically (no bearer needed — NAS accepts the
 // cookie). Returns { agents } on success, or { needsOrgSelection: true, orgs }
@@ -7734,7 +7734,7 @@ async function discoverCloudAgents(org?: string) {
 
   if (!(await hasLivePortalSession())) {
     const err = new Error(
-      'You are not signed in to Hermes Cloud. Open Settings → Gateway, choose Hermes Cloud, and sign in.'
+      'You are not signed in to Beyond Cloud. Open Settings → Gateway, choose Beyond Cloud, and sign in.'
     ) as any
 
     err.needsCloudLogin = true
@@ -7785,7 +7785,7 @@ async function discoverCloudAgents(org?: string) {
       // recover it) — surface it as a re-login, not a generic failure.
       if (error && error.statusCode === 401) {
         const err = new Error(
-          'Your Hermes Cloud session has expired. Open Settings → Gateway and sign in again.'
+          'Your Beyond Cloud session has expired. Open Settings → Gateway and sign in again.'
         ) as any
 
         err.needsCloudLogin = true
@@ -7880,7 +7880,7 @@ async function cloudAgentSilentSignIn(dashboardUrl, { background = false } = {})
   // interactive prompt rather than a silent cascade. Discovery already gates on
   // this, but a selection can arrive after the session lapsed.
   if (!(await hasLivePortalSession())) {
-    const err = new Error('Your Hermes Cloud session has expired. Sign in to Hermes Cloud again.') as any
+    const err = new Error('Your Beyond Cloud session has expired. Sign in to Beyond Cloud again.') as any
     err.needsCloudLogin = true
     throw err
   }
@@ -8424,7 +8424,7 @@ function sanitizeConnectionProfiles(raw: Record<string, any>) {
       cleaned.headers = headers
     }
 
-    // Preserve the Hermes Cloud org tag on cloud-mode entries so Settings can
+    // Preserve the Beyond Cloud org tag on cloud-mode entries so Settings can
     // reopen into the same org for a per-profile cloud connection.
     if (cleaned.mode === 'cloud') {
       const cloudName = String(entry.name || '').trim()
@@ -8572,7 +8572,7 @@ function readDesktopConnectionsRegistry() {
     } catch {
       // Write failed (full disk, read-only userData). Keep the migrated
       // registry in memory so list/save keep working this session instead of
-      // hard-failing every hermes:connections:* call.
+      // hard-failing every beyond:connections:* call.
       connectionRegistryCache = registry
       connectionRegistryCacheMtime = null
     }
@@ -8716,7 +8716,7 @@ function sanitizeConnectionsRegistry(registry = readDesktopConnectionsRegistry()
 /**
  * Save (create or edit) a registry connection from a renderer payload.
  * Edits merge over the stored entry (mergeConnectionInput) so fields the
- * editor doesn't carry — cloud `org`, ssh `remoteHermesPath`/`remoteProfile` —
+ * editor doesn't carry — cloud `org`, ssh `remoteBeyondPath`/`remoteProfile` —
  * survive a rename. Token handling mirrors coerceDesktopConnectionConfig: an
  * incoming plaintext token is encrypted (honoring the same allowPlainTextToken
  * opt-in seam as Settings → Gateway); an absent token field inherits the
@@ -8793,7 +8793,7 @@ const desktopProfilePreferences = createDesktopProfilePreferences(DESKTOP_PROFIL
   onDefaultChanged: route => {
     for (const win of BrowserWindow.getAllWindows()) {
       if (!win.webContents.isDestroyed()) {
-        win.webContents.send('hermes:profile:default:changed', route)
+        win.webContents.send('beyond:profile:default:changed', route)
       }
     }
   }
@@ -8817,9 +8817,9 @@ function writeActiveDesktopProfile(name: string | null): string | null {
 }
 
 // True when the given pid belongs to a running process whose command line
-// contains "hermes", avoiding false positives from stale gateway.pid files
+// contains "beyond", avoiding false positives from stale gateway.pid files
 // whose PID was recycled by the OS to an unrelated process.
-function isHermesProcess(pid) {
+function isBeyondProcess(pid) {
   try {
     process.kill(pid, 0) // signal 0 = existence check, no signal sent
   } catch {
@@ -8830,7 +8830,7 @@ function isHermesProcess(pid) {
   try {
     const cmdline = fs.readFileSync(`/proc/${pid}/cmdline`, 'utf8')
 
-    return cmdline.includes('hermes')
+    return cmdline.includes('beyond')
   } catch {
     // /proc not available (macOS) — fall back to ps. Use -o args= to inspect
     // the full command line, not just the process name.  -o comm= would return
@@ -8839,7 +8839,7 @@ function isHermesProcess(pid) {
       const { execSync } = require('child_process')
       const out = execSync(`ps -p ${pid} -o args=`, { encoding: 'utf8', timeout: 2000 })
 
-      return out.includes('hermes')
+      return out.includes('beyond')
     } catch {
       return false
     }
@@ -8848,8 +8848,8 @@ function isHermesProcess(pid) {
 
 // Seed active-profile.json from the best available signal when the file does
 // not yet exist.  Runs exactly once (no-op once the file exists).  Priority:
-//   1. Legacy ~/.hermes/active_profile (explicit CLI choice via hermes profile use)
-//   2. Running gateway (gateway.pid with verified liveness + hermes identity)
+//   1. Legacy ~/.beyond/active_profile (explicit CLI choice via beyond profile use)
+//   2. Running gateway (gateway.pid with verified liveness + beyond identity)
 //   3. state.db heuristics (hybrid recency×size score picks the primary workspace)
 // The stored JSON includes _migrated:true so the renderer can optionally surface
 // a one-time notification that the profile was auto-detected.
@@ -8865,14 +8865,14 @@ function migrateActiveProfileIfMissing() {
 
   activeProfileMigrationAttempted = true
   migrateActiveProfileIfMissingPure(DESKTOP_PROFILE_CONFIG_PATH, {
-    legacyActivePath: path.join(HERMES_HOME, 'active_profile'),
-    hermesHome: HERMES_HOME,
-    profilesRoot: path.join(HERMES_HOME, 'profiles'),
+    legacyActivePath: path.join(BEYOND_HOME, 'active_profile'),
+    beyondHome: BEYOND_HOME,
+    profilesRoot: path.join(BEYOND_HOME, 'profiles'),
     existsSync: p => fs.existsSync(p),
     readFileSync: (p, enc) => fs.readFileSync(p, enc),
     statSync: p => fs.statSync(p),
     readdirSync: (p, opts) => fs.readdirSync(p, opts as { withFileTypes: true }),
-    isHermesProcess,
+    isBeyondProcess,
     now: () => Date.now(),
     writeJson: (target, decision) => {
       // Mirror writeActiveDesktopProfile's atomic-write + parent-dir-create
@@ -8894,7 +8894,7 @@ async function sanitizeDesktopConnectionConfig(config = readDesktopConnectionCon
   const scoped = key ? config.profiles?.[key] || null : null
   const block = key ? scoped || {} : config.remote || {}
 
-  const envOverride = key ? false : Boolean(process.env.HERMES_DESKTOP_REMOTE_URL)
+  const envOverride = key ? false : Boolean(process.env.BEYOND_DESKTOP_REMOTE_URL)
   const savedMode = key ? scoped?.mode : config.mode
   const ssh = savedMode === 'ssh' ? normalizeSshConfig(block) : null
 
@@ -8902,7 +8902,7 @@ async function sanitizeDesktopConnectionConfig(config = readDesktopConnectionCon
 
   const remoteToken = decryptDesktopSecret(block.token)
   const authMode = normAuthMode(block.authMode)
-  const remoteUrl = envOverride ? String(process.env.HERMES_DESKTOP_REMOTE_URL || '') : String(block.url || '')
+  const remoteUrl = envOverride ? String(process.env.BEYOND_DESKTOP_REMOTE_URL || '') : String(block.url || '')
   const mode = envOverride ? 'remote' : savedMode === 'ssh' ? 'ssh' : modeIsRemoteLike(savedMode) ? savedMode : 'local'
 
   // Whether the OS keyring (safeStorage) can encrypt the saved token. When
@@ -8943,7 +8943,7 @@ async function sanitizeDesktopConnectionConfig(config = readDesktopConnectionCon
     remoteAuthMode: authMode,
     remoteOauthConnected,
     remoteUrl,
-    // The persisted Hermes Cloud org (slug/id) for a cloud connection, or '' for
+    // The persisted Beyond Cloud org (slug/id) for a cloud connection, or '' for
     // remote/local. Lets Settings → Gateway reopen into the same org.
     cloudOrg: mode === 'cloud' ? String(block.org || '') : '',
     remoteTokenPreview: tokenPreview(remoteToken),
@@ -8958,10 +8958,10 @@ async function sanitizeDesktopConnectionConfig(config = readDesktopConnectionCon
     sshUser: (ssh || savedSsh)?.user || '',
     sshPort: (ssh || savedSsh)?.port || null,
     sshKeyPath: (ssh || savedSsh)?.keyPath || '',
-    sshRemoteHermesPath: (ssh || savedSsh)?.remoteHermesPath || '',
+    sshRemoteBeyondPath: (ssh || savedSsh)?.remoteBeyondPath || '',
     sshRemoteProfile: (ssh || savedSsh)?.remoteProfile || '',
     // The env override only forces the global/primary connection; a per-profile
-    // scope is never overridden by HERMES_DESKTOP_REMOTE_URL.
+    // scope is never overridden by BEYOND_DESKTOP_REMOTE_URL.
     envOverride
   }
 }
@@ -8969,7 +8969,7 @@ async function sanitizeDesktopConnectionConfig(config = readDesktopConnectionCon
 // Build + validate a `{ url, authMode, token }` remote block. OAuth gateways
 // authenticate via the login-window session cookie (verified at connect time in
 // resolveRemoteBackend), so only token-auth remotes require a saved token.
-// `org` (optional) is the Hermes Cloud org slug/id the instance was discovered
+// `org` (optional) is the Beyond Cloud org slug/id the instance was discovered
 // under — persisted so Settings can reopen into the same org; omitted from the
 // block when empty so plain remote connections stay unchanged.
 function buildRemoteBlock(
@@ -9038,7 +9038,7 @@ function coerceDesktopConnectionConfig(input: any = {}, existing = readDesktopCo
   // The block being edited: a per-profile entry or the global remote block.
   const rawExistingBlock = key ? existing.profiles?.[key] || {} : existing.remote || {}
   // Leaving a CLOUD connection unselects it: a cloud block's url/org/token
-  // describe a discovered Hermes Cloud instance, NOT a user-owned remote gateway,
+  // describe a discovered Beyond Cloud instance, NOT a user-owned remote gateway,
   // so switching to local or remote must NOT inherit them (otherwise the stale
   // cloud URL lingers and re-selecting Cloud looks "already connected"). When the
   // saved block was cloud and the new mode is not cloud, start from an empty
@@ -9152,7 +9152,7 @@ function buildSshBlock(input: any, existingBlock: any = {}) {
     user: input.sshUser ?? existingBlock.user,
     port: input.sshPort ?? existingBlock.port,
     keyPath: input.sshKeyPath ?? existingBlock.keyPath,
-    remoteHermesPath: input.sshRemoteHermesPath ?? existingBlock.remoteHermesPath,
+    remoteBeyondPath: input.sshRemoteBeyondPath ?? existingBlock.remoteBeyondPath,
     remoteProfile: input.sshRemoteProfile ?? existingBlock.remoteProfile
   })
 
@@ -9218,7 +9218,7 @@ async function buildRemoteConnection(
 
   if (!token) {
     throw new Error(
-      'Remote Hermes gateway is selected, but no session token is saved. ' +
+      'Remote Beyond gateway is selected, but no session token is saved. ' +
         'Open Settings → Gateway and save a token, or switch back to Local.'
     )
   }
@@ -9545,8 +9545,8 @@ function activeSshTerminalTarget(webContentsId?: number) {
   const route = resolveDesktopRemoteRoute({
     config,
     env: {
-      token: process.env.HERMES_DESKTOP_REMOTE_TOKEN,
-      url: process.env.HERMES_DESKTOP_REMOTE_URL
+      token: process.env.BEYOND_DESKTOP_REMOTE_TOKEN,
+      url: process.env.BEYOND_DESKTOP_REMOTE_URL
     },
     profile,
     registry: readDesktopConnectionsRegistry()
@@ -9735,8 +9735,8 @@ async function rollbackSshBootstrapResult(ssh, result, profile, sshConfig, bound
       pid: result.pid,
       spawnNonce: result.spawnNonce,
       profile: resolveRemoteSshDashboardProfile(sshConfig.remoteProfile, profile),
-      hermesPath: result.hermesPath,
-      hermesHome: result.hermesHome,
+      beyondPath: result.beyondPath,
+      beyondHome: result.beyondHome,
       startedAt: result.startedAt,
       creationTimeNs: result.creationTimeNs,
       creationTime: result.creationTime
@@ -9745,7 +9745,7 @@ async function rollbackSshBootstrapResult(ssh, result, profile, sshConfig, bound
     if (result.platform?.os === 'Windows') {
       await terminateOwnedWindowsDashboardForUpdate(
         ssh,
-        { hermesPath: result.hermesPath, hermesHome: result.hermesHome, python: result.pythonPath },
+        { beyondPath: result.beyondPath, beyondHome: result.beyondHome, python: result.pythonPath },
         expected
       )
     } else if (result.platform?.os === 'Linux' || result.platform?.os === 'Darwin') {
@@ -9835,19 +9835,19 @@ async function bootstrapSshConnectionInner(profile, sshConfig, reuseToken, sourc
       managedConnectionUpdateGate.assertCanDial(metadata.registryConnectionId, metadata.managedUpdateCorrelation || '')
     }
 
-    const platform = await detectRemotePlatform(ssh, sshConfig.remoteHermesPath || '')
+    const platform = await detectRemotePlatform(ssh, sshConfig.remoteBeyondPath || '')
     const lifecycle = platform.os === 'Windows' ? connectWindowsRemote : remoteLifecycle.connect
     result = await lifecycle({
       ssh,
       platform,
       profile: resolveRemoteSshDashboardProfile(sshConfig.remoteProfile, profile),
-      remoteHermesPath: sshConfig.remoteHermesPath || '',
+      remoteBeyondPath: sshConfig.remoteBeyondPath || '',
       ownershipId: sshOwnershipKey(profile),
       reuseToken: reuseToken || '',
       forward: (localPort, remotePort) => ssh.forward(localPort, remotePort),
       cancelForward: (localPort, remotePort) => ssh.cancelForward(localPort, remotePort),
       pickLocalPort,
-      waitForHermes: (baseUrl, token) => waitForHermes(baseUrl, token, lease.signal, 'token'),
+      waitForBeyond: (baseUrl, token) => waitForBeyond(baseUrl, token, lease.signal, 'token'),
       probeReuseProof: sshProbeReuseProof,
       adoptServedToken: adoptServedDashboardToken,
       rememberLog: sshRememberLog,
@@ -9910,22 +9910,22 @@ async function bootstrapSshConnectionInner(profile, sshConfig, reuseToken, sourc
         pid: result.pid,
         host: sshConfig.host,
         hostLabel,
-        hermesVersion: result.hermesVersion || '',
+        beyondVersion: result.beyondVersion || '',
         remotePlatform: result.platform?.os || '',
         reused: result.reused,
         spawnNonce: result.spawnNonce,
         creationTimeNs: result.creationTimeNs,
         creationTime: result.creationTime,
         startedAt: result.startedAt,
-        hermesPath: result.hermesPath,
-        hermesHome: result.hermesHome,
+        beyondPath: result.beyondPath,
+        beyondHome: result.beyondHome,
         pythonPath: result.pythonPath,
         remoteProfile: resolveRemoteSshDashboardProfile(sshConfig.remoteProfile, profile),
         registryConnectionId:
           metadata.registryConnectionId ||
           (typeof source === 'string' && source.startsWith('registry:') ? source.slice('registry:'.length) : ''),
         // Never infer primary ownership from a non-composite scope key: legacy
-        // per-profile pools also use bare keys. Only startHermes' explicit call
+        // per-profile pools also use bare keys. Only startBeyond' explicit call
         // site may label a registry-qualified SSH scope as the primary backend.
         primaryRegistryScope: metadata.primaryRegistryScope === true
       })
@@ -9936,7 +9936,7 @@ async function bootstrapSshConnectionInner(profile, sshConfig, reuseToken, sourc
 
   sshRememberLog(
     `[ssh] connection ${result.reused ? 'REUSED' : 'spawned'} dashboard: ` +
-      `${result.hermesVersion || 'hermes (version unknown)'} at ${result.hermesPath || '?'}`
+      `${result.beyondVersion || 'beyond (version unknown)'} at ${result.beyondPath || '?'}`
   )
 
   const connection = await buildRemoteConnection(
@@ -9951,13 +9951,13 @@ async function bootstrapSshConnectionInner(profile, sshConfig, reuseToken, sourc
 
   return {
     ...connection,
-    remoteHermesVersion: result.hermesVersion || '',
+    remoteBeyondVersion: result.beyondVersion || '',
     ssh: {
       effectiveConfigFingerprint: sshConfig.effectiveConfigFingerprint,
       host: sshConfig.host,
       keyPath: sshConfig.keyPath,
       port: sshConfig.port,
-      remoteHermesPath: sshConfig.remoteHermesPath,
+      remoteBeyondPath: sshConfig.remoteBeyondPath,
       remoteProfile: sshConfig.remoteProfile,
       user: sshConfig.user
     }
@@ -10007,7 +10007,7 @@ function persistSshConnectionToken(profile, source, token, registryConnectionId 
 // Resolve the remote backend for a given profile, or null when that profile
 // should run a LOCAL backend. Precedence:
 //   1. explicit per-profile remote override (connection.json `profiles[name]`)
-//   2. env override (HERMES_DESKTOP_REMOTE_URL/_TOKEN) — applies app-wide
+//   2. env override (BEYOND_DESKTOP_REMOTE_URL/_TOKEN) — applies app-wide
 //   3. global remote (connection.json `mode: 'remote'`)
 // A null/empty profile resolves the env/global remote, so legacy callers and
 // the connection test (which pass no profile) are unchanged.
@@ -10036,8 +10036,8 @@ async function resolveRemoteBackend(
     const currentRoute = resolveDesktopRemoteRoute({
       config: readDesktopConnectionConfig(),
       env: {
-        token: process.env.HERMES_DESKTOP_REMOTE_TOKEN,
-        url: process.env.HERMES_DESKTOP_REMOTE_URL
+        token: process.env.BEYOND_DESKTOP_REMOTE_TOKEN,
+        url: process.env.BEYOND_DESKTOP_REMOTE_URL
       },
       profile: profileKey,
       registry: readDesktopConnectionsRegistry()
@@ -10073,8 +10073,8 @@ async function resolveRemoteBackend(
     : resolveDesktopRemoteRoute({
         config,
         env: {
-          token: process.env.HERMES_DESKTOP_REMOTE_TOKEN,
-          url: process.env.HERMES_DESKTOP_REMOTE_URL
+          token: process.env.BEYOND_DESKTOP_REMOTE_TOKEN,
+          url: process.env.BEYOND_DESKTOP_REMOTE_URL
         },
         profile,
         registry
@@ -10142,7 +10142,7 @@ function configuredRemoteProfileNames() {
 // profile via ?profile=. Cloud counts — it resolves to a remote backend (Q6).
 // Distinct from per-profile overrides — here there's one host for all.
 function globalRemoteActive() {
-  if (process.env.HERMES_DESKTOP_REMOTE_URL) {
+  if (process.env.BEYOND_DESKTOP_REMOTE_URL) {
     return true
   }
 
@@ -10178,7 +10178,7 @@ function registryPrimaryIsRemote() {
 // True when the PRIMARY profile's backend resolves to a remote/cloud host —
 // i.e. resolveRemoteBackend(primaryProfileKey()) would return a descriptor
 // rather than null. Mirrors that function's precedence (per-profile override →
-// env → global) so a startHermes() failure can be classified as remote (never
+// env → global) so a startBeyond() failure can be classified as remote (never
 // latch — transient, must stay retryable) vs local (latch to break install
 // loops) BEFORE the throwing resolve/mint runs.
 function primaryBackendIsRemote() {
@@ -10199,7 +10199,7 @@ async function requestJsonForProfile(profile: string, path: string, method: stri
 
 async function probeRemoteAuthMode(rawUrl) {
   // Determine how a remote gateway expects callers to authenticate, WITHOUT
-  // sending any credentials. ``/api/status`` is public on every Hermes
+  // sending any credentials. ``/api/status`` is public on every Beyond
   // gateway (it backs the portal liveness probe) and reports:
   //   auth_required: true  → OAuth gate is engaged (cookie + ws-ticket auth)
   //   auth_required: false → loopback/--insecure: legacy session-token auth
@@ -10232,7 +10232,7 @@ async function probeRemoteAuthMode(rawUrl) {
 
   if (authRequired) {
     // Best-effort: a gated gateway exposes the registered providers so the
-    // button can read "Sign in with Nous Research" instead of a generic
+    // button can read "Sign in with Beyond" instead of a generic
     // label, and so a username/password provider can be distinguished from
     // an OAuth-redirect one (``supports_password``). A failure here doesn't
     // change the auth mode, so swallow it.
@@ -10272,7 +10272,7 @@ async function testDesktopConnectionConfig(input: any = {}) {
       user: input.sshUser,
       port: input.sshPort,
       keyPath: input.sshKeyPath,
-      remoteHermesPath: input.sshRemoteHermesPath
+      remoteBeyondPath: input.sshRemoteBeyondPath
     })
 
     if (!sshConfig) {
@@ -10293,28 +10293,28 @@ async function testDesktopConnectionConfig(input: any = {}) {
       for (;;) {
         try {
           await ssh.open()
-          const platform: any = await detectRemotePlatform(ssh, sshConfig.remoteHermesPath || '')
-          let hermesPath
-          let hermesVersion
+          const platform: any = await detectRemotePlatform(ssh, sshConfig.remoteBeyondPath || '')
+          let beyondPath
+          let beyondVersion
           let supported
 
           if (platform.os === 'Windows') {
             const runtime = platform
-            hermesPath = runtime.hermesPath
+            beyondPath = runtime.beyondPath
             const inspection = await inspectWindowsSupport(ssh, runtime)
-            hermesVersion = inspection.version
+            beyondVersion = inspection.version
             supported = inspection.supported
           } else {
-            hermesPath = await remoteLifecycle.locateHermes(ssh, sshConfig.remoteHermesPath || '')
-            hermesVersion = await remoteLifecycle.probeHermesVersion(ssh, hermesPath)
-            supported = await remoteLifecycle.remoteSupportsSshOwnership(ssh, hermesPath)
+            beyondPath = await remoteLifecycle.locateBeyond(ssh, sshConfig.remoteBeyondPath || '')
+            beyondVersion = await remoteLifecycle.probeBeyondVersion(ssh, beyondPath)
+            supported = await remoteLifecycle.remoteSupportsSshOwnership(ssh, beyondPath)
           }
 
           if (!supported) {
             return {
               reachable: false,
               sshError: 'update-required',
-              error: 'Update Hermes on the remote host before connecting with Desktop SSH.'
+              error: 'Update Beyond on the remote host before connecting with Desktop SSH.'
             }
           }
 
@@ -10323,8 +10323,8 @@ async function testDesktopConnectionConfig(input: any = {}) {
             sshError: null,
             error: null,
             remotePlatform: `${platform.os}/${platform.arch}`,
-            remoteHermesPath: hermesPath,
-            remoteHermesVersion: hermesVersion,
+            remoteBeyondPath: beyondPath,
+            remoteBeyondVersion: beyondVersion,
             host: sshConfig.user ? `${sshConfig.user}@${sshConfig.host}` : sshConfig.host
           }
         } catch (error: any) {
@@ -10377,7 +10377,7 @@ async function testDesktopConnectionConfig(input: any = {}) {
       token = decryptDesktopSecret(block.token)
     }
   } else {
-    const remote = (await resolveRemoteBackend(key)) || (await startHermes())
+    const remote = (await resolveRemoteBackend(key)) || (await startBeyond())
     baseUrl = remote.baseUrl
     token = remote.token
     authMode = normAuthMode(remote.authMode)
@@ -10391,7 +10391,7 @@ async function testDesktopConnectionConfig(input: any = {}) {
   // connects — a separate transport with separate server-side guards (Host/
   // Origin, ws-ticket/token auth). Validating only the HTTP side produced a
   // false-positive "reachable" while the real boot still failed with "Could not
-  // connect to Hermes gateway". Mirror the renderer's connect here so the test
+  // connect to Beyond gateway". Mirror the renderer's connect here so the test
   // reflects the full path the app actually uses.
   const wsUrl = await resolveTestWsUrl(baseUrl, authMode, token, {
     mintTicket: url => mintGatewayWsTicket(url, testHeaders)
@@ -10439,11 +10439,11 @@ function resetBootProgressForReconnect() {
 
 // Reset routing and UI state only. Local callers must await physical teardown.
 // Remote revalidation has no local child and can reset this state directly.
-function resetHermesConnectionState({ soft = false }: { soft?: boolean } = {}): void {
+function resetBeyondConnectionState({ soft = false }: { soft?: boolean } = {}): void {
   backendStartFailure = null
   remoteReauthFailure = null
   remoteLiveness.clear()
-  // The next startHermes() re-reads active-profile.json for its launch profile.
+  // The next startBeyond() re-reads active-profile.json for its launch profile.
   primaryProfilePin.clear()
   invalidatePrimaryConnection()
 
@@ -10462,7 +10462,7 @@ function invalidatePrimaryConnection() {
 
 // Re-home the primary backend: reset connection state, then wait for the live
 // dashboard process to actually exit (SIGKILL after 5s) so the next
-// startHermes() spawns fresh instead of racing the dying one. Shared by the
+// startBeyond() spawns fresh instead of racing the dying one. Shared by the
 // connection-config and profile switch flows.
 async function teardownPrimaryBackendAndWait({ soft = false }: { soft?: boolean } = {}): Promise<void> {
   const stopping = backendConnectionState.stopProcess(localBackendLifecycle.stop)
@@ -10472,7 +10472,7 @@ async function teardownPrimaryBackendAndWait({ soft = false }: { soft?: boolean 
   }
 
   try {
-    resetHermesConnectionState({ soft })
+    resetBeyondConnectionState({ soft })
     await stopping
   } finally {
     if (soft) {
@@ -10492,7 +10492,7 @@ function sendConnectionApplied() {
     return
   }
 
-  webContents.send('hermes:connection:applied')
+  webContents.send('beyond:connection:applied')
 }
 
 // Registry lifecycle push: a connection was removed or materially edited, so
@@ -10505,13 +10505,13 @@ function broadcastConnectionsChanged(payload: { connectionId: string; reason: 'r
     const { webContents } = win
 
     if (webContents && !webContents.isDestroyed()) {
-      webContents.send('hermes:connections:changed', payload)
+      webContents.send('beyond:connections:changed', payload)
     }
   }
 }
 
 // The profile the primary (window) backend was actually LAUNCHED as. Pinned by
-// startHermes() and cleared when the primary is torn down; while a primary is
+// startBeyond() and cleared when the primary is torn down; while a primary is
 // live this must NOT follow active-profile.json (see primary-profile-pin.ts).
 const primaryProfilePin = new PrimaryProfilePin()
 
@@ -10614,7 +10614,7 @@ async function ensureBackend(
   const route = resolveProfileBackendRoute(key, routeOpts)
 
   if (route.backend === 'primary') {
-    const connection = await startHermes(key)
+    const connection = await startBeyond(key)
     setWslBridgeProfileState(key, connection.mode !== 'remote')
 
     // A shared backend still owes the caller its profile scope, so renderer-side
@@ -10699,7 +10699,7 @@ async function ensureRegistryBackend(
         user: source.user,
         port: source.port,
         keyPath: source.keyPath,
-        remoteHermesPath: source.remoteHermesPath,
+        remoteBeyondPath: source.remoteBeyondPath,
         remoteProfile: source.remoteProfile || (profileKey === 'default' ? '' : profileKey)
       })
     }
@@ -10769,7 +10769,7 @@ async function ensureRegistryBackend(
     const rawProfile = String(profile ?? '').trim()
 
     const localProfileExists = rawProfile
-      ? directoryExists(path.join(HERMES_HOME, 'profiles', rawProfile.toLowerCase()))
+      ? directoryExists(path.join(BEYOND_HOME, 'profiles', rawProfile.toLowerCase()))
       : undefined
 
     // Pass the raw profile, not profileKey: profileKey collapses null to
@@ -10922,10 +10922,10 @@ async function connectRegistryBackend(
       profile: profileKey,
       connectionId: source.id,
       // The remote process runs as this profile; the desktop-side profile key
-      // is only the routing label. hermes:api uses it to translate explicit
+      // is only the routing label. beyond:api uses it to translate explicit
       // self-profile query filters into the backend's namespace.
       remoteProfile: sshConfig.remoteProfile || '',
-      logs: hermesLog.slice(-80),
+      logs: beyondLog.slice(-80),
       ...getWindowState()
     }
   }
@@ -10946,7 +10946,7 @@ async function connectRegistryBackend(
     source.headers
   )
 
-  await waitForRemoteHermes(connection)
+  await waitForRemoteBeyond(connection)
   poolEntry.remoteBaseUrl = connection.baseUrl
 
   // Remote/cloud backends live on another host too — disable the WSL path
@@ -10960,7 +10960,7 @@ async function connectRegistryBackend(
     // One host, many profiles: REST paths must carry ?profile= (same contract
     // as the global-remote shared-primary route).
     sharedRemote: true,
-    logs: hermesLog.slice(-80),
+    logs: beyondLog.slice(-80),
     ...getWindowState()
   }
 }
@@ -11013,7 +11013,7 @@ async function restoreManagedPrimarySshBackend(source, profile, correlationId) {
   backendConnectionState.invalidate()
 
   try {
-    return await startHermes()
+    return await startBeyond()
   } finally {
     if (managedPrimaryRestoreOwners.get(source.id)?.correlationId === correlationId) {
       managedPrimaryRestoreOwners.delete(source.id)
@@ -11030,7 +11030,7 @@ function managedSshConfig(source, profile = '') {
     user: source.user,
     port: source.port,
     keyPath: source.keyPath,
-    remoteHermesPath: source.remoteHermesPath,
+    remoteBeyondPath: source.remoteBeyondPath,
     remoteProfile: source.remoteProfile || (profileKey === 'default' ? '' : profileKey)
   })
 }
@@ -11044,8 +11044,8 @@ async function captureManagedSshScopes(source) {
     resolveDesktopRemoteRoute({
       config,
       env: {
-        token: process.env.HERMES_DESKTOP_REMOTE_TOKEN,
-        url: process.env.HERMES_DESKTOP_REMOTE_URL
+        token: process.env.BEYOND_DESKTOP_REMOTE_TOKEN,
+        url: process.env.BEYOND_DESKTOP_REMOTE_URL
       },
       profile,
       registry
@@ -11156,7 +11156,7 @@ async function captureManagedSshScopes(source) {
 }
 
 function remoteUpdateTargetFromState(state): RemoteUpdateTarget {
-  if (!state?.ssh || !state?.hermesPath || !state?.hermesHome) {
+  if (!state?.ssh || !state?.beyondPath || !state?.beyondHome) {
     throw new Error('The managed SSH scope does not carry a complete remote runtime identity.')
   }
 
@@ -11167,8 +11167,8 @@ function remoteUpdateTargetFromState(state): RemoteUpdateTarget {
   return {
     ssh: state.ssh,
     platform: state.remotePlatform,
-    hermesPath: state.hermesPath,
-    hermesHome: state.hermesHome,
+    beyondPath: state.beyondPath,
+    beyondHome: state.beyondHome,
     ...(state.pythonPath ? { pythonPath: state.pythonPath } : {})
   }
 }
@@ -11190,29 +11190,29 @@ async function openManagedSshUpdateTransport(
   await ssh.open()
 
   try {
-    const platform: any = await detectRemotePlatform(ssh, config.remoteHermesPath || '')
+    const platform: any = await detectRemotePlatform(ssh, config.remoteBeyondPath || '')
 
     if (platform.os === 'Windows') {
-      const runtime = platform.hermesPath ? platform : await probeWindowsRemote(ssh, config.remoteHermesPath || '')
+      const runtime = platform.beyondPath ? platform : await probeWindowsRemote(ssh, config.remoteBeyondPath || '')
 
       return {
         close: () => ssh.close(),
         target: {
           ssh,
           platform: 'Windows',
-          hermesPath: runtime.hermesPath,
-          hermesHome: runtime.hermesHome,
+          beyondPath: runtime.beyondPath,
+          beyondHome: runtime.beyondHome,
           pythonPath: runtime.python
         }
       }
     }
 
-    const hermesPath = await remoteLifecycle.locateHermes(ssh, config.remoteHermesPath || '')
-    const hermesHome = await remoteLifecycle.probeRemoteHermesHome(ssh)
+    const beyondPath = await remoteLifecycle.locateBeyond(ssh, config.remoteBeyondPath || '')
+    const beyondHome = await remoteLifecycle.probeRemoteBeyondHome(ssh)
 
     return {
       close: () => ssh.close(),
-      target: { ssh, platform: platform.os, hermesPath, hermesHome }
+      target: { ssh, platform: platform.os, beyondPath, beyondHome }
     }
   } catch (error) {
     await ssh.close()
@@ -11241,8 +11241,8 @@ async function drainManagedSshScope(scope) {
       pid: state.pid,
       spawnNonce: state.spawnNonce,
       profile: state.remoteProfile || '',
-      hermesPath: state.hermesPath,
-      hermesHome: state.hermesHome,
+      beyondPath: state.beyondPath,
+      beyondHome: state.beyondHome,
       startedAt: state.startedAt,
       creationTimeNs: state.creationTimeNs,
       creationTime: state.creationTime
@@ -11251,7 +11251,7 @@ async function drainManagedSshScope(scope) {
     if (state.remotePlatform === 'Windows') {
       await terminateOwnedWindowsDashboardForUpdate(
         state.ssh,
-        { hermesPath: state.hermesPath, hermesHome: state.hermesHome, python: state.pythonPath },
+        { beyondPath: state.beyondPath, beyondHome: state.beyondHome, python: state.pythonPath },
         expected
       )
     } else if (state.remotePlatform === 'Linux' || state.remotePlatform === 'Darwin') {
@@ -11271,10 +11271,10 @@ async function drainManagedSshScope(scope) {
         // exact token first; only recreate the forward when cancellation was
         // confirmed, avoiding a duplicate-bind attempt that masks recovery.
         if (!forwardClosed) {
-          await waitForHermes(`http://127.0.0.1:${state.localPort}`, scope.reuseToken, undefined, 'token')
+          await waitForBeyond(`http://127.0.0.1:${state.localPort}`, scope.reuseToken, undefined, 'token')
         } else {
           await state.ssh.forward(state.localPort, state.remotePort)
-          await waitForHermes(`http://127.0.0.1:${state.localPort}`, scope.reuseToken, undefined, 'token')
+          await waitForBeyond(`http://127.0.0.1:${state.localPort}`, scope.reuseToken, undefined, 'token')
         }
 
         scope.forwardRestored = true
@@ -11490,8 +11490,8 @@ function assertPoolEntryStillOwned(poolKey: string, entry: any) {
 
 // Resolve the connection descriptor for a named profile that is not the
 // primary: attach to (or start) its canonical local gateway via
-// `hermes gateway ensure`, or verify and describe its remote. Mirrors the local
-// portion of startHermes() without the boot-progress UI, bootstrap, or
+// `beyond gateway ensure`, or verify and describe its remote. Mirrors the local
+// portion of startBeyond() without the boot-progress UI, bootstrap, or
 // first-run handling (those belong to the primary only). `opts.forceLocal`
 // skips remote resolution entirely (the registry 'local' entry means THIS
 // machine regardless of the v1 routing table); `opts.poolKey` is the
@@ -11511,7 +11511,7 @@ async function dialPoolBackend(profile, entry, opts: { forceLocal?: boolean; poo
   profileDeletionGate.assertCanStart(profile)
 
   if (remote) {
-    await waitForRemoteHermes(remote)
+    await waitForRemoteBeyond(remote)
 
     // Recorded on the entry so revalidation can probe this descriptor without
     // awaiting connectionPromise, which may still be pending for a sibling.
@@ -11520,18 +11520,18 @@ async function dialPoolBackend(profile, entry, opts: { forceLocal?: boolean; poo
     return {
       ...remote,
       profile,
-      logs: hermesLog.slice(-80),
+      logs: beyondLog.slice(-80),
       ...getWindowState()
     }
   }
 
   assertLocalProfileCanStart(profile, profileDeletionGate, key =>
-    directoryExists(path.join(HERMES_HOME, 'profiles', key))
+    directoryExists(path.join(BEYOND_HOME, 'profiles', key))
   )
 
   const connection = await ensureLocalGateway(async () => {
     const backend = await ensureRuntime(
-      await resolveHermesBackend(['--profile', profile, 'gateway', 'ensure', '--json']),
+      await resolveBeyondBackend(['--profile', profile, 'gateway', 'ensure', '--json']),
       () => assertPoolEntryStillOwned(poolKey, entry)
     )
 
@@ -11541,9 +11541,9 @@ async function dialPoolBackend(profile, entry, opts: { forceLocal?: boolean; poo
     // Never another profile's dotenv credentials from the Desktop env (#68367).
     return runGatewayEnsure(
       { ...backend, env: desktopBackendSpawnEnv(backend.env || {}) },
-      resolveHermesCwd(),
-      HERMES_HOME,
-      profileBackendParentEnv({ hermesHome: HERMES_HOME, profile })
+      resolveBeyondCwd(),
+      BEYOND_HOME,
+      profileBackendParentEnv({ beyondHome: BEYOND_HOME, profile })
     )
   }, async () => {
     // Same update mutual exclusion as the primary's waitForLocalStart (#73822);
@@ -11562,15 +11562,15 @@ async function dialPoolBackend(profile, entry, opts: { forceLocal?: boolean; poo
     })
     // Update waits yield: retirement or profile deletion may win in that gap.
     assertPoolEntryStillOwned(poolKey, entry)
-    assertLocalProfileCanStart(profile, profileDeletionGate, key => directoryExists(path.join(HERMES_HOME, 'profiles', key)))
+    assertLocalProfileCanStart(profile, profileDeletionGate, key => directoryExists(path.join(BEYOND_HOME, 'profiles', key)))
   }, restartStaleLocalGateway)
 
   assertPoolEntryStillOwned(poolKey, entry)
 
-  return { ...connection, profile, logs: hermesLog.slice(-80), ...getWindowState() }
+  return { ...connection, profile, logs: beyondLog.slice(-80), ...getWindowState() }
 }
 
-// `hermes gateway restart` drains in-flight turns before the owner exits; the CLI client is
+// `beyond gateway restart` drains in-flight turns before the owner exits; the CLI client is
 // bounded so a wedged drain cannot hang Restart. The gateway's own drain is unaffected by the kill.
 const GATEWAY_RESTART_CLIENT_TIMEOUT_MS = 120_000
 
@@ -11580,26 +11580,26 @@ const GATEWAY_RESTART_CLIENT_TIMEOUT_MS = 120_000
 // what answers.
 async function restartLocalGatewayOwner(ownerProfile: string): Promise<void> {
   const result = await runGatewayOwnerRestart(async args => {
-    const backend = await ensureRuntime(await resolveHermesBackend(args), () => undefined)
+    const backend = await ensureRuntime(await resolveBeyondBackend(args), () => undefined)
 
     return runGatewayEnsure(
       { ...backend, env: desktopBackendSpawnEnv(backend.env || {}) },
-      resolveHermesCwd(),
-      HERMES_HOME,
-      profileBackendParentEnv({ hermesHome: HERMES_HOME, profile: ownerProfile }),
-      { timeoutMs: GATEWAY_RESTART_CLIENT_TIMEOUT_MS, label: 'hermes gateway restart' }
+      resolveBeyondCwd(),
+      BEYOND_HOME,
+      profileBackendParentEnv({ beyondHome: BEYOND_HOME, profile: ownerProfile }),
+      { timeoutMs: GATEWAY_RESTART_CLIENT_TIMEOUT_MS, label: 'beyond gateway restart' }
     )
   }, ownerProfile)
 
   const reason = `${result.stdout}\n${result.stderr}`.trim().split(/\r?\n/).filter(Boolean).pop()
-  rememberLog(`[gateway] hermes --profile ${ownerProfile} gateway restart exited ${result.code}${reason ? `: ${reason}` : ''}`)
+  rememberLog(`[gateway] beyond --profile ${ownerProfile} gateway restart exited ${result.code}${reason ? `: ${reason}` : ''}`)
 }
 
-// A ready gateway whose boot commit differs from this Hermes (it outlived `hermes update`) is
+// A ready gateway whose boot commit differs from this Beyond (it outlived `beyond update`) is
 // restarted once before attaching instead of being re-attached on every dial.
 const restartStaleLocalGateway = createStaleGatewayRestarter(restartLocalGatewayOwner, rememberLog)
 
-// Models-page "Restart Hermes": restart the local gateway behind `profile`'s cached descriptor.
+// Models-page "Restart Beyond": restart the local gateway behind `profile`'s cached descriptor.
 // A remote/SSH descriptor has no gatewayEndpoint, so nothing local is touched for it.
 async function restartAttachedLocalGateway(profile: string): Promise<void> {
   const pending = profile === primaryProfileKey()
@@ -11615,7 +11615,7 @@ async function restartAttachedLocalGateway(profile: string): Promise<void> {
 }
 
 // Forget a cached descriptor. Nothing is killed: the gateway behind it owns its
-// own lifetime (`hermes gateway ensure` attach semantics), so the next
+// own lifetime (`beyond gateway ensure` attach semantics), so the next
 // ensure*() for this key simply re-dials. Every retire path — dispatch probe
 // failure, resume revalidation, registry removal, profile delete/rename, quit —
 // funnels through here so the verb stays in one place.
@@ -11652,7 +11652,7 @@ async function stopAllPoolBackends() {
  * root — it is machine-scoped and shared with the surviving gateway and
  * other installs; image locks there are the updater's pause/resume job.
  * Runs after the graceful backend teardown, skips the pids it owned and
- * every live Hermes runtime process, so it is only the net for what
+ * every live Beyond runtime process, so it is only the net for what
  * detached. Best effort throughout; see package-process-reap.ts.
  */
 function reapInstallRootedStragglers(excludePids: number[]): void {
@@ -11685,7 +11685,7 @@ function reapInstallRootedStragglers(excludePids: number[]): void {
 }
 
 // Closing Desktop never stops the detached gateway: only processes this app
-// still owns are torn down, and the straggler reap protects every live Hermes
+// still owns are torn down, and the straggler reap protects every live Beyond
 // runtime tree (package-process-reap.ts).
 const backendShutdown = createBackendShutdownCoordinator(async (): Promise<void> => {
   const ownedChildren = IS_WINDOWS ? collectOwnedBackendChildren() : []
@@ -11746,7 +11746,7 @@ async function exitAfterBackendShutdown(code) {
 // Returns the profile name whose backend was torn down, or null when the
 // request is not a profile-delete.  The caller uses this to skip ensureBackend
 // for the just-torn-down profile — otherwise ensureBackend respawns a pool
-// backend whose ensure_hermes_home() recreates the deleted profile directory.
+// backend whose ensure_beyond_home() recreates the deleted profile directory.
 //
 // The routing *decision* (which branch fires, what profile name gets
 // returned) lives in the pure decideProfileDeleteAction() in
@@ -11785,7 +11785,7 @@ async function prepareProfileRenameRequest(request) {
       mainWindow?.reload()
     },
     restartPrimaryBackend: async () => {
-      await startHermes()
+      await startBeyond()
     },
     teardownPoolBackendAndWait,
     teardownPrimaryBackendAndWait,
@@ -11810,21 +11810,21 @@ function latchedBootFailure(): Error | null {
   return bootstrapFailure ?? backendStartFailure ?? remoteReauthFailure ?? null
 }
 
-async function startHermes(requestedProfile?: string) {
+async function startBeyond(requestedProfile?: string) {
   // Only the single-instance lock holder may reap/spawn/claim the desktop
   // backend. A lock-losing instance must stay inert even if some path reaches
   // here (e.g. the deferred-quit window before `ready`): its reapOrphans()
   // otherwise SIGTERMs the running instance's live backend (#87295).
   if (!isPrimaryInstance) {
     rememberLog('[boot] non-primary instance: skipping backend machinery')
-    throw new Error('Hermes Desktop is already running in another window.')
+    throw new Error('Beyond Desktop is already running in another window.')
   }
 
   await reapOrphanedBackendsOnce()
   localBackendLifecycle.assertCanStart()
 
   // Latched-failure short-circuit: once bootstrap has failed in this
-  // process, every subsequent startHermes() call re-throws the same error
+  // process, every subsequent startBeyond() call re-throws the same error
   // without re-running install.ps1. This prevents the renderer's
   // ensureGatewayOpen retries (and any other getConnection callers) from
   // restarting a 5-10 minute install loop while the user is still reading
@@ -11835,7 +11835,7 @@ async function startHermes(requestedProfile?: string) {
   // its "Sign in" button clickable, instead of re-driving boot on every retry.
   //
   // Deliberately silent: this runs on every proxied request while a failure is
-  // latched (ensureBackend -> startHermes), so a log line here would flood the
+  // latched (ensureBackend -> startBeyond), so a log line here would flood the
   // bounded rememberLog ring and evict the lines that explain the original
   // failure. The supervisor logs the refusal once in runPrimaryRecoverySpawn.
   const latched = latchedBootFailure()
@@ -11847,7 +11847,7 @@ async function startHermes(requestedProfile?: string) {
   // E2E: simulate a boot failure without breaking the real backend. The boot
   // progresses a few steps, then fails with the given error message.
   if (BOOT_FAKE_ERROR) {
-    await advanceBootProgress('backend.resolve', 'Resolving Hermes backend', 8)
+    await advanceBootProgress('backend.resolve', 'Resolving Beyond backend', 8)
     const error = new Error(BOOT_FAKE_ERROR) as any
     error.isBootstrapFailure = true
     bootstrapFailure = error
@@ -11873,7 +11873,7 @@ async function startHermes(requestedProfile?: string) {
 
   // ONE launch-profile decision for this attempt (#108417): routing identity,
   // the --profile argv and the child env all derive from the same read, so a
-  // hermes:profile:remember landing mid-startup becomes the NEXT boot's
+  // beyond:profile:remember landing mid-startup becomes the NEXT boot's
   // preference instead of splitting routing identity from the launch
   // argument. An explicit profile-scoped caller names both.
   const { argvProfile: activeProfile, routingProfile: primaryProfile } = requestedProfile
@@ -11881,7 +11881,7 @@ async function startHermes(requestedProfile?: string) {
     : resolveLaunchProfile(readActiveDesktopProfile)
 
   // Pin the routing table to the profile this primary actually boots as; a
-  // later hermes:profile:remember must not retarget requests mid-life.
+  // later beyond:profile:remember must not retarget requests mid-life.
   primaryProfilePin.pin(primaryProfile)
 
   // Legacy path callers without an explicit profile belong to the primary
@@ -11900,8 +11900,8 @@ async function startHermes(requestedProfile?: string) {
       // remotes and Apply invalidated this attempt), bail before probing.
       backendConnectionState.assertCurrentAttempt(connectionAttempt)
 
-      await advanceBootProgress('backend.remote', `Connecting to remote Hermes backend at ${remote.baseUrl}`, 24)
-      await waitForRemoteHermes(remote)
+      await advanceBootProgress('backend.remote', `Connecting to remote Beyond backend at ${remote.baseUrl}`, 24)
+      await waitForRemoteBeyond(remote)
 
       // Second async boundary: the health probe itself can outlive the
       // attempt. A late success here must not publish a stale descriptor.
@@ -11909,16 +11909,16 @@ async function startHermes(requestedProfile?: string) {
 
       updateBootProgress({
         phase: 'backend.ready',
-        message: 'Remote Hermes backend is ready',
+        message: 'Remote Beyond backend is ready',
         progress: 94,
         running: true,
         error: null
       })
 
-      return createPrimaryRemoteConnection(remote, hermesLog.slice(-80), getWindowState())
+      return createPrimaryRemoteConnection(remote, beyondLog.slice(-80), getWindowState())
     }
 
-    await advanceBootProgress('backend.resolve', 'Resolving Hermes backend', 8)
+    await advanceBootProgress('backend.resolve', 'Resolving Beyond backend', 8)
     // Resolve for the desktop's primary profile so a per-profile remote
     // override on the active profile is honored (falls back to env / global).
 
@@ -11940,10 +11940,10 @@ async function startHermes(requestedProfile?: string) {
     const backendArgs = ['gateway', 'ensure', '--json']
 
     // Pin the desktop's chosen profile via the global --profile flag. This is
-    // deterministic (it wins over the sticky ~/.hermes/active_profile file) and
-    // resolves HERMES_HOME the same way `hermes -p <name>` does on the CLI. A
-    // launch override is persisted into active-profile.json before startHermes,
-    // so Hermes.exe --profile <name> and hermes -p <name> desktop both land
+    // deterministic (it wins over the sticky ~/.beyond/active_profile file) and
+    // resolves BEYOND_HOME the same way `beyond -p <name>` does on the CLI. A
+    // launch override is persisted into active-profile.json before startBeyond,
+    // so Beyond.exe --profile <name> and beyond -p <name> desktop both land
     // here. `activeProfile` is the SAME decision that named routing above —
     // never re-read here (#108417). An unset preference keeps the legacy
     // launch so existing installs are unaffected.
@@ -11958,9 +11958,9 @@ async function startHermes(requestedProfile?: string) {
       ensureLocalRuntime: backend =>
         ensureRuntime(backend, () => backendConnectionState.assertCurrentAttempt(connectionAttempt)),
       prepareLocalBackend: async () => {
-        await advanceBootProgress('backend.runtime', 'Resolving Hermes runtime', 28)
+        await advanceBootProgress('backend.runtime', 'Resolving Beyond runtime', 28)
 
-        return resolveHermesBackend(backendArgs)
+        return resolveBeyondBackend(backendArgs)
       },
       resolveRemote: () => {
         // Classify immediately before each throwing resolve. This callback runs
@@ -11997,7 +11997,7 @@ async function startHermes(requestedProfile?: string) {
       return setup.connection
     }
 
-    // No `attachHostBackend` is wired: `hermes gateway ensure` below IS the
+    // No `attachHostBackend` is wired: `beyond gateway ensure` below IS the
     // attach-or-start step for the canonical local gateway.
     if (setup.kind === 'attached') {
       throw new Error('Unexpected attached backend outcome without a host attach step.')
@@ -12008,22 +12008,22 @@ async function startHermes(requestedProfile?: string) {
 
     const connection = await ensureLocalGateway(() => runGatewayEnsure(
       { ...setup.backend, env: desktopBackendSpawnEnv(setup.backend.env || {}) },
-      resolveHermesCwd(),
-      HERMES_HOME,
-      profileBackendParentEnv({ hermesHome: HERMES_HOME, profile: primaryProfile })
+      resolveBeyondCwd(),
+      BEYOND_HOME,
+      profileBackendParentEnv({ beyondHome: BEYOND_HOME, profile: primaryProfile })
     ), undefined, restartStaleLocalGateway)
 
     backendConnectionState.assertCurrentAttempt(connectionAttempt)
 
     backendStartFailure = null
-    rememberLog('[backend] Hermes gateway is ready')
-    updateBootProgress({ phase: 'backend.ready', message: 'Hermes gateway is ready', progress: 94, running: true, error: null })
+    rememberLog('[backend] Beyond gateway is ready')
+    updateBootProgress({ phase: 'backend.ready', message: 'Beyond gateway is ready', progress: 94, running: true, error: null })
     bootstrapRepairAttempt = 0
 
     // The primary descriptor names its own profile: a profile-less descriptor
     // reads as "default" downstream and breaks per-source profile memory when
     // the primary actually booted as another profile (#825324fd).
-    return { ...connection, profile: primaryProfile, logs: hermesLog.slice(-80), ...getWindowState() }
+    return { ...connection, profile: primaryProfile, logs: beyondLog.slice(-80), ...getWindowState() }
   })().catch(async error => {
     if (!backendConnectionState.clearPromiseForAttempt(connectionAttempt)) {
       throw error
@@ -12174,7 +12174,7 @@ function wireCommonWindowHandlers(win, { zoom = true }: { zoom?: boolean } = {})
 
   installContextMenuBridge(win)
   // Always deny, never open as a side effect: GHSA-9f4c-93c8-jc8g. Trusted
-  // links arrive via `hermes:openExternal`, not here. See window-open-policy.ts.
+  // links arrive via `beyond:openExternal`, not here. See window-open-policy.ts.
   // The trusted-hub delegation (window-open-policy.ts, #91612) also never
   // creates a window: it hands http/https/mailto opens from the EXACT hub
   // origin to the audited `openExternalUrl` as a deny side effect.
@@ -12197,11 +12197,11 @@ function wireCommonWindowHandlers(win, { zoom = true }: { zoom?: boolean } = {})
     const frame = findFrameByIdentifier(win.webContents, frameProcessId, frameRoutingId)
     const frameOrigin = safeFrameOrigin(frame)
 
-    if (frameOrigin !== HERMES_HUB_ORIGIN && frameOrigin !== HERMES_HUB_FALLBACK_ORIGIN) {
+    if (frameOrigin !== BEYOND_HUB_ORIGIN && frameOrigin !== BEYOND_HUB_FALLBACK_ORIGIN) {
       return
     }
 
-    if (isHermesHubPickerUrl(url)) {
+    if (isBeyondHubPickerUrl(url)) {
       return
     }
 
@@ -12271,14 +12271,14 @@ function installPreviewGuestEscapeHatch() {
 /**
  * Give the preview pane's `<webview>` guests a preload — and ONLY those
  * guests. The pane's webview is the one `webview` tag in the app and it
- * always carries the `persist:hermes-preview` partition, so the partition is
+ * always carries the `persist:beyond-preview` partition, so the partition is
  * the ownership key: any future webview that does not opt into that partition
  * inherits nothing from this mechanism.
  *
  * The preload (preview-guest-preload-entry.ts) never opens anything itself.
  * It forwards a clicked `_blank` anchor to the host renderer via
  * `sendToHost`, and the pane admits the scheme and routes the URL through the
- * audited `hermes:openExternal` channel. Popup requests themselves stay
+ * audited `beyond:openExternal` channel. Popup requests themselves stay
  * denied-by-omission: the webview has no `allowpopups`, and the
  * `setWindowOpenHandler` contract (GHSA-9f4c-93c8-jc8g) stays side-effect
  * free.
@@ -12333,7 +12333,7 @@ function focusWindow(win) {
   }
 
   // #83998: show() and focus() both seize the Windows OS foreground,
-  // dismissing other apps' native save/confirm dialogs while Hermes streams
+  // dismissing other apps' native save/confirm dialogs while Beyond streams
   // in the background. Reveal without activation, and only take the keyboard
   // when the window doesn't already have focus — a redundant focus() still
   // pumps SetForegroundWindow.
@@ -12359,7 +12359,7 @@ function spawnSecondaryWindow({
     height: SESSION_WINDOW_MIN_HEIGHT,
     minWidth: SESSION_WINDOW_MIN_WIDTH,
     minHeight: SESSION_WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: 'Beyond',
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -12451,7 +12451,7 @@ function notifyBrowserPopoutClosed(tabId) {
 
   for (const other of BrowserWindow.getAllWindows()) {
     if (!other.isDestroyed()) {
-      other.webContents.send('hermes:browser-popout:closed', tabId)
+      other.webContents.send('beyond:browser-popout:closed', tabId)
     }
   }
 }
@@ -12464,7 +12464,7 @@ function spawnBrowserWindow(tabId) {
     height: BROWSER_WINDOW_HEIGHT,
     minWidth: BROWSER_WINDOW_MIN_WIDTH,
     minHeight: BROWSER_WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: 'Beyond',
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -12576,7 +12576,7 @@ function createInstanceWindow(
     ...nextInstanceBounds(source),
     minWidth: WINDOW_MIN_WIDTH,
     minHeight: WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: 'Beyond',
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -12657,11 +12657,11 @@ registerMachineProfile()
 
 // The pet overlay: a single transparent, frameless, always-on-top window that
 // hosts ONLY the floating mascot. Shift-clicking the in-window pet "pops it out"
-// here so it can leave the app's bounds and stay visible while Hermes is
+// here so it can leave the app's bounds and stay visible while Beyond is
 // minimized (Codex-style task-completion glance). It carries no gateway
 // connection of its own — the main renderer is the single source of truth and
-// pushes pet state over IPC (hermes:pet-overlay:state); the overlay just renders
-// it. Control flows back (pop-in, composer submit) via hermes:pet-overlay:control.
+// pushes pet state over IPC (beyond:pet-overlay:state); the overlay just renders
+// it. Control flows back (pop-in, composer submit) via beyond:pet-overlay:control.
 let petOverlayWindow = null
 // Set once the app is really exiting (before-quit, or the primary window's
 // close on Windows/Linux where closing it IS quitting). Distinct from
@@ -12705,7 +12705,7 @@ function spawnPetOverlayWindow(bounds) {
     // taskbar/alt-tab entry. On macOS, cmd-tab is app-level and this can make
     // the whole app look like it vanished when the only newly-created visible
     // window is a frameless overlay. Use NSPanel + Mission Control hiding below
-    // instead, leaving the main Hermes app as the Dock/cmd-tab anchor.
+    // instead, leaving the main Beyond app as the Dock/cmd-tab anchor.
     skipTaskbar: !IS_MAC,
     hasShadow: false,
     alwaysOnTop: true,
@@ -12715,9 +12715,9 @@ function spawnPetOverlayWindow(bounds) {
     hiddenInMissionControl: IS_MAC,
     // Non-activating: the overlay must never become the app's key/main window,
     // or it (a frameless, taskbar-skipping panel) becomes the app's switcher
-    // anchor and the Hermes icon drops out of cmd/alt-tab — especially when the
+    // anchor and the Beyond icon drops out of cmd/alt-tab — especially when the
     // main window is minimized. We flip this on only while the composer needs
-    // the keyboard (see hermes:pet-overlay:set-focusable).
+    // the keyboard (see beyond:pet-overlay:set-focusable).
     focusable: false,
     show: false,
     // Fully transparent — the renderer paints only the sprite + bubble.
@@ -12743,7 +12743,7 @@ function spawnPetOverlayWindow(bounds) {
 
   // The overlay is a transparent rectangle; only the sprite pixels should be
   // interactive. The renderer toggles click-through as the cursor enters/
-  // leaves the sprite (hermes:pet-overlay:ignore-mouse), but the window MUST
+  // leaves the sprite (beyond:pet-overlay:ignore-mouse), but the window MUST
   // start click-through from the main process: if the overlay page is slow to
   // load, blank, or its renderer has died, a mouse-enabled transparent window
   // sits over the desktop eating clicks (the invisible "dead zone" bug). The
@@ -12758,7 +12758,7 @@ function spawnPetOverlayWindow(bounds) {
   try {
     // Electron docs: macOS may transform process type on each
     // setVisibleOnAllWorkspaces() call unless skipTransformProcessType=true,
-    // which briefly hides the Dock/cmd-tab presence. Keep Hermes in the normal
+    // which briefly hides the Dock/cmd-tab presence. Keep Beyond in the normal
     // ForegroundApplication class so shift-clicking the pet never drops the app
     // out of app switchers.
     win.setVisibleOnAllWorkspaces(
@@ -12795,7 +12795,7 @@ function spawnPetOverlayWindow(bounds) {
     if (
       shouldPopInOnOverlayClosed({ appQuitting, mainWindowAlive: Boolean(mainWindow && !mainWindow.isDestroyed()) })
     ) {
-      mainWindow.webContents.send('hermes:pet-overlay:control', { type: 'pop-in' })
+      mainWindow.webContents.send('beyond:pet-overlay:control', { type: 'pop-in' })
     }
   })
 
@@ -12878,14 +12878,14 @@ function rehomePetOverlay() {
   petOverlayWindow.setBounds(resolved)
 
   if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('hermes:pet-overlay:control', { type: 'bounds', bounds: resolved })
+    mainWindow.webContents.send('beyond:pet-overlay:control', { type: 'bounds', bounds: resolved })
   }
 }
 
 // ── HUD mode ────────────────────────────────────────────────────────────────
 //
 // The chrome-free floating chat: a transparent, frameless, always-on-top
-// window showing only the composer and its scrollback, so Hermes can be driven
+// window showing only the composer and its scrollback, so Beyond can be driven
 // while the user works in another app.
 //
 // Unlike the pet overlay / quick entry, this is a FULL app renderer with its
@@ -12903,7 +12903,7 @@ const hudWindows = new WeakSet<BrowserWindow>()
 // live main window exists at HUD-open time, visible or not: the HUD hides the
 // app window itself, so a main window minimized or behind another app when
 // the HUD opened still needs a surface back — arming only on `isVisible()`
-// left the user with NO Hermes window after the second toggle (#88513).
+// left the user with NO Beyond window after the second toggle (#88513).
 let hudRestoreMainWindow = false
 
 // The session the HUD is currently on, reported by its renderer whenever the
@@ -13084,7 +13084,7 @@ function startHudCursorFeed(win: BrowserWindow) {
     }
 
     last = key
-    win.webContents.send('hermes:hud:cursor', point)
+    win.webContents.send('beyond:hud:cursor', point)
   }, HUD_CURSOR_POLL_MS)
 
   win.on('closed', () => clearInterval(timer))
@@ -13104,7 +13104,7 @@ function startHudGameOverlayFeed(win: BrowserWindow) {
 
   const push = (state: { active: boolean; app: string }) => {
     if (!win.isDestroyed()) {
-      win.webContents.send('hermes:hud:game-overlay', state)
+      win.webContents.send('beyond:hud:game-overlay', state)
     }
   }
 
@@ -13132,7 +13132,7 @@ function startHudGameOverlayFeed(win: BrowserWindow) {
 
     if (!reported) {
       reported = true
-      console.warn(`[hermes] HUD cannot enumerate windows: ${windows.reason}`)
+      console.warn(`[beyond] HUD cannot enumerate windows: ${windows.reason}`)
     }
 
     return null
@@ -13201,7 +13201,7 @@ function broadcastHudState(open) {
 
   for (const win of BrowserWindow.getAllWindows()) {
     if (!win.isDestroyed()) {
-      win.webContents.send('hermes:hud:changed', payload)
+      win.webContents.send('beyond:hud:changed', payload)
     }
   }
 }
@@ -13220,7 +13220,7 @@ function spawnHudWindow(sessionId, profile) {
     // window grows a few px every drag (worse at >100% DPI scaling). The
     // composer drag calls setPosition, which must move the window, not resize
     // it. Resizing is done by the renderer's edge/corner handles through
-    // `hermes:hud:set-bounds`, which flips resizable on for the call — the
+    // `beyond:hud:set-bounds`, which flips resizable on for the call — the
     // same pattern the pet overlay uses for its wheel-scale.
     resizable: false,
     // macOS AppKit's constrainFrameRect clamps setBounds to the current
@@ -13258,7 +13258,7 @@ function spawnHudWindow(sessionId, profile) {
   win.setHiddenInMissionControl?.(true)
 
   // Linux intentionally starts on ONE virtual desktop. During a renderer
-  // grab, hermes:hud:workspace-transfer temporarily makes the X11 window
+  // grab, beyond:hud:workspace-transfer temporarily makes the X11 window
   // sticky; releasing it assigns the HUD to KDE's then-current desktop.
 
   // Streaming into a window that is ALWAYS blurred (the user is in another
@@ -13392,7 +13392,7 @@ function openHudWindow(sessionId, profile) {
     // conversation in the HUD", and a plain focus leaves the wrong one there.
     if (sessionId && sessionId !== hudSessionId) {
       hudSessionId = sessionId
-      hudWindow.webContents.send('hermes:hud:goto', sessionId)
+      hudWindow.webContents.send('beyond:hud:goto', sessionId)
       // Keep every window's idea of where the HUD is pointed in step, so the
       // toggle keeps reading "switch" vs "dismiss" correctly.
       broadcastHudState(true)
@@ -13555,7 +13555,7 @@ function spawnQuickEntryWindow() {
   // renderer already reported a live gateway.
   win.webContents.on('did-finish-load', () => {
     if (!win.isDestroyed() && quickEntryLastState) {
-      win.webContents.send('hermes:quick-entry:state', quickEntryLastState)
+      win.webContents.send('beyond:quick-entry:state', quickEntryLastState)
     }
   })
 
@@ -13597,7 +13597,7 @@ function showQuickEntryWindow() {
   quickEntryWindow.show()
   quickEntryWindow.focus()
   // Re-summoned: tell the renderer to clear any stale draft and refocus.
-  quickEntryWindow.webContents.send('hermes:quick-entry:shown')
+  quickEntryWindow.webContents.send('beyond:quick-entry:shown')
 }
 
 function hideQuickEntryWindow() {
@@ -13661,7 +13661,7 @@ function createWindow() {
     ),
     minWidth: WINDOW_MIN_WIDTH,
     minHeight: WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: 'Beyond',
     // Frameless title bar on every platform so the renderer can paint the
     // "hide sidebar" button (and other left-side titlebar tools) flush with
     // the top edge — matching the macOS layout where the traffic lights sit
@@ -13814,7 +13814,7 @@ function createWindow() {
               LINUX_GPU_SOFTWARE_ACTIVE ||
               linuxGpuFallbackActive ||
               alreadyHasDisableGpu(process.argv, process.env) ||
-              isHermesDesktopGpuOverrideOff(process.env)
+              isBeyondDesktopGpuOverrideOff(process.env)
 
             const gpuChildPresent = app
               .getAppMetrics()
@@ -13840,7 +13840,7 @@ function createWindow() {
               }
 
               console.warn(
-                '[hermes] Linux: no GPU child after window reveal — GPU init is retrying silently; software fallback engaged for the next launch (#124843)'
+                '[beyond] Linux: no GPU child after window reveal — GPU init is retrying silently; software fallback engaged for the next launch (#124843)'
               )
             }
           }
@@ -13861,7 +13861,7 @@ function createWindow() {
   bindWindowChromeEvents(mainWindow, sendWindowStateChanged)
 
   // Reopen where the user left off. close is the backstop, flushed
-  // synchronously before the window is gone.
+  // synchrobeyondly before the window is gone.
   bindGeometryPersistence(mainWindow, schedulePersistWindowState)
   mainWindow.on('maximize', schedulePersistWindowState)
   mainWindow.on('unmaximize', schedulePersistWindowState)
@@ -13926,7 +13926,7 @@ function createWindow() {
             windowsGpuStackCookieFallbackActive ||
             alreadyHasDisableGpu(process.argv, process.env),
           relaunchAttempted: windowsGpuStackCookieRelaunchAttempted,
-          gpuOverrideOff: isHermesDesktopGpuOverrideOff(process.env)
+          gpuOverrideOff: isBeyondDesktopGpuOverrideOff(process.env)
         }
 
         if (shouldRelaunchForRendererStackCookieCrashLoop(stackCookieCrashLoop)) {
@@ -13965,7 +13965,7 @@ function createWindow() {
             errorCode: details?.exitCode,
             errorDescription:
               'The desktop renderer crashed repeatedly (Windows STATUS_STACK_BUFFER_OVERRUN / 0xC0000409). GPU fallback could not recover the window.',
-            repairHint: 'hermes desktop --force-build',
+            repairHint: 'beyond desktop --force-build',
             reloadUrl: DEV_SERVER || pathToFileURL(resolveRendererIndex()).toString()
           })
 
@@ -14022,7 +14022,7 @@ function createWindow() {
           errorCode: details?.errorCode,
           url: details?.url,
           errorDescription: 'The desktop renderer failed to load repeatedly after the update.',
-          repairHint: 'hermes desktop --force-build',
+          repairHint: 'beyond desktop --force-build',
           reloadUrl: DEV_SERVER || pathToFileURL(resolveRendererIndex()).toString()
         })
       },
@@ -14041,7 +14041,7 @@ function createWindow() {
         const exit = details?.exitCode === undefined ? '' : `, exit code ${String(details.exitCode)}`
         rememberLog(`[renderer:main] renderer terminated while live (reason=${reason}${exit}); surfacing recovery page`)
         void loadRendererLoadErrorPage(mainWindow, {
-          title: 'Hermes desktop UI was terminated',
+          title: 'Beyond desktop UI was terminated',
           errorDescription:
             `The desktop UI process was terminated unexpectedly (reason: ${reason}${exit}). ` +
             'Your sessions and the background gateway are unaffected — reload to continue.',
@@ -14083,7 +14083,7 @@ function createWindow() {
       errorCode: 'ERR_FILE_NOT_FOUND',
       errorDescription: `The desktop renderer bundle is incomplete after the last update (${tornAssets.length} missing file(s)).`,
       missingAssets: tornAssets,
-      repairHint: 'hermes desktop --force-build',
+      repairHint: 'beyond desktop --force-build',
       reloadUrl: pathToFileURL(rendererIndex).toString()
     })
   } else {
@@ -14101,7 +14101,7 @@ function createWindow() {
   // shared (backendConnectionState), so the renderer's getConnection() joins
   // this in-flight boot instead of duplicating it; early boot-progress events
   // the renderer misses are recovered by its getBootProgress() pull on mount.
-  const startup = defaultRoute ? connectDesktopProfileRoute(defaultRoute) : startHermes()
+  const startup = defaultRoute ? connectDesktopProfileRoute(defaultRoute) : startBeyond()
   startup.catch(error => rememberLog(error.stack || error.message))
 
   mainWindow.webContents.once('did-finish-load', () => {
@@ -14112,7 +14112,7 @@ function createWindow() {
   })
 }
 
-ipcMain.handle('hermes:connection', async (event, profile) => {
+ipcMain.handle('beyond:connection', async (event, profile) => {
   const route = resolveDesktopConnectionRequest(
     profile,
     windowConnectionRoutes.get(event.sender.id),
@@ -14134,12 +14134,12 @@ async function connectDesktopProfileRoute(route: DesktopProfileRoute, sender?: E
   )
 
   // Every republish carries LIVE window state (#102451): the backend pool entry
-  // (and the getWindowState() snapshot startHermes baked into it) outlives
+  // (and the getWindowState() snapshot startBeyond baked into it) outlives
   // reloads, reconnects and sleep/wake, so a reply built only from the cached
   // descriptor overwrites the renderer's live fullscreen flag with the
   // mint-time snapshot. Reading the caller's state HERE keeps registry-scoped,
   // primary-resolved and bare replies consistent with the
-  // hermes:window-state-changed live-push path.
+  // beyond:window-state-changed live-push path.
   const windowState = liveWindowState(sender, {
     fromWebContents: BrowserWindow.fromWebContents,
     getWindowState,
@@ -14164,7 +14164,7 @@ async function connectDesktopProfileRoute(route: DesktopProfileRoute, sender?: E
 // ensureBackend when the v1 route is local, and attaches to this machine's
 // canonical gateway when the v1 global mode is remote (the registry 'local'
 // entry always means this machine) unless the profile is remote-only.
-ipcMain.handle('hermes:connection:for', async (event, payload) => {
+ipcMain.handle('beyond:connection:for', async (event, payload) => {
   const { connectionId, profile } = payload && typeof payload === 'object' ? (payload as any) : ({} as any)
   const registry = readDesktopConnectionsRegistry()
   const id = registryDialConnectionId(connectionId, registry.primary)
@@ -14198,16 +14198,16 @@ function recordWindowConnectionRoute(sender: Electron.WebContents, route: unknow
   }
 }
 
-ipcMain.on('hermes:connection:active-route', (event, route) => recordWindowConnectionRoute(event.sender, route))
+ipcMain.on('beyond:connection:active-route', (event, route) => recordWindowConnectionRoute(event.sender, route))
 // Reconnect-after-wake recovery. A REMOTE primary backend has no child process,
 // so the 'exit'/'error' handlers that would clear a dead connection promise never
 // fire — once the remote becomes unreachable across a sleep/wake the renderer
 // re-dials the same dead descriptor forever and the composer stays stuck on
-// "Starting Hermes…". Before the renderer's backoff loop reconnects, it asks us
+// "Starting Beyond…". Before the renderer's backoff loop reconnects, it asks us
 // to confirm the cached PRIMARY backend is still reachable; if a remote one is
 // not, we drop the cache so the next getConnection() rebuilds it. Local backends
 // self-heal via their child 'exit' handler, so we never touch them here.
-ipcMain.handle('hermes:connection:revalidate', async () => {
+ipcMain.handle('beyond:connection:revalidate', async () => {
   const connectionPromise = backendConnectionState.getPromise()
 
   if (!connectionPromise) {
@@ -14226,7 +14226,7 @@ ipcMain.handle('hermes:connection:revalidate', async () => {
         currentConnectionPromise: () => backendConnectionState.getPromise(),
         log: rememberLog,
         probe: (connection, path, options) => fetchJsonForBackend(connection, path, options),
-        resetConnection: () => resetHermesConnectionState({ soft: true }),
+        resetConnection: () => resetBeyondConnectionState({ soft: true }),
         tracker: remoteLiveness
       }),
       revalidatePool()
@@ -14304,10 +14304,10 @@ function revalidateSuspectPoolAfterResume() {
   )
 }
 
-ipcMain.handle('hermes:gateway:ws-url', async (_event, profile) => {
+ipcMain.handle('beyond:gateway:ws-url', async (_event, profile) => {
   return gatewayWsUrlIpcResult(() => freshGatewayWsUrl(profile, _event.sender.id))
 })
-ipcMain.handle('hermes:window:openSession', async (_event, sessionId, opts) => {
+ipcMain.handle('beyond:window:openSession', async (_event, sessionId, opts) => {
   if (typeof sessionId !== 'string' || !sessionId.trim()) {
     return { ok: false, error: 'invalid-session-id' }
   }
@@ -14320,13 +14320,13 @@ ipcMain.handle('hermes:window:openSession', async (_event, sessionId, opts) => {
 
   return { ok: true }
 })
-ipcMain.handle('hermes:window:openInstance', async (event, options) => {
+ipcMain.handle('beyond:window:openInstance', async (event, options) => {
   createInstanceWindow(options, BrowserWindow.fromWebContents(event.sender))
 
   return { ok: true }
 })
 registerWindowControlIpc(ipcMain, sender => BrowserWindow.fromWebContents(sender))
-ipcMain.handle('hermes:window:openBrowser', async (_event, tabId) => {
+ipcMain.handle('beyond:window:openBrowser', async (_event, tabId) => {
   if (typeof tabId !== 'string' || !tabId.trim()) {
     return { ok: false, error: 'invalid-tab-id' }
   }
@@ -14342,35 +14342,35 @@ ipcMain.handle('hermes:window:openBrowser', async (_event, tabId) => {
 // between them over IPC. Destination validation and reply correlation stay
 // renderer-side, so every feature riding this relay still fails closed instead
 // of falling through to whatever window happens to be active later.
-ipcMain.on('hermes:window:relay', (event, payload) => {
+ipcMain.on('beyond:window:relay', (event, payload) => {
   for (const other of BrowserWindow.getAllWindows()) {
     if (!other.isDestroyed() && other.webContents.id !== event.sender.id) {
-      other.webContents.send('hermes:window:relay', payload)
+      other.webContents.send('beyond:window:relay', payload)
     }
   }
 })
 
 // Hand a session to the user's OWN terminal emulator, running the TUI against
-// it (`hermes --tui --resume <id>`). Not the in-app terminal pane: the point is
+// it (`beyond --tui --resume <id>`). Not the in-app terminal pane: the point is
 // to continue the chat in the terminal they already live in.
 //
 // The desktop's runtime is usually a venv Python invoked as
-// `python -m hermes_cli.main`, so we resolve the SAME backend the app itself
+// `python -m beyond_cli.main`, so we resolve the SAME backend the app itself
 // launches and carry its argv + PYTHONPATH into a launcher script rather than
-// hoping a `hermes` exists on the user's interactive PATH. Resolution only —
+// hoping a `beyond` exists on the user's interactive PATH. Resolution only —
 // never ensureRuntime(), which would kick off a first-run install from a menu
 // click; an unresolved runtime is reported instead.
-ipcMain.handle('hermes:window:openInTerminal', async (_event, sessionId, opts) => {
+ipcMain.handle('beyond:window:openInTerminal', async (_event, sessionId, opts) => {
   if (typeof sessionId !== 'string' || !sessionId.trim()) {
     return { ok: false, error: 'invalid-session-id' }
   }
 
   try {
     const profile = typeof opts?.profile === 'string' ? opts.profile.trim() : ''
-    const backend = await resolveHermesBackend(tuiResumeArgs(sessionId.trim(), profile || undefined))
+    const backend = await resolveBeyondBackend(tuiResumeArgs(sessionId.trim(), profile || undefined))
 
     if (!backend.command) {
-      return { ok: false, error: 'Hermes is not installed yet' }
+      return { ok: false, error: 'Beyond is not installed yet' }
     }
 
     const { cwd } = sanitizeWorkspaceCwd(opts?.cwd)
@@ -14379,7 +14379,7 @@ ipcMain.handle('hermes:window:openInTerminal', async (_event, sessionId, opts) =
 
     const scriptPath = path.join(
       scriptDir,
-      `hermes-${crypto.randomBytes(6).toString('hex')}${terminalScriptExtension()}`
+      `beyond-${crypto.randomBytes(6).toString('hex')}${terminalScriptExtension()}`
     )
 
     fs.writeFileSync(
@@ -14388,7 +14388,7 @@ ipcMain.handle('hermes:window:openInTerminal', async (_event, sessionId, opts) =
         args: backend.args,
         command: backend.command,
         cwd,
-        env: terminalScriptEnv(backend.env, HERMES_HOME)
+        env: terminalScriptEnv(backend.env, BEYOND_HOME)
       }),
       { mode: 0o700 }
     )
@@ -14413,8 +14413,8 @@ ipcMain.handle('hermes:window:openInTerminal', async (_event, sessionId, opts) =
     return { ok: false, error: error.message }
   }
 })
-ipcMain.handle('hermes:wake-indicator:get', () => wakeIndicatorController.getState())
-ipcMain.on('hermes:wake-indicator:set', (_event, state) => {
+ipcMain.handle('beyond:wake-indicator:get', () => wakeIndicatorController.getState())
+ipcMain.on('beyond:wake-indicator:set', (_event, state) => {
   wakeIndicatorController.setState(state)
 })
 
@@ -14423,14 +14423,14 @@ ipcMain.on('hermes:wake-indicator:set', (_event, state) => {
 // shortcuts and the View menu. Reads and writes target the asking window.
 registerPreparedSubmissions()
 
-ipcMain.handle('hermes:zoom:get', event => {
+ipcMain.handle('beyond:zoom:get', event => {
   const window = BrowserWindow.fromWebContents(event.sender)
 
   const level = window && !window.isDestroyed() ? window.webContents.getZoomLevel() : DEFAULT_ZOOM_LEVEL
 
   return { level, percent: zoomLevelToPercent(level) }
 })
-ipcMain.on('hermes:zoom:set-percent', (event, percent) => {
+ipcMain.on('beyond:zoom:set-percent', (event, percent) => {
   const window = BrowserWindow.fromWebContents(event.sender)
 
   if (!window || window.isDestroyed()) {
@@ -14461,7 +14461,7 @@ const hudIpc = registerHudIpc({
   }
 })
 
-ipcMain.handle('hermes:backend:recycle', async (_event, profile) => {
+ipcMain.handle('beyond:backend:recycle', async (_event, profile) => {
   // Models-page recovery after a code-skew 503 (#97046): kill the owned
   // SSH serve (if any) before the local child so reconnect cannot reuse a
   // stale lockfile, and restart the attached local gateway (Desktop does not
@@ -14478,9 +14478,9 @@ ipcMain.handle('hermes:backend:recycle', async (_event, profile) => {
 
   return { ok: true }
 })
-ipcMain.handle('hermes:bootstrap:reset', async () => {
+ipcMain.handle('beyond:bootstrap:reset', async () => {
   // Renderer's "Reload and retry" path. Clear the latched failure and
-  // reset connection state so the next startHermes() call restarts the
+  // reset connection state so the next startBeyond() call restarts the
   // full backend flow (including a fresh runBootstrap pass).
   rememberLog('[bootstrap] reset requested by renderer; clearing latched failure')
   await teardownPrimaryBackendAndWait()
@@ -14492,10 +14492,10 @@ ipcMain.handle('hermes:bootstrap:reset', async () => {
 
   return { ok: true }
 })
-ipcMain.handle('hermes:bootstrap:repair', async (): Promise<{ ok: boolean; bundled?: boolean; error?: string }> => {
+ipcMain.handle('beyond:bootstrap:repair', async (): Promise<{ ok: boolean; bundled?: boolean; error?: string }> => {
   // A bundled install's payload is immutable and sealed at build time —
   // "repair" would re-run the installer against a separate
-  // %LOCALAPPDATA%\hermes tree the app doesn't own. The only repair for a
+  // %LOCALAPPDATA%\beyond tree the app doesn't own. The only repair for a
   // damaged bundle is reinstalling the app itself. Refuse without touching
   // bootstrapRepairRequested so a stale renderer can't drive an install.
   if (installShape() === 'bundled') {
@@ -14504,7 +14504,7 @@ ipcMain.handle('hermes:bootstrap:repair', async (): Promise<{ ok: boolean; bundl
     return { ok: false, error: 'bundled-immutable' }
   }
 
-  // Forceful repair: force the next startHermes() through the full installer
+  // Forceful repair: force the next startBeyond() through the full installer
   // (refreshing a broken/partial venv) and clear any latched failure + live
   // connection. The renderer reloads afterwards to re-drive the boot flow.
   //
@@ -14542,7 +14542,7 @@ ipcMain.handle('hermes:bootstrap:repair', async (): Promise<{ ok: boolean; bundl
   // The guard may decide the install is healthy enough that a restart
   // (without touching the venv) is the right answer. Translate that into
   // the existing flag: if the guard said "soft restart", we skip the
-  // "bypass active runtime" path inside startHermes() and fall through
+  // "bypass active runtime" path inside startBeyond() and fall through
   // to the normal restart branch, which just kills the current child
   // and respawns it against the same venv. See #74874 — this is what
   // breaks the infinite reinstall loop the user hit.
@@ -14566,13 +14566,13 @@ registerUpdateHoldIpc(ipcMain, {
   quit: () => app.quit()
 })
 
-ipcMain.handle('hermes:bootstrap:continue-local', async () => {
+ipcMain.handle('beyond:bootstrap:continue-local', async () => {
   rememberLog('[bootstrap] local install selected by renderer; continuing first-launch bootstrap')
   continueFirstRunLocalBootstrap()
 
   return { ok: true }
 })
-ipcMain.handle('hermes:bootstrap:cancel', async () => {
+ipcMain.handle('beyond:bootstrap:cancel', async () => {
   // Renderer's Cancel button during first-launch install. Abort the running
   // install script (SIGTERM via the runner's abortSignal). runBootstrap
   // resolves with { cancelled: true }, which surfaces the recovery overlay.
@@ -14588,18 +14588,18 @@ ipcMain.handle('hermes:bootstrap:cancel', async () => {
 
   return { ok: false, cancelled: false }
 })
-ipcMain.handle('hermes:bootstrap:get', async () => getBootstrapState())
-ipcMain.handle('hermes:local-backend:probe', async () => {
+ipcMain.handle('beyond:bootstrap:get', async () => getBootstrapState())
+ipcMain.handle('beyond:local-backend:probe', async () => {
   // Resolution only. ensureRuntime/runBootstrap must not start from a hover
   // or a click that has not confirmed the install.
-  const backend = await resolveHermesBackend([])
+  const backend = await resolveBeyondBackend([])
 
   return { bootstrapNeeded: backend?.kind === 'bootstrap-needed' }
 })
-ipcMain.handle('hermes:connection-config:get', async (_event, profile) =>
+ipcMain.handle('beyond:connection-config:get', async (_event, profile) =>
   sanitizeDesktopConnectionConfig(readDesktopConnectionConfig(), profile)
 )
-ipcMain.handle('hermes:plugin-profile-routes', async (_event, rawProfileNames) => {
+ipcMain.handle('beyond:plugin-profile-routes', async (_event, rawProfileNames) => {
   const fallbackProfileNames = Array.isArray(rawProfileNames)
     ? rawProfileNames
         .filter(name => typeof name === 'string')
@@ -14671,8 +14671,8 @@ ipcMain.handle('hermes:plugin-profile-routes', async (_event, rawProfileNames) =
     sources: registry.connections
   })
 })
-ipcMain.handle('hermes:ssh-config:hosts', async () => ({ hosts: collectSshConfigHosts() }))
-ipcMain.handle('hermes:ssh-config:resolve', async (_event, host) => {
+ipcMain.handle('beyond:ssh-config:hosts', async () => ({ hosts: collectSshConfigHosts() }))
+ipcMain.handle('beyond:ssh-config:resolve', async (_event, host) => {
   const value = String(host || '').trim()
 
   if (!value) {
@@ -14712,25 +14712,25 @@ ipcMain.handle('hermes:ssh-config:resolve', async (_event, host) => {
     })
   })
 })
-ipcMain.handle('hermes:connection-config:test', async (_event, payload) => testDesktopConnectionConfig(payload))
+ipcMain.handle('beyond:connection-config:test', async (_event, payload) => testDesktopConnectionConfig(payload))
 
 // ── Opt-in keychain encryption for stored secrets ───────────────────────────
 // get returns the current policy without touching safeStorage; set flips it
 // and re-encodes every stored secret (see applySecretStorageEncryption).
-ipcMain.handle('hermes:secret-storage:get', async () => ({ on: secretStoragePolicy().on }))
-ipcMain.handle('hermes:secret-storage:set', async (_event: any, on: any) => applySecretStorageEncryption(on === true))
+ipcMain.handle('beyond:secret-storage:get', async () => ({ on: secretStoragePolicy().on }))
+ipcMain.handle('beyond:secret-storage:set', async (_event: any, on: any) => applySecretStorageEncryption(on === true))
 
 // ── v2 connection registry IPC (multi-source) ───────────────────────────────
 // Storage-level CRUD for named agent sources. Routing/pooling consumption of
 // the registry lands separately; these handlers only manage the persisted
 // list, so they are safe to ship ahead of the switchover.
-ipcMain.handle('hermes:connections:list', async () => sanitizeConnectionsRegistry())
-ipcMain.handle('hermes:connections:save', async (_event, payload) => {
+ipcMain.handle('beyond:connections:list', async () => sanitizeConnectionsRegistry())
+ipcMain.handle('beyond:connections:save', async (_event, payload) => {
   const saved = await saveRegistryConnection(payload)
 
   return { ok: true, connection: saved, registry: sanitizeConnectionsRegistry() }
 })
-ipcMain.handle('hermes:connections:remove', async (_event, id) => {
+ipcMain.handle('beyond:connections:remove', async (_event, id) => {
   const key = String(id || '')
   managedConnectionUpdateGate.assertCanMutate(key)
   const registry = removeConnection(readDesktopConnectionsRegistry(), key)
@@ -14749,27 +14749,27 @@ ipcMain.handle('hermes:connections:remove', async (_event, id) => {
 
   return { ok: true, registry: sanitizeConnectionsRegistry(registry) }
 })
-ipcMain.handle('hermes:connections:set-primary', async (_event, id) => {
+ipcMain.handle('beyond:connections:set-primary', async (_event, id) => {
   assertCanMutateManagedPrimaryRouting()
   const registry = setPrimaryConnection(readDesktopConnectionsRegistry(), String(id || ''))
   writeDesktopConnectionsRegistry(registry)
 
   return { ok: true, registry: sanitizeConnectionsRegistry(registry) }
 })
-ipcMain.handle('hermes:connections:set-launch-mode', async (_event, mode) => {
+ipcMain.handle('beyond:connections:set-launch-mode', async (_event, mode) => {
   assertCanMutateManagedPrimaryRouting()
   const registry = setConnectionLaunchMode(readDesktopConnectionsRegistry(), String(mode || ''))
   writeDesktopConnectionsRegistry(registry)
 
   return { ok: true, registry: sanitizeConnectionsRegistry(registry) }
 })
-ipcMain.handle('hermes:connections:set-last-used', async (_event, id) => {
+ipcMain.handle('beyond:connections:set-last-used', async (_event, id) => {
   const registry = setLastUsedConnection(readDesktopConnectionsRegistry(), String(id || ''))
   writeDesktopConnectionsRegistry(registry)
 
   return { ok: true, registry: sanitizeConnectionsRegistry(registry) }
 })
-ipcMain.handle('hermes:connections:test', async (_event, id) => {
+ipcMain.handle('beyond:connections:test', async (_event, id) => {
   const registry = readDesktopConnectionsRegistry()
   const entry = registry.connections.find(c => c.id === String(id || ''))
 
@@ -14786,7 +14786,7 @@ ipcMain.handle('hermes:connections:test', async (_event, id) => {
       sshUser: entry.user,
       sshPort: entry.port,
       sshKeyPath: entry.keyPath,
-      sshRemoteHermesPath: entry.remoteHermesPath
+      sshRemoteBeyondPath: entry.remoteBeyondPath
     })
 
     if (result?.reachable) {
@@ -14811,7 +14811,7 @@ ipcMain.handle('hermes:connections:test', async (_event, id) => {
   let testHeaders = {}
 
   if (entry.kind === 'local') {
-    const local = await startHermes()
+    const local = await startBeyond()
     baseUrl = local.baseUrl
     token = local.token
     authMode = normAuthMode(local.authMode)
@@ -14895,7 +14895,7 @@ async function probeSshProfileInventory(connection) {
     user: connection.user,
     port: connection.port,
     keyPath: connection.keyPath,
-    remoteHermesPath: connection.remoteHermesPath
+    remoteBeyondPath: connection.remoteBeyondPath
   })
 
   if (!sshConfig) {
@@ -14908,8 +14908,8 @@ async function probeSshProfileInventory(connection) {
   )
 
   try {
-    const platform = await ssh.open().then(() => detectRemotePlatform(ssh, sshConfig.remoteHermesPath || ''))
-    const profiles = await remoteLifecycle.listRemoteHermesProfiles(ssh, platform)
+    const platform = await ssh.open().then(() => detectRemotePlatform(ssh, sshConfig.remoteBeyondPath || ''))
+    const profiles = await remoteLifecycle.listRemoteBeyondProfiles(ssh, platform)
 
     if (profiles.length > 0) {
       sshRosterCache.set(connection.id, profiles)
@@ -15068,7 +15068,7 @@ async function enumerateRegistryAgentSources(registry = readDesktopConnectionsRe
                 )
               : undefined
 
-            // The root HERMES_HOME is an agent too; enumerations that omit it
+            // The root BEYOND_HOME is an agent too; enumerations that omit it
             // (older backends list only named profiles) still get a default row.
             if (!profiles.includes('default')) {
               profiles.unshift('default')
@@ -15123,7 +15123,7 @@ async function enumerateRegistryAgentSources(registry = readDesktopConnectionsRe
   )
 }
 
-ipcMain.handle('hermes:agents:roster', async () => {
+ipcMain.handle('beyond:agents:roster', async () => {
   const registry = readDesktopConnectionsRegistry()
   const enumerations = await enumerateRegistryAgentSources(registry)
 
@@ -15146,7 +15146,7 @@ ipcMain.handle('hermes:agents:roster', async () => {
 })
 
 // Registry-scoped fresh WS URL: the (connectionId, profile) analogue of
-// hermes:gateway:ws-url. Same single-use-ticket discipline for OAuth sources.
+// beyond:gateway:ws-url. Same single-use-ticket discipline for OAuth sources.
 const registryGatewayWsUrlHandler = createRegistryGatewayWsUrlHandler({
   ensureBackend: ensureRegistryBackend,
   mintTicket: mintGatewayWsTicket,
@@ -15154,12 +15154,12 @@ const registryGatewayWsUrlHandler = createRegistryGatewayWsUrlHandler({
   rememberHeaders: rememberRemoteWsHeaders
 })
 
-ipcMain.handle('hermes:gateway:ws-url-for', async (_event, payload) => {
+ipcMain.handle('beyond:gateway:ws-url-for', async (_event, payload) => {
   return gatewayWsUrlIpcResult(async () => {
     const connection = await ensureRegistryBackend(payload?.connectionId, payload?.profile)
 
     if (connection.gatewayEndpoint) {
-      return localGatewayDial({ ensure: () => ensureRegistryBackend(payload?.connectionId, payload?.profile), launchHome: HERMES_HOME,
+      return localGatewayDial({ ensure: () => ensureRegistryBackend(payload?.connectionId, payload?.profile), launchHome: BEYOND_HOME,
         forget: () => forgetRegistryLocalGatewayDescriptor(payload?.connectionId, payload?.profile), profile: String(payload?.profile ?? ''),
         prepare: (baseUrl, ticket) => localGatewayDials.prepare(baseUrl, ticket, _event.sender.id) })
     }
@@ -15169,9 +15169,9 @@ ipcMain.handle('hermes:gateway:ws-url-for', async (_event, payload) => {
 })
 
 const pluginWsUrl = createPluginWsUrlHandler({ ensureBackend, ensureRegistryBackend, forgetLocalGatewayDescriptor,
-  forgetRegistryLocalGatewayDescriptor, launchHome: HERMES_HOME, prepare: localGatewayDials.preparePlugin })
+  forgetRegistryLocalGatewayDescriptor, launchHome: BEYOND_HOME, prepare: localGatewayDials.preparePlugin })
 
-ipcMain.handle('hermes:plugin:ws-url', (event, payload) => pluginWsUrl(payload ?? {}, event.sender.id))
+ipcMain.handle('beyond:plugin:ws-url', (event, payload) => pluginWsUrl(payload ?? {}, event.sender.id))
 
 // Transactional update for a Desktop-managed SSH install. Unlike the generic
 // fleet fan-out below, this path owns the remote serve lifecycle: it gates new
@@ -15221,14 +15221,14 @@ async function requestManagedSshUpdate(rawId) {
   return operation
 }
 
-ipcMain.handle('hermes:connections:update-managed', async (_event, rawId) => requestManagedSshUpdate(rawId))
+ipcMain.handle('beyond:connections:update-managed', async (_event, rawId) => requestManagedSshUpdate(rawId))
 
-// Fan out `hermes update` to every eligible registered connection at once.
+// Fan out `beyond update` to every eligible registered connection at once.
 // Cloud entries are excluded (platform-managed); each dispatch reports
 // independently so one dead LAN box can't wedge the batch. Local reuses the
 // app's own update pipeline; Desktop-managed SSH uses the transactional
 // drain/update/restore lifecycle; URL remotes POST their backend updater.
-ipcMain.handle('hermes:connections:update-all', async (_event, payload) => {
+ipcMain.handle('beyond:connections:update-all', async (_event, payload) => {
   const registry = readDesktopConnectionsRegistry()
 
   // Optional renderer-side exclusions: the everything-update flow dispatches
@@ -15272,7 +15272,7 @@ ipcMain.handle('hermes:connections:update-all', async (_event, payload) => {
           ensureRegistryBackend(connection.id, null)
         )
 
-        const body: any = await postJsonForBackend(descriptor, '/api/hermes/update', {}, { timeoutMs: 15_000 })
+        const body: any = await postJsonForBackend(descriptor, '/api/beyond/update', {}, { timeoutMs: 15_000 })
 
         if (body?.ok === false) {
           // The backend refused (docker/nix/externally-managed installs) —
@@ -15309,7 +15309,7 @@ async function getJsonForBackend(descriptor, path, opts: any = {}) {
 }
 
 // Any-method REST call against a resolved backend descriptor — the descriptor
-// analogue of the hermes:api handler's own auth split: OAuth backends prefer a
+// analogue of the beyond:api handler's own auth split: OAuth backends prefer a
 // native bearer (cookieless RFC 8252 flow) and fall back to the OAuth cookie
 // partition; token/local descriptors use the static session-token header.
 async function fetchJsonForBackend(
@@ -15372,8 +15372,8 @@ async function fetchJsonForBackend(
   })
 }
 
-ipcMain.handle('hermes:connection-config:probe', async (_event, rawUrl) => probeRemoteAuthMode(rawUrl))
-ipcMain.handle('hermes:connection-config:oauth-login', async (_event, rawUrl, rawOpts) => {
+ipcMain.handle('beyond:connection-config:probe', async (_event, rawUrl) => probeRemoteAuthMode(rawUrl))
+ipcMain.handle('beyond:connection-config:oauth-login', async (_event, rawUrl, rawOpts) => {
   // Capability-gated login (RFC 8252). Probe the gateway's public /api/status
   // for supported auth_flows and /api/auth/providers for provider capabilities:
   //   - all providers support password → always use the embedded login window
@@ -15465,7 +15465,7 @@ ipcMain.handle('hermes:connection-config:oauth-login', async (_event, rawUrl, ra
 
       nativeAccessTokenCoordinator.storeTokens(baseUrl, tokens)
       // Confirmed sign-in — release the reauth latch so the next
-      // startHermes() re-dials instead of replaying the stale rejection.
+      // startBeyond() re-dials instead of replaying the stale rejection.
       remoteReauthFailure = null
 
       return { ok: true, baseUrl, connected: true, connectionId: loginConnectionId || undefined }
@@ -15509,7 +15509,7 @@ ipcMain.handle('hermes:connection-config:oauth-login', async (_event, rawUrl, ra
 
   return { ok: true, baseUrl, connected, connectionId: loginConnectionId || undefined }
 })
-ipcMain.handle('hermes:connection-config:oauth-logout', async (_event, rawUrl) => {
+ipcMain.handle('beyond:connection-config:oauth-logout', async (_event, rawUrl) => {
   const baseUrl = normalizeRemoteBaseUrl(rawUrl)
 
   // Also drop any native (RFC 8252) bearer tokens for this gateway so a
@@ -15527,42 +15527,42 @@ ipcMain.handle('hermes:connection-config:oauth-logout', async (_event, rawUrl) =
   return { ok: true, connected }
 })
 
-// --- Hermes Cloud (cloud-auto-discovery Phase 3) ---
+// --- Beyond Cloud (cloud-auto-discovery Phase 3) ---
 // One portal login in the OAuth partition powers both discovery and the silent
 // per-agent cascade. See the discovery/cascade helpers above.
-ipcMain.handle('hermes:cloud:status', async () => ({
+ipcMain.handle('beyond:cloud:status', async () => ({
   portalBaseUrl: resolvePortalBaseUrl(),
   signedIn: await hasLivePortalSession()
 }))
-ipcMain.handle('hermes:cloud:login', async () => {
+ipcMain.handle('beyond:cloud:login', async () => {
   await openPortalLoginWindow()
 
   return { ok: true, signedIn: await hasLivePortalSession() }
 })
-ipcMain.handle('hermes:cloud:logout', async () => {
+ipcMain.handle('beyond:cloud:logout', async () => {
   await clearOauthSession(resolvePortalBaseUrl())
 
   return { ok: true, signedIn: await hasLivePortalSession() }
 })
-ipcMain.handle('hermes:cloud:discover', async (_event, org) => {
+ipcMain.handle('beyond:cloud:discover', async (_event, org) => {
   // Returns { agents } or { needsOrgSelection: true, orgs }. `org` (optional)
   // scopes discovery to a chosen org for multi-org users.
   return discoverCloudAgents(typeof org === 'string' && org ? org : undefined)
 })
-ipcMain.handle('hermes:cloud:agent-sign-in', async (_event, dashboardUrl) => {
+ipcMain.handle('beyond:cloud:agent-sign-in', async (_event, dashboardUrl) => {
   // Silent per-agent sign-in via the shared portal session. Returns the agent's
   // gateway baseUrl + whether its session cookie landed; the renderer then
   // saves a cloud-mode connection pointed at this dashboardUrl.
   return cloudAgentSilentSignIn(dashboardUrl)
 })
-ipcMain.handle('hermes:connection-config:save', async (_event, payload) => {
+ipcMain.handle('beyond:connection-config:save', async (_event, payload) => {
   assertCanMutateManagedPrimaryRouting()
   const config = coerceDesktopConnectionConfig(payload)
   writeDesktopConnectionConfig(config)
 
   return sanitizeDesktopConnectionConfig(config, payload?.profile)
 })
-ipcMain.handle('hermes:connection-config:apply', async (_event, payload) => {
+ipcMain.handle('beyond:connection-config:apply', async (_event, payload) => {
   assertCanMutateManagedPrimaryRouting()
   const previousConfig = readDesktopConnectionConfig()
   const previousRegistry = readDesktopConnectionsRegistry()
@@ -15636,21 +15636,21 @@ ipcMain.handle('hermes:connection-config:apply', async (_event, payload) => {
   return sanitizeDesktopConnectionConfig(config, payload?.profile)
 })
 
-ipcMain.handle('hermes:profile:default:get', async () => desktopProfilePreferences.getDefault())
-ipcMain.handle('hermes:profile:default:set', async (_event, route) => desktopProfilePreferences.setDefault(route))
-ipcMain.handle('hermes:profile:get', async () => ({ profile: readActiveDesktopProfile() }))
-// Persistence-only sibling of hermes:profile:set: records the profile the
+ipcMain.handle('beyond:profile:default:get', async () => desktopProfilePreferences.getDefault())
+ipcMain.handle('beyond:profile:default:set', async (_event, route) => desktopProfilePreferences.setDefault(route))
+ipcMain.handle('beyond:profile:get', async () => ({ profile: readActiveDesktopProfile() }))
+// Persistence-only sibling of beyond:profile:set: records the profile the
 // Desktop last used WITHOUT tearing down the backend or reloading the window.
 // An explicit default route wins at launch and is never replaced here.
-ipcMain.handle('hermes:profile:remember', async (_event, name) => ({
+ipcMain.handle('beyond:profile:remember', async (_event, name) => ({
   profile: writeActiveDesktopProfile(name)
 }))
-ipcMain.handle('hermes:profile:set', async (_event, name) => {
+ipcMain.handle('beyond:profile:set', async (_event, name) => {
   assertCanMutateManagedPrimaryRouting()
   const next = writeActiveDesktopProfile(name)
 
   // Switching profiles is a backend re-home: relaunch the dashboard under the
-  // new HERMES_HOME. Pool backends keep their own homes, so only the primary
+  // new BEYOND_HOME. Pool backends keep their own homes, so only the primary
   // is torn down.
   await teardownPrimaryBackendAndWait()
   mainWindow?.reload()
@@ -15658,13 +15658,13 @@ ipcMain.handle('hermes:profile:set', async (_event, name) => {
   return { profile: next }
 })
 
-ipcMain.on('hermes:previewShortcutActive', (_event, active) => {
+ipcMain.on('beyond:previewShortcutActive', (_event, active) => {
   previewShortcutActive = Boolean(active)
 })
 
 // The host renderer reports which of its Browser guests are off screen (a
 // hidden session's kept-alive page), so focused-guest gestures skip them.
-ipcMain.on('hermes:preview-guest-hidden', (event, payload) => {
+ipcMain.on('beyond:preview-guest-hidden', (event, payload) => {
   notePreviewGuestHidden(
     event.sender,
     electronWebContents.fromId(Number(payload?.webContentsId)),
@@ -15672,7 +15672,7 @@ ipcMain.on('hermes:preview-guest-hidden', (event, payload) => {
   )
 })
 
-ipcMain.on('hermes:f12ShortcutActive', (event, active) => {
+ipcMain.on('beyond:f12ShortcutActive', (event, active) => {
   if (active) {
     f12ShortcutActiveWindows.add(event.sender.id)
   } else {
@@ -15684,7 +15684,7 @@ app.on('web-contents-created', (_event, contents) => {
   contents.once('destroyed', () => f12ShortcutActiveWindows.delete(contents.id))
 })
 
-ipcMain.handle('hermes:requestMicrophoneAccess', async () => {
+ipcMain.handle('beyond:requestMicrophoneAccess', async () => {
   if (!IS_MAC || typeof systemPreferences.askForMediaAccess !== 'function') {
     return true
   }
@@ -15696,7 +15696,7 @@ ipcMain.handle('hermes:requestMicrophoneAccess', async () => {
 // Metadata only (app, title, bounds) — never pixels. On macOS, other apps'
 // window titles are gated behind the Screen Recording permission; pass titles
 // through only when it is ALREADY granted, and never prompt for it here.
-ipcMain.handle('hermes:window:readBelow', async event => {
+ipcMain.handle('beyond:window:readBelow', async event => {
   const win = BrowserWindow.fromWebContents(event.sender)
 
   if (!win || win.isDestroyed()) {
@@ -16140,7 +16140,7 @@ function isNotFoundApiError(error) {
   return /(?:^|\s)404\b/.test(String((error as any)?.message ?? error))
 }
 
-async function handleHermesApiRequest(request) {
+async function handleBeyondApiRequest(request) {
   // Registry-pinned request (request.connectionId): the renderer is working
   // against a REGISTERED gateway connection, so the data — cron jobs and their
   // run sessions included — lives in THAT host's state.db, not any local
@@ -16179,13 +16179,13 @@ async function handleHermesApiRequest(request) {
   const profile = request?.profile
   // After tearing down a backend for profile deletion, route to the primary
   // backend instead of spawning a fresh pool backend.  A freshly spawned
-  // backend calls ensure_hermes_home() which recreates the profile directory,
+  // backend calls ensure_beyond_home() which recreates the profile directory,
   // defeating the deletion and leaving a zombie process.
   //
   // Local-profile REST calls stay on the primary dashboard and carry ?profile=
   // (or name the profile in the path / PATCH body). A request that MUTATES
   // state the server cannot scope at all retains its pooled backend, whose
-  // HERMES_HOME is then the scope, so a destructive call can never fall
+  // BEYOND_HOME is then the scope, so a destructive call can never fall
   // through to the primary home — `resolveProfileBackendRoute` case 6.
   //
   // A profile rename tears down the old-name backend the same way; for a
@@ -16259,13 +16259,13 @@ function formatApiRequestFailure(
   const path = String(request?.path ?? '(no path)').slice(0, 500)
   const detail = error instanceof Error ? (error.stack ?? error.message) : String(error)
 
-  return `[hermes:api ${method} ${path}] ${detail}`.slice(0, 6000)
+  return `[beyond:api ${method} ${path}] ${detail}`.slice(0, 6000)
 }
 
-ipcMain.handle('hermes:api', async (_event, request) => {
+ipcMain.handle('beyond:api', async (_event, request) => {
   // Hold the deletion gate for BOTH profile deletes and renames: a concurrent
   // renderer reconnect entering ensureBackend() mid-mutation would otherwise
-  // respawn the old-name backend and recreate its HERMES_HOME (#45474).
+  // respawn the old-name backend and recreate its BEYOND_HOME (#45474).
   const deletingProfile = profileNameFromDeleteRequest(request)
   const mutatingProfile = deletingProfile || profileRenameFromRequest(request)?.oldName || null
   const registryConnectionId = apiRequestRegistryConnectionId(request)
@@ -16285,14 +16285,14 @@ ipcMain.handle('hermes:api', async (_event, request) => {
     }
 
     if (!mutatingProfile) {
-      return await handleHermesApiRequest(request)
+      return await handleBeyondApiRequest(request)
     }
 
     const releaseProfileDeletion = profileDeletionGate.acquire(mutatingProfile)
 
-    return await handleHermesApiRequest(request).finally(releaseProfileDeletion)
+    return await handleBeyondApiRequest(request).finally(releaseProfileDeletion)
   } catch (error) {
-    // Electron logs "Error occurred in handler for 'hermes:api'" with a full
+    // Electron logs "Error occurred in handler for 'beyond:api'" with a full
     // stack for EVERY rejected invoke, and there is no opt-out on the handler.
     // Session resolution is a deliberate probe ladder (`resolveStoredSession`:
     // cache → active backend → each other profile) and the renderer already
@@ -16307,7 +16307,7 @@ ipcMain.handle('hermes:api', async (_event, request) => {
     // contract is unchanged; only Electron's logging is bypassed. Every other
     // failure still rejects and still logs in full.
     if (isNotFoundApiError(error)) {
-      return { [HERMES_API_EXPECTED_404]: String((error as any)?.message ?? error) }
+      return { [BEYOND_API_EXPECTED_404]: String((error as any)?.message ?? error) }
     }
 
     // Persist the failure (full stack) before the rejection crosses to the
@@ -16321,7 +16321,7 @@ ipcMain.handle('hermes:api', async (_event, request) => {
 
 // Speech claims outlive instant cues so throttled peer windows cannot replay a reply.
 const ownsAmbientCue: ReturnType<typeof createAmbientClaimArbiter> = createAmbientClaimArbiter()
-ipcMain.handle('hermes:ambient:claim', (_event: IpcMainInvokeEvent, key: unknown): boolean =>
+ipcMain.handle('beyond:ambient:claim', (_event: IpcMainInvokeEvent, key: unknown): boolean =>
   ownsAmbientCue(String(key ?? ''))
 )
 
@@ -16360,14 +16360,14 @@ function persistDataUrlReadMaxMb(maxMb) {
   return next
 }
 
-ipcMain.handle('hermes:data-url-read-max:get', () => ({
+ipcMain.handle('beyond:data-url-read-max:get', () => ({
   maxMb: dataUrlReadMaxMb,
   // Keep the default bytes constant visible for tests / diagnostics.
   defaultMaxMb: DATA_URL_READ_DEFAULT_MAX_MB,
   maxBytes: dataUrlReadMaxBytesFromMb(dataUrlReadMaxMb)
 }))
 
-ipcMain.handle('hermes:data-url-read-max:set', (_event, maxMb) => {
+ipcMain.handle('beyond:data-url-read-max:set', (_event, maxMb) => {
   const next = persistDataUrlReadMaxMb(maxMb)
 
   return {
@@ -16377,7 +16377,7 @@ ipcMain.handle('hermes:data-url-read-max:set', (_event, maxMb) => {
   }
 })
 
-ipcMain.handle('hermes:readFileDataUrl', async (_event, filePath) => {
+ipcMain.handle('beyond:readFileDataUrl', async (_event, filePath) => {
   // Backend-reported paths are WSL/POSIX (`/home/...`, `/mnt/c/...`); on a
   // Windows host bridge them to a UNC/drive form, same as directory reads.
   const bridgedPath = resolveIpcFileReadPath(filePath)
@@ -16401,7 +16401,7 @@ ipcMain.handle('hermes:readFileDataUrl', async (_event, filePath) => {
 // Keep a finite cap so Electron + base64 memory stays bounded while archives
 // can exceed the default 16 MiB preview ceiling (and still fit the gateway
 // WebSocket frame limit after base64 expansion).
-ipcMain.handle('hermes:readFileDataUrlForAttach', async (_event, filePath) => {
+ipcMain.handle('beyond:readFileDataUrlForAttach', async (_event, filePath) => {
   const bridgedPath = resolveIpcFileReadPath(filePath)
 
   try {
@@ -16419,7 +16419,7 @@ ipcMain.handle('hermes:readFileDataUrlForAttach', async (_event, filePath) => {
   }
 })
 
-ipcMain.handle('hermes:readFileText', async (_event, filePath) => {
+ipcMain.handle('beyond:readFileText', async (_event, filePath) => {
   try {
     const { resolvedPath, stat } = await resolveReadableFileForIpc(resolveIpcFileReadPath(filePath), {
       maxBytes: TEXT_PREVIEW_SOURCE_MAX_BYTES,
@@ -16461,13 +16461,13 @@ ipcMain.handle('hermes:readFileText', async (_event, filePath) => {
 })
 
 // Runtime desktop plugins load their FULL source through this door.
-// `hermes:readFileText` is the *preview* read and silently truncates at
+// `beyond:readFileText` is the *preview* read and silently truncates at
 // TEXT_PREVIEW_MAX_BYTES (512 KiB) — for a plugin that means evaluating half a
 // file. Dedicated generous cap, full read, and a hard EFBIG (via maxBytes)
 // instead of truncation when the source exceeds it.
 const PLUGIN_SOURCE_MAX_BYTES = 16 * 1024 * 1024
 
-ipcMain.handle('hermes:readPluginSource', async (_event: unknown, filePath: unknown) => {
+ipcMain.handle('beyond:readPluginSource', async (_event: unknown, filePath: unknown) => {
   const { resolvedPath, stat } = await resolveReadableFileForIpc(filePath, {
     maxBytes: PLUGIN_SOURCE_MAX_BYTES,
     purpose: 'Plugin source'
@@ -16481,7 +16481,7 @@ ipcMain.handle('hermes:readPluginSource', async (_event: unknown, filePath: unkn
   }
 })
 
-ipcMain.handle('hermes:selectPaths', async (_event, options: any = {}) => {
+ipcMain.handle('beyond:selectPaths', async (_event, options: any = {}) => {
   const properties = selectPathsDialogProperties(options || {})
 
   let resolvedDefaultPath
@@ -16523,13 +16523,13 @@ registerSaveDialogIpc(ipcMain, {
   showSaveDialog: options => dialog.showSaveDialog(mainWindow, options)
 })
 
-ipcMain.handle('hermes:saveGatewayFile', (_event, payload) => saveGatewayFile(payload))
+ipcMain.handle('beyond:saveGatewayFile', (_event, payload) => saveGatewayFile(payload))
 
-ipcMain.handle('hermes:saveImageFromUrl', (_event, url) => saveImageFromUrl(String(url || '')))
+ipcMain.handle('beyond:saveImageFromUrl', (_event, url) => saveImageFromUrl(String(url || '')))
 
 // The custom context menu's edit verbs. They act on the SENDER's focused
 // element, so the renderer restores focus to the editable before invoking.
-ipcMain.handle('hermes:context-menu:edit', (event, command) => {
+ipcMain.handle('beyond:context-menu:edit', (event, command) => {
   const contents = event.sender
 
   if (command === 'copy') {
@@ -16545,7 +16545,7 @@ ipcMain.handle('hermes:context-menu:edit', (event, command) => {
 
 // Copy the image under the sender's LAST context-menu gesture. Chromium only
 // exposes image bytes through copyImageAt, and only main saw the coordinates.
-ipcMain.handle('hermes:context-menu:copy-image', event => {
+ipcMain.handle('beyond:context-menu:copy-image', event => {
   const point = lastContextMenuPoint.get(event.sender.id)
 
   if (point) {
@@ -16555,13 +16555,13 @@ ipcMain.handle('hermes:context-menu:copy-image', event => {
 
 registerSpellcheckDictionaryIpc(ipcMain, electronWebContents)
 
-ipcMain.handle('hermes:capturePreview', async (_event, payload) => {
+ipcMain.handle('beyond:capturePreview', async (_event, payload) => {
   const guest = electronWebContents.fromId(Number(payload?.webContentsId))
 
   return capturePreviewContents(guest, payload?.rect, payload?.viewport)
 })
 
-ipcMain.handle('hermes:saveImageBuffer', async (_event, payload) => {
+ipcMain.handle('beyond:saveImageBuffer', async (_event, payload) => {
   const data = payload?.data
 
   if (!data) {
@@ -16573,17 +16573,17 @@ ipcMain.handle('hermes:saveImageBuffer', async (_event, payload) => {
   return writeComposerImage(buffer, payload?.ext || '.png', payload?.name)
 })
 
-ipcMain.handle('hermes:savePastedText', async (_event, payload) => {
+ipcMain.handle('beyond:savePastedText', async (_event, payload) => {
   const text = typeof payload?.text === 'string' ? payload.text : ''
 
   if (!text) {
     throw new Error('savePastedText: missing text')
   }
 
-  return writeComposerPaste(HERMES_HOME, text)
+  return writeComposerPaste(BEYOND_HOME, text)
 })
 
-ipcMain.handle('hermes:saveClipboardImage', async () => {
+ipcMain.handle('beyond:saveClipboardImage', async () => {
   // Electron 44 removed clipboard.readImage(); PNG bytes now arrive through
   // clipboard.read() + ClipboardItem.getType('image/png') as a Blob.
   const png = await readClipboardImagePng(clipboard)
@@ -16606,21 +16606,21 @@ ipcMain.handle('hermes:saveClipboardImage', async () => {
   return ''
 })
 
-ipcMain.handle('hermes:normalizePreviewTarget', (_event, target, baseDir) =>
+ipcMain.handle('beyond:normalizePreviewTarget', (_event, target, baseDir) =>
   normalizePreviewTarget(String(target || ''), baseDir ? String(baseDir) : '')
 )
 
-ipcMain.handle('hermes:watchPreviewFile', (event, url) => watchPreviewFile(event.sender, String(url || '')))
+ipcMain.handle('beyond:watchPreviewFile', (event, url) => watchPreviewFile(event.sender, String(url || '')))
 
-ipcMain.handle('hermes:watchDirectory', (event, dir) => watchDirectory(event.sender, String(dir || '')))
+ipcMain.handle('beyond:watchDirectory', (event, dir) => watchDirectory(event.sender, String(dir || '')))
 
-ipcMain.handle('hermes:stopPreviewFileWatch', (_event, id) => stopPreviewFileWatch(String(id || '')))
+ipcMain.handle('beyond:stopPreviewFileWatch', (_event, id) => stopPreviewFileWatch(String(id || '')))
 
 // Each renderer reports the turns it has in flight; the quit guard reads the
 // merged picture. Keyed by webContents id so a closed window stops counting.
 const activeWorkByWebContents = new Map<number, ActiveWork>()
 
-// Synchronous, webContents-independent cache of the most recent active-work
+// Synchrobeyond, webContents-independent cache of the most recent active-work
 // summary we heard from *any* renderer. The per-webContents map above is
 // dropped the moment a webContents is destroyed (a stream can reload its
 // webContents mid-turn), so at quit time it can read empty even though a turn
@@ -16660,7 +16660,7 @@ function updateStreamThrottleFromActiveWork() {
   applyKeepAwake(working)
 }
 
-ipcMain.on('hermes:active-work', (event, payload) => {
+ipcMain.on('beyond:active-work', (event, payload) => {
   const id = event.sender.id
 
   if (!activeWorkByWebContents.has(id)) {
@@ -16686,7 +16686,7 @@ ipcMain.on('hermes:active-work', (event, payload) => {
   updateStreamThrottleFromActiveWork()
 })
 
-ipcMain.on('hermes:titlebar-theme', (_event, payload) => {
+ipcMain.on('beyond:titlebar-theme', (_event, payload) => {
   if (!payload || !isHexColor(payload.background) || !isHexColor(payload.foreground)) {
     return
   }
@@ -16705,7 +16705,7 @@ ipcMain.on('hermes:titlebar-theme', (_event, payload) => {
 })
 
 // Pin the native appearance to the app theme (see NATIVE_THEME_CONFIG_PATH).
-ipcMain.on('hermes:native-theme', (_event, mode) => {
+ipcMain.on('beyond:native-theme', (_event, mode) => {
   if (!THEME_SOURCES.has(mode)) {
     return
   }
@@ -16723,7 +16723,7 @@ ipcMain.on('hermes:native-theme', (_event, mode) => {
 // that cheap. Native work is diffed, so an intensity-only change under glass
 // touches nothing (it's painted by the renderer). And the disk write is
 // coalesced onto a trailing timer, because writePersistedTranslucency is a
-// synchronous writeFileSync and doing one per tick blocks the main process
+// synchrobeyond writeFileSync and doing one per tick blocks the main process
 // mid-drag. Only a cold launch reads that file, so it just has to be correct
 // once the hand comes off the slider.
 let translucencyWriteTimer = null
@@ -16764,21 +16764,21 @@ app.on('quit', () => {
   quitFinalization.cancel()
 })
 
-// Answered synchronously so preload can publish the verdict before the
+// Answered synchrobeyondly so preload can publish the verdict before the
 // renderer's first script — see the note there on why it cannot decide this
 // itself. Registered at module scope, which runs long before any window.
-ipcMain.on('hermes:translucency:support', event => {
+ipcMain.on('beyond:translucency:support', event => {
   event.returnValue = { glass: GLASS_SUPPORTED, translucency: TRANSLUCENCY_SUPPORTED }
 })
 
 // Feature-flag facts the renderer needs before first paint (same sendSync
 // pattern as translucency). Resolved in feature-flags.ts from the launch
-// argv and the artifact's channel: `--local` (from `hermes desktop --local`
-// or directly on Hermes.exe, a shortcut edit) gates the local-models GUI on
+// argv and the artifact's channel: `--local` (from `beyond desktop --local`
+// or directly on Beyond.exe, a shortcut edit) gates the local-models GUI on
 // stable builds, and canary builds get the same surfaces by default. Launch
 // flags survive self-relaunches because collectRelaunchArgs only strips
 // internal flags.
-ipcMain.on('hermes:feature-flags', (event: IpcMainEvent): void => {
+ipcMain.on('beyond:feature-flags', (event: IpcMainEvent): void => {
   event.returnValue = {
     ...resolveFeatureFlags({
       argv: process.argv,
@@ -16790,7 +16790,7 @@ ipcMain.on('hermes:feature-flags', (event: IpcMainEvent): void => {
   }
 })
 
-ipcMain.on('hermes:translucency', (_event, payload) => {
+ipcMain.on('beyond:translucency', (_event, payload) => {
   const next = normalizeTranslucency(payload, GLASS_SUPPORTED)
   const previous = translucencyState
 
@@ -16848,7 +16848,7 @@ const keepAwake = createKeepAwakeController({
       return false
     }
 
-    mainWindow.webContents.send('hermes:keep-awake-offer')
+    mainWindow.webContents.send('beyond:keep-awake-offer')
 
     return true
   }
@@ -16859,14 +16859,14 @@ function applyKeepAwake(working = isAnyTurnInFlight()) {
   keepAwake.apply(working)
 }
 
-ipcMain.on('hermes:keep-awake', (_event, value) => keepAwake.setMode(value))
+ipcMain.on('beyond:keep-awake', (_event, value) => keepAwake.setMode(value))
 
 // Quick Entry: the renderer reads the live registration state on settings mount
 // and writes the preference back. Main is authoritative — it owns the OS
 // accelerator — so both handlers return the state that ACTUALLY resulted,
 // including `registered: false` + `error: 'taken'` when another app owns the
 // chord. See electron/quick-entry.ts + store/quick-entry.
-ipcMain.handle('hermes:quick-entry:settings:get', async () => {
+ipcMain.handle('beyond:quick-entry:settings:get', async () => {
   const settings = readQuickEntrySettings()
   const state = quickEntryShortcut.current()
 
@@ -16880,7 +16880,7 @@ ipcMain.handle('hermes:quick-entry:settings:get', async () => {
   }
 })
 
-ipcMain.handle('hermes:quick-entry:settings:set', async (_event, patch) => {
+ipcMain.handle('beyond:quick-entry:settings:set', async (_event, patch) => {
   const current = readQuickEntrySettings()
 
   const next = sanitizeQuickEntrySettings({
@@ -16903,7 +16903,7 @@ const quickEntrySubmitRelay = createQuickEntrySubmitRelay({
   // resending a prompt that may already be delivered.
   onLateResult: (correlationId, result) => {
     if (quickEntryWindow && !quickEntryWindow.isDestroyed()) {
-      quickEntryWindow.webContents.send('hermes:quick-entry:late-result', { correlationId, result })
+      quickEntryWindow.webContents.send('beyond:quick-entry:late-result', { correlationId, result })
     }
   },
   onSuccess: () => {
@@ -16922,7 +16922,7 @@ const quickEntrySubmitRelay = createQuickEntrySubmitRelay({
 
 // Main owns the request lifecycle so the capture window can keep text until
 // the primary renderer confirms delivery (#85590).
-ipcMain.handle('hermes:quick-entry:submit', (event, payload) => {
+ipcMain.handle('beyond:quick-entry:submit', (event, payload) => {
   if (!quickEntryWindow || event.sender !== quickEntryWindow.webContents) {
     return { code: 'forbidden', message: 'Quick Entry sender is not authorized.', ok: false, retryable: false }
   }
@@ -16935,20 +16935,20 @@ ipcMain.handle('hermes:quick-entry:submit', (event, payload) => {
   }
 
   if (!mainWindow || mainWindow.isDestroyed()) {
-    return { code: 'no-primary', message: 'The primary Hermes window is unavailable.', ok: false, retryable: true }
+    return { code: 'no-primary', message: 'The primary Beyond window is unavailable.', ok: false, retryable: true }
   }
 
   const target =
     typeof payload === 'object' && typeof payload?.target === 'string' && payload.target ? payload.target : 'current'
 
   return quickEntrySubmitRelay.begin(correlationId => {
-    mainWindow.webContents.send('hermes:quick-entry:submit', { correlationId, target, text })
+    mainWindow.webContents.send('beyond:quick-entry:submit', { correlationId, target, text })
   })
 })
 
 // Main cannot invoke the primary renderer, so the primary returns by id. Stale
 // or duplicate acknowledgements are intentionally ignored (#85590).
-ipcMain.on('hermes:quick-entry:ack', (event, payload) => {
+ipcMain.on('beyond:quick-entry:ack', (event, payload) => {
   if (!mainWindow || event.sender !== mainWindow.webContents) {
     return
   }
@@ -16959,15 +16959,15 @@ ipcMain.on('hermes:quick-entry:ack', (event, payload) => {
 // Primary renderer → main → quick window: gateway connection state + the
 // recent-session list for the target picker. Cached so a quick window spawned
 // AFTER the last push still boots from truth instead of "disconnected".
-ipcMain.on('hermes:quick-entry:state', (_event, payload) => {
+ipcMain.on('beyond:quick-entry:state', (_event, payload) => {
   quickEntryLastState = payload ?? null
 
   if (quickEntryWindow && !quickEntryWindow.isDestroyed()) {
-    quickEntryWindow.webContents.send('hermes:quick-entry:state', payload)
+    quickEntryWindow.webContents.send('beyond:quick-entry:state', payload)
   }
 })
 
-ipcMain.on('hermes:quick-entry:dismiss', () => hideQuickEntryWindow())
+ipcMain.on('beyond:quick-entry:dismiss', () => hideQuickEntryWindow())
 
 // Disable F12 DevTools: maintained in the main process so a cold launch
 // restores it before any window is shown (applied on ready). The renderer
@@ -16982,7 +16982,7 @@ function readPersistedDisableF12() {
   }
 }
 
-ipcMain.on('hermes:devtools:disable-f12', (_event, on) => {
+ipcMain.on('beyond:devtools:disable-f12', (_event, on) => {
   f12Blocked = Boolean(on)
 
   try {
@@ -17002,7 +17002,7 @@ registerChallengeWindowIpc({
   rememberLog
 })
 
-ipcMain.handle('hermes:openExternal', async (_event, url) => {
+ipcMain.handle('beyond:openExternal', async (_event, url) => {
   const result = await openExternalUrl(url)
 
   if (result.ok === false && result.reason === 'invalid') {
@@ -17012,7 +17012,7 @@ ipcMain.handle('hermes:openExternal', async (_event, url) => {
 
 // ── Find-in-page (Ctrl/Cmd+F) ─────────────────────────────────────────────
 // The desktop supports multiple BrowserWindows (one primary plus any
-// per-session secondary windows spawned via `hermes:window:openSession`).
+// per-session secondary windows spawned via `beyond:window:openSession`).
 // Find must run against the requesting window, not a global — otherwise
 // Cmd+F pressed in a secondary session window would search the primary
 // and the match counter would report matches the user can't see. Resolve
@@ -17039,7 +17039,7 @@ function ensureFoundInPageForwarder(sender: Electron.WebContents): void {
   })
 }
 
-ipcMain.handle('hermes:find-in-page', async (event, query, options) => {
+ipcMain.handle('beyond:find-in-page', async (event, query, options) => {
   const win = BrowserWindow.fromWebContents(event.sender)
 
   if (!win || win.isDestroyed()) {
@@ -17049,12 +17049,12 @@ ipcMain.handle('hermes:find-in-page', async (event, query, options) => {
   ensureFoundInPageForwarder(event.sender)
   await performFindAfterIndexingStarted(win.webContents, query, options)
 
-  // The match count still arrives asynchronously via `found-in-page`; this
+  // The match count still arrives asynchrobeyondly via `found-in-page`; this
   // reply only acknowledges that Chromium has begun returning this request.
   return { count: 0 }
 })
 
-ipcMain.handle('hermes:stop-find-in-page', event => {
+ipcMain.handle('beyond:stop-find-in-page', event => {
   const win = BrowserWindow.fromWebContents(event.sender)
 
   if (!win || win.isDestroyed()) {
@@ -17066,9 +17066,9 @@ ipcMain.handle('hermes:stop-find-in-page', event => {
 
 // The renderer can't know whether a loopback URL is reachable — only main
 // knows which transport backs this gateway. Ask before loading one.
-ipcMain.handle('hermes:preview:reach', async (event, url) => reachablePreviewUrl(event.sender.id, String(url || '')))
+ipcMain.handle('beyond:preview:reach', async (event, url) => reachablePreviewUrl(event.sender.id, String(url || '')))
 
-ipcMain.handle('hermes:openPreviewInBrowser', async (_event, url) => {
+ipcMain.handle('beyond:openPreviewInBrowser', async (_event, url) => {
   if (!(await openPreviewInBrowser(url))) {
     throw new Error('Invalid preview URL')
   }
@@ -17076,17 +17076,17 @@ ipcMain.handle('hermes:openPreviewInBrowser', async (_event, url) => {
 
 // User-configurable default project directory. The renderer reads this on
 // settings mount and seeds the value into the picker; writing back persists
-// it via writeDefaultProjectDir so resolveHermesCwd picks it up on the next
+// it via writeDefaultProjectDir so resolveBeyondCwd picks it up on the next
 // session spawn (no app restart needed).
-ipcMain.handle('hermes:setting:defaultProjectDir:get', async () => ({
+ipcMain.handle('beyond:setting:defaultProjectDir:get', async () => ({
   dir: readDefaultProjectDir(),
   defaultLabel: app.getPath('home'),
-  resolvedCwd: resolveHermesCwd()
+  resolvedCwd: resolveBeyondCwd()
 }))
 
-ipcMain.handle('hermes:workspace:sanitize', async (_event, cwd) => sanitizeWorkspaceCwd(cwd))
+ipcMain.handle('beyond:workspace:sanitize', async (_event, cwd) => sanitizeWorkspaceCwd(cwd))
 
-ipcMain.handle('hermes:setting:defaultProjectDir:set', async (_event, dir) => {
+ipcMain.handle('beyond:setting:defaultProjectDir:set', async (_event, dir) => {
   const next = typeof dir === 'string' && dir.trim() ? dir.trim() : null
 
   if (next) {
@@ -17102,7 +17102,7 @@ ipcMain.handle('hermes:setting:defaultProjectDir:set', async (_event, dir) => {
   return { dir: next }
 })
 
-ipcMain.handle('hermes:setting:defaultProjectDir:pick', async () => {
+ipcMain.handle('beyond:setting:defaultProjectDir:pick', async () => {
   const result = await dialog.showOpenDialog({
     title: 'Choose default project directory',
     properties: ['openDirectory', 'createDirectory'],
@@ -17116,11 +17116,11 @@ ipcMain.handle('hermes:setting:defaultProjectDir:pick', async () => {
   return { canceled: false, dir: result.filePaths[0] }
 })
 
-ipcMain.handle('hermes:fetchLinkTitle', (_event, url) => fetchLinkTitle(url))
+ipcMain.handle('beyond:fetchLinkTitle', (_event, url) => fetchLinkTitle(url))
 
-ipcMain.handle('hermes:resolveFavicon', (_event, url) => resolveFaviconCached(url))
+ipcMain.handle('beyond:resolveFavicon', (_event, url) => resolveFaviconCached(url))
 
-ipcMain.handle('hermes:logs:reveal', async () => {
+ipcMain.handle('beyond:logs:reveal', async () => {
   try {
     await fs.promises.mkdir(path.dirname(DESKTOP_LOG_PATH), { recursive: true })
 
@@ -17136,27 +17136,27 @@ ipcMain.handle('hermes:logs:reveal', async () => {
   }
 })
 
-ipcMain.handle('hermes:logs:recent', async () => ({ path: DESKTOP_LOG_PATH, lines: hermesLog.slice(-200) }))
+ipcMain.handle('beyond:logs:recent', async () => ({ path: DESKTOP_LOG_PATH, lines: beyondLog.slice(-200) }))
 
 // Renderer error-boundary catches (#79428 defect B): the component stack only
 // exists in renderer memory, so the boundary posts it here and we persist it
 // via the desktop.log pipeline. `on`, not `handle` — the sender may be mid-
 // crash and must not await. Flush immediately: a crashing window can be gone
 // before the debounced flush timer fires.
-ipcMain.on('hermes:logs:renderer-error', (_event, report) => {
+ipcMain.on('beyond:logs:renderer-error', (_event, report) => {
   const { label, boundary, message, componentStack } = report && typeof report === 'object' ? report : {}
   rememberLog(formatRendererBoundaryReport(label, boundary, message, componentStack))
   flushDesktopLogBufferSync()
 })
 
-// The preload reads this small, sanitized payload synchronously so the renderer
+// The preload reads this small, sanitized payload synchrobeyondly so the renderer
 // can register the local skin before its first theme paint. It stays independent
 // of the selected gateway, which can be an offline remote primary.
-ipcMain.on('hermes:skin:local', event => {
+ipcMain.on('beyond:skin:local', event => {
   // The window route is more specific than the global next-launch preference:
   // a peer can be booting another profile while that preference changes.
   event.returnValue = readLocalSkinPayload(
-    HERMES_HOME,
+    BEYOND_HOME,
     windowConnectionRoutes.get(event.sender.id)?.profile,
     primaryProfileKey()
   )
@@ -17166,7 +17166,7 @@ ipcMain.on('hermes:skin:local', event => {
 // so the caller posts the full error here for desktop.log. Fire-and-forget,
 // like renderer-error — the toast must never depend on this round-trip.
 // Clamp: the line is renderer-supplied.
-ipcMain.on('hermes:logs:renderer-line', (_event, line) => {
+ipcMain.on('beyond:logs:renderer-line', (_event, line) => {
   const text = typeof line === 'string' ? line.slice(0, 6000) : ''
 
   if (!text) {
@@ -17179,7 +17179,7 @@ ipcMain.on('hermes:logs:renderer-line', (_event, line) => {
 
 // Local filesystem + plugin-root IPC (readDir/reveal/rename/trash/…) — see fs-ipc.ts.
 registerFsIpc({
-  hermesHome: HERMES_HOME,
+  beyondHome: BEYOND_HOME,
   readActiveDesktopProfile,
   expandUserPath,
   resolveRequestedPathForIpc,
@@ -17194,7 +17194,7 @@ registerGitIpc({ resolveGitBinary, resolveGhBinary })
 // mcp-oauth-callback-ipc.ts.
 registerMcpOauthCallbackIpc()
 
-// Embedded terminal PTY host (hermes:terminal:*) — see terminal-ipc.ts.
+// Embedded terminal PTY host (beyond:terminal:*) — see terminal-ipc.ts.
 const terminalIpc = registerTerminalIpc({
   isWindows: IS_WINDOWS,
   findOnPath,
@@ -17208,7 +17208,7 @@ const terminalIpc = registerTerminalIpc({
 const disposeTerminalSession = terminalIpc.disposeTerminalSession
 
 ipcMain.handle(
-  'hermes:updates:check',
+  'beyond:updates:check',
   async (_event: Electron.IpcMainInvokeEvent, opts?: { force?: boolean }): Promise<UpdaterStatusWire> =>
     checkUpdates({ force: Boolean(opts?.force) }).catch((error: Error): UpdaterStatusWire => ({
       supported: true,
@@ -17219,7 +17219,7 @@ ipcMain.handle(
     }))
 )
 
-ipcMain.handle('hermes:updates:apply', async (_event, payload) =>
+ipcMain.handle('beyond:updates:apply', async (_event, payload) =>
   applyUpdates().catch(error => ({
     ok: false,
     error: 'apply-failed',
@@ -17228,17 +17228,17 @@ ipcMain.handle('hermes:updates:apply', async (_event, payload) =>
 )
 
 // About ▸ Updates channel selector; source checkouts only (packages bake their channel).
-ipcMain.handle('hermes:updates:channel:set', async (_event, name: unknown): Promise<UpdaterStatusWire> => {
+ipcMain.handle('beyond:updates:channel:set', async (_event, name: unknown): Promise<UpdaterStatusWire> => {
   assertSourceUpdateChannel(INSTALL_STAMP)
 
   return resolveCheckoutUpdateStrategy().check({ force: true, setChannel: sourceChannelName(name) })
 })
 
-function resolveHermesVersion(scope: { connectionId?: string; profile?: string } = {}): Promise<string> {
-  return resolveGatewayVersion(path => handleHermesApiRequest({ ...scope, path, timeoutMs: 5000 }))
+function resolveBeyondVersion(scope: { connectionId?: string; profile?: string } = {}): Promise<string> {
+  return resolveGatewayVersion(path => handleBeyondApiRequest({ ...scope, path, timeoutMs: 5000 }))
 }
 
-// Renderer-bundle skew: `hermes update` moves the SOURCE TREE, but the UI
+// Renderer-bundle skew: `beyond update` moves the SOURCE TREE, but the UI
 // (including bundled plugins like Bot Mode) is compiled into this binary at
 // build time. A terminal-side update — or an in-app update whose bundle-swap
 // leg failed — leaves the new runtime running under an old renderer, so About
@@ -17252,19 +17252,19 @@ const checkRendererSkew = createBundleSkewChecker(
   (args, options) => execGit(resolveGitBinary(), args, options),
   // Only a LIVE marker defers the warning: Desktop never deletes a dead one,
   // so a leftover file would otherwise suppress it indefinitely.
-  { isUpdating: async () => updateInFlight || isQuittingForHandoff || Boolean(await readLiveUpdateMarker(HERMES_HOME)) }
+  { isUpdating: async () => updateInFlight || isQuittingForHandoff || Boolean(await readLiveUpdateMarker(BEYOND_HOME)) }
 )
 
 async function detectRendererSkew() {
   return checkRendererSkew(resolveUpdateRoot())
 }
 
-// Re-resolve the live Hermes version and push it into the native About panel
-// just before showing it, so an in-place `hermes update` is reflected without
+// Re-resolve the live Beyond version and push it into the native About panel
+// just before showing it, so an in-place `beyond update` is reflected without
 // an app restart. macOS only — `showAboutPanel()` is a no-op elsewhere, and the
 // other platforms don't use this menu item.
 function showAboutPanelFresh(): void {
-  void Promise.all([detectRendererSkew(), resolveHermesVersion()]).then(([skew, version]) => {
+  void Promise.all([detectRendererSkew(), resolveBeyondVersion()]).then(([skew, version]) => {
     const info: AppVersionInfo = appVersionInfo(INSTALL_STAMP, version, app.getVersion())
     // The product name already identifies canary and commit builds. Never pass
     // through empty/placeholder: the panel would render the bundle's 0.0.0 (#124581).
@@ -17272,27 +17272,27 @@ function showAboutPanelFresh(): void {
     app.setAboutPanelOptions({
       applicationName: APP_NAME,
       applicationVersion: skew.outOfSync ? `${display} — app build out of date, update the desktop app` : display,
-      copyright: 'Copyright © 2026 Nous Research'
+      copyright: 'Copyright © 2026 Beyond'
     })
     app.showAboutPanel()
   })
 }
 
-ipcMain.handle('hermes:version', async (_event, scope?: { connectionId?: string; profile?: string }) => {
-  const [skew, version] = await Promise.all([detectRendererSkew(), resolveHermesVersion(scope)])
+ipcMain.handle('beyond:version', async (_event, scope?: { connectionId?: string; profile?: string }) => {
+  const [skew, version] = await Promise.all([detectRendererSkew(), resolveBeyondVersion(scope)])
 
   return {
     ...appVersionInfo(INSTALL_STAMP, version, app.getVersion()),
     electronVersion: process.versions.electron,
     nodeVersion: process.versions.node,
     platform: process.platform,
-    hermesRoot: resolveUpdateRoot(),
-    hermesHome: HERMES_HOME,
+    beyondRoot: resolveUpdateRoot(),
+    beyondHome: BEYOND_HOME,
     bundleOutOfSync: skew.outOfSync,
     bundleCommitsBehind: skew.desktopCommitsBehind,
     // The install id: sha16 of the canonical install-root path — the key of
     // this install's per-install channel record and its installs/<sha16>/
-    // state folder. Same value `hermes update --install-id` prints; About
+    // state folder. Same value `beyond update --install-id` prints; About
     // renders it as `sha16 (path)`.
     installId: installIdForRoot(resolveUpdateRoot(), canonicalizeInstallPath),
     // The artifact kind of THIS app plus whether the runtime checkout came
@@ -17304,7 +17304,7 @@ ipcMain.handle('hermes:version', async (_event, scope?: { connectionId?: string;
     // Bundled artifacts always run their payload; light artifacts have no
     // runtime and only reach remote backends. External builds classify from
     // the install stamp (git/docker/nix), 'unknown' when it can't be told.
-    hermesRuntime: resolveHermesRuntime(),
+    beyondRuntime: resolveBeyondRuntime(),
     // True when the bundle on disk is not the one this process loaded — a
     // plain app restart (no rebuild, no installer) clears the skew above.
     // Packaged only: a dev `--build-only` rewrites build/install-stamp.json
@@ -17314,29 +17314,29 @@ ipcMain.handle('hermes:version', async (_event, scope?: { connectionId?: string;
   }
 })
 
-// The About page's "Restart Hermes" button (shown when bundleSwapPending):
+// The About page's "Restart Beyond" button (shown when bundleSwapPending):
 // load the already-swapped bundle without asking the user to quit manually.
 // app.relaunch() re-executes by path, so the fresh process picks up whatever
 // bundle now lives there.
-ipcMain.handle('hermes:app:relaunch', async () => {
+ipcMain.handle('beyond:app:relaunch', async () => {
   rememberLog('[updates] renderer requested an app relaunch (swapped bundle pending)')
   app.relaunch({ args: buildNoSandboxRelaunchArgs(process.argv.slice(1)) })
   void exitAfterBackendShutdown(0)
 })
 
 /** The latest pm/venv/plugin-operation receipt — the machine-readable
- *  surface every medium reads (CLI: `hermes pm status`). Returned as one
+ *  surface every medium reads (CLI: `beyond pm status`). Returned as one
  *  parsed JSON object: { kind, outcome, venv_rebuild, plugin_bisect,
  *  plugin_checks, ... } or null when no operation has run yet. The file
- *  lives at <HERMES_HOME>/logs/update_receipts/latest.json — written by
+ *  lives at <BEYOND_HOME>/logs/update_receipts/latest.json — written by
  *  pm syncs (bisect disables, failed rebuilds), plugin update checks,
  *  and (embedded) updates. */
 function readLatestSyncReceipt(): Record<string, unknown> | null {
-  const receiptPath = path.join(HERMES_HOME, 'logs', 'update_receipts', 'latest.json')
+  const receiptPath = path.join(BEYOND_HOME, 'logs', 'update_receipts', 'latest.json')
 
   try {
     const text = fs.readFileSync(receiptPath, 'utf8')
-    // tolerate a BOM (hermes writes plain, but editors touch configs)
+    // tolerate a BOM (beyond writes plain, but editors touch configs)
     const stripped = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text
 
     return JSON.parse(stripped)
@@ -17345,7 +17345,7 @@ function readLatestSyncReceipt(): Record<string, unknown> | null {
   }
 }
 
-ipcMain.handle('hermes:sync-status', () => readLatestSyncReceipt())
+ipcMain.handle('beyond:sync-status', () => readLatestSyncReceipt())
 
 // Python's Path.resolve() equivalent for install-id derivation: realpath when
 // the path exists, plain resolve otherwise. Must stay byte-compatible with
@@ -17361,11 +17361,11 @@ function canonicalizeInstallPath(p: string): string {
 
 /** True when the runtime checkout was created by a bootstrap installer
  *  (install.sh / install.ps1 / the desktop first-launch bootstrap): those all
- *  finish by writing `.hermes-bootstrap-complete` into the checkout root, and
- *  `hermes update` preserves the file, so a manual clone never grows one. A
+ *  finish by writing `.beyond-bootstrap-complete` into the checkout root, and
+ *  `beyond update` preserves the file, so a manual clone never grows one. A
  *  missing checkout (sealed bundled payloads, remote backends) is not
  *  installer-created. */
-export function isInstallerCreatedCheckout(root: string | null = ACTIVE_HERMES_ROOT): boolean {
+export function isInstallerCreatedCheckout(root: string | null = ACTIVE_BEYOND_ROOT): boolean {
   if (!root) {
     return false
   }
@@ -17382,7 +17382,7 @@ export function isInstallerCreatedCheckout(root: string | null = ACTIVE_HERMES_R
  *  the canonical-root checkout stamp plus the bootstrap marker, or the app
  *  stamp's `source`, so About's Runtime row names
  *  git/docker/nix/desktop-bootstrap instead of a bare "external". */
-function resolveHermesRuntime() {
+function resolveBeyondRuntime() {
   const stamp = INSTALL_STAMP as InstallStamp | null
 
   if (stamp?.payload === 'light') {
@@ -17426,9 +17426,9 @@ function resolveHermesRuntime() {
 //
 // The renderer's About → Danger Zone surfaces three options that mirror the
 // CLI exactly: GUI only, Lite (keep user data), Full. We ask the agent to do
-// the actual removal via `hermes uninstall …` so the cross-platform PATH /
+// the actual removal via `beyond uninstall …` so the cross-platform PATH /
 // registry / service / node-symlink cleanup all lives in one place
-// (hermes_cli/uninstall.py + hermes_cli/gui_uninstall.py).
+// (beyond_cli/uninstall.py + beyond_cli/gui_uninstall.py).
 //
 // The IPC boundary applies the baked install policy before either callback.
 // Only self-managed installs use the Python summary or the cleanup script.
@@ -17439,8 +17439,8 @@ function uninstallVenvPython(): string {
 
 function fallbackUninstallSummary(): UninstallSummaryDetails {
   return {
-    hermes_home: HERMES_HOME,
-    agent_installed: isHermesSourceRoot(ACTIVE_HERMES_ROOT) && fileExists(uninstallVenvPython()),
+    beyond_home: BEYOND_HOME,
+    agent_installed: isBeyondSourceRoot(ACTIVE_BEYOND_ROOT) && fileExists(uninstallVenvPython()),
     gui_installed: true,
     source_built_artifacts: [],
     packaged_app_paths: [],
@@ -17453,7 +17453,7 @@ function fallbackUninstallSummary(): UninstallSummaryDetails {
 
 async function probeUninstallSummary(): Promise<UninstallSummaryDetails> {
   const py: string = uninstallVenvPython()
-  const agentRoot: string = ACTIVE_HERMES_ROOT
+  const agentRoot: string = ACTIVE_BEYOND_ROOT
 
   if (!fileExists(py)) {
     return fallbackUninstallSummary()
@@ -17475,10 +17475,10 @@ async function probeUninstallSummary(): Promise<UninstallSummaryDetails> {
     try {
       const child: ChildProcess = spawn(
         py,
-        ['-m', 'hermes_cli.main', 'uninstall', '--gui-summary'],
+        ['-m', 'beyond_cli.main', 'uninstall', '--gui-summary'],
         hiddenWindowsChildOptions({
           cwd: agentRoot,
-          env: { ...process.env, HERMES_HOME, NO_COLOR: '1' },
+          env: { ...process.env, BEYOND_HOME, NO_COLOR: '1' },
           stdio: ['ignore', 'pipe', 'ignore']
         })
       )
@@ -17526,14 +17526,14 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
     return {
       ok: false,
       error: 'agent-missing',
-      message: `Can't run the uninstaller: no Hermes agent venv at ${VENV_ROOT}.`
+      message: `Can't run the uninstaller: no Beyond agent venv at ${VENV_ROOT}.`
     }
   }
 
   // Interpreter choice (Finding 3): lite/full rmtree the venv that holds the
   // running python.exe. On Windows a running .exe is mandatory-locked, so the
   // rmtree must NOT be driven by the venv's own interpreter — use a system
-  // Python with PYTHONPATH=<agentRoot> so `import hermes_cli` resolves from
+  // Python with PYTHONPATH=<agentRoot> so `import beyond_cli` resolves from
   // source while the venv is torn down. gui-only doesn't touch the venv, so the
   // venv python is fine there. If no system Python exists (the Windows edge
   // case), fall back to the venv python — gui-only is unaffected; lite/full may
@@ -17546,7 +17546,7 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
 
     if (sysPy) {
       py = sysPy
-      pythonPath = ACTIVE_HERMES_ROOT
+      pythonPath = ACTIVE_BEYOND_ROOT
     } else if (IS_WINDOWS) {
       rememberLog(
         '[uninstall] no system Python found for lite/full on Windows; falling back ' +
@@ -17566,7 +17566,7 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
   // lock would make the script's rmdir half-fail (#37532 for the update path).
   // Reuses the incident-hardened update teardown; no-op on macOS/Linux.
   try {
-    await releaseBackendLock(ACTIVE_HERMES_ROOT, 'uninstall')
+    await releaseBackendLock(ACTIVE_BEYOND_ROOT, 'uninstall')
   } catch (error) {
     rememberLog(`[uninstall] backend teardown errored (continuing): ${error.message}`)
   }
@@ -17575,10 +17575,10 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
     desktopPid: process.pid,
     pythonExe: py,
     pythonPath,
-    agentRoot: ACTIVE_HERMES_ROOT,
+    agentRoot: ACTIVE_BEYOND_ROOT,
     uninstallArgs,
     appPath: removeBundle,
-    hermesHome: HERMES_HOME
+    beyondHome: BEYOND_HOME
   }
 
   let scriptPath
@@ -17587,12 +17587,12 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
 
   try {
     if (IS_WINDOWS) {
-      scriptPath = path.join(app.getPath('temp'), `hermes-uninstall-${Date.now()}.cmd`)
+      scriptPath = path.join(app.getPath('temp'), `beyond-uninstall-${Date.now()}.cmd`)
       fs.writeFileSync(scriptPath, buildWindowsCleanupScript(scriptArgs))
       runner = process.env.ComSpec || 'cmd.exe'
       runnerArgs = ['/c', scriptPath]
     } else {
-      scriptPath = path.join(app.getPath('temp'), `hermes-uninstall-${Date.now()}.sh`)
+      scriptPath = path.join(app.getPath('temp'), `beyond-uninstall-${Date.now()}.sh`)
       fs.writeFileSync(scriptPath, buildPosixCleanupScript(scriptArgs), { mode: 0o755 })
       runner = '/bin/bash'
       runnerArgs = [scriptPath]
@@ -17638,26 +17638,26 @@ registerDesktopUninstallIpc({
 
 // Download a VS Code Marketplace extension and return the raw color-theme JSON
 // it contributes. No theme code is executed — we only read JSON from the .vsix.
-ipcMain.handle('hermes:vscode-theme:fetch', async (_event, id) => fetchMarketplaceThemes(String(id || '')))
+ipcMain.handle('beyond:vscode-theme:fetch', async (_event, id) => fetchMarketplaceThemes(String(id || '')))
 
 // Search the Marketplace for color-theme extensions (empty query = top installs).
-ipcMain.handle('hermes:vscode-theme:search', async (_event, query) => searchMarketplaceThemes(String(query || ''), 20))
+ipcMain.handle('beyond:vscode-theme:search', async (_event, query) => searchMarketplaceThemes(String(query || ''), 20))
 
 // ---------------------------------------------------------------------------
-// hermes:// deep links (e.g. hermes://blueprint/morning-brief?time=08:00,
-// hermes://mcp/install?name=NAME&config=B64 — the vendor "Add to Hermes"
-// button, or hermes://plugin/install?repo=owner/repo). Dev
-// (`HERMES_DESKTOP_DEV_SERVER`) registers hermes-dev:// instead — bare
-// Electron or a stale OS handler often owns hermes:// on dev machines.
+// beyond:// deep links (e.g. beyond://blueprint/morning-brief?time=08:00,
+// beyond://mcp/install?name=NAME&config=B64 — the vendor "Add to Beyond"
+// button, or beyond://plugin/install?repo=owner/repo). Dev
+// (`BEYOND_DESKTOP_DEV_SERVER`) registers beyond-dev:// instead — bare
+// Electron or a stale OS handler often owns beyond:// on dev machines.
 // Parsing is generic ({kind, name, params}); the renderer routes per kind
 // and anything install-shaped requires explicit user confirmation there.
 // A docs/dashboard "Send to App" button opens this URL; we route it into the
 // running app. Three delivery paths: macOS 'open-url',
 // Win/Linux running-app 'second-instance' (argv), Win/Linux cold-start argv.
 // ---------------------------------------------------------------------------
-const HERMES_PROTOCOL = DEV_SERVER ? 'hermes-dev' : 'hermes'
+const BEYOND_PROTOCOL = DEV_SERVER ? 'beyond-dev' : 'beyond'
 /** Schemes accepted when parsing inbound URLs (dev accepts both). */
-const DEEPLINK_SCHEMES = DEV_SERVER ? ['hermes-dev', 'hermes'] : ['hermes']
+const DEEPLINK_SCHEMES = DEV_SERVER ? ['beyond-dev', 'beyond'] : ['beyond']
 let _pendingDeepLink = null
 let _rendererReadyForDeepLink = false
 // Set by sendOpenUpdatesRequested() when the renderer cannot hear it yet.
@@ -17694,7 +17694,7 @@ function handleDeepLink(url) {
     return
   }
 
-  // hermes://blueprint/<key>?slot=val  -> host="blueprint", path="/<key>"
+  // beyond://blueprint/<key>?slot=val  -> host="blueprint", path="/<key>"
   const kind = parsed.hostname || ''
   const name = decodeURIComponent((parsed.pathname || '').replace(/^\//, ''))
   const params = {}
@@ -17715,7 +17715,7 @@ function handleDeepLink(url) {
     return
   }
 
-  // hermes://close-preview — the out-of-band exit hatch for a preview pane
+  // beyond://close-preview — the out-of-band exit hatch for a preview pane
   // that fullscreened itself and now owns all input (#97213). Handled here
   // rather than in the renderer because the whole point is to work when the
   // renderer cannot hear anything: exit the fullscreen window and close the
@@ -17754,7 +17754,7 @@ function handleDeepLink(url) {
     // #130810 un-hide a tray-hidden window; #83998 no foreground re-pump.
     activateWindow(mainWindow)
 
-    mainWindow.webContents.send('hermes:deep-link', payload)
+    mainWindow.webContents.send('beyond:deep-link', payload)
     rememberLog(`[deeplink] delivered ${kind}/${name}`)
   } catch (err) {
     rememberLog(`[deeplink] delivery failed: ${err.message}`)
@@ -17763,7 +17763,7 @@ function handleDeepLink(url) {
 
 // Renderer calls this (via IPC) once it has mounted its deep-link listener, so
 // a link that arrived during boot/install is flushed exactly once.
-ipcMain.handle('hermes:deep-link-ready', () => {
+ipcMain.handle('beyond:deep-link-ready', () => {
   _rendererReadyForDeepLink = true
 
   if (_pendingOpenUpdates) {
@@ -17775,7 +17775,7 @@ ipcMain.handle('hermes:deep-link-ready', () => {
     const queued = _pendingDeepLink
     _pendingDeepLink = null
     handleDeepLink(
-      `${HERMES_PROTOCOL}://${queued.kind}/${encodeURIComponent(queued.name)}` +
+      `${BEYOND_PROTOCOL}://${queued.kind}/${encodeURIComponent(queued.name)}` +
         (Object.keys(queued.params).length ? '?' + new URLSearchParams(queued.params).toString() : '')
     )
   }
@@ -17785,7 +17785,7 @@ ipcMain.handle('hermes:deep-link-ready', () => {
 
 function registerDeepLinkProtocol() {
   registerDeepLinkProtocolWith({
-    app, protocol: HERMES_PROTOCOL, env: process.env, defaultApp: Boolean(process.defaultApp),
+    app, protocol: BEYOND_PROTOCOL, env: process.env, defaultApp: Boolean(process.defaultApp),
     argv: process.argv, execPath: process.execPath, resolve: entry => path.resolve(entry), log: rememberLog
   })
 }
@@ -17801,20 +17801,20 @@ if (preReadyDockSteps.includes('register-deep-link')) {
 }
 
 // Single-instance lock: deep links on a running app (Win/Linux) arrive as a
-// second-instance argv. Without the lock a second `hermes://` launch spawns a
+// second-instance argv. Without the lock a second `beyond://` launch spawns a
 // whole new app instead of routing into the running one.
 if (!isPrimaryInstance) {
   // Hard-exit, not app.quit(): the before-quit teardown coordinator defers a
   // plain quit (event.preventDefault + async backend shutdown), and in that
   // window `ready` still fires — the lock-losing instance then runs the full
-  // startup (shortcut registration, createWindow → startHermes), whose
+  // startup (shortcut registration, createWindow → startBeyond), whose
   // reapOrphans() SIGTERMs the running instance's live backend (#87295).
   // app.exit() terminates immediately, before `ready`, so a second launch
   // routes into the running window and never touches backend machinery.
   app.exit(0)
 } else {
   // Cold-start --profile must win over the stored preference before
-  // startHermes() reads active-profile.json. Only the instance that will
+  // startBeyond() reads active-profile.json. Only the instance that will
   // boot writes: a second launch must not retarget the running app. A missing
   // or invalid flag is a no-op, so the stored profile stays.
   try {
@@ -17822,16 +17822,16 @@ if (!isPrimaryInstance) {
       writeActiveDesktopProfile(name)
     })
   } catch (error) {
-    console.error('[hermes] failed to persist --profile launch override:', error)
+    console.error('[beyond] failed to persist --profile launch override:', error)
   }
 
   app.on('second-instance', (_event, argv) => {
-    // --close-preview: the same escape hatch as hermes://close-preview, for
+    // --close-preview: the same escape hatch as beyond://close-preview, for
     // environments where spawning a URL is harder than a flag (kiosk launchers,
-    // SSH-started sessions). Checked before deep links so a carried `hermes://`
+    // SSH-started sessions). Checked before deep links so a carried `beyond://`
     // URL still routes normally when no flag is present.
     if (hasClosePreviewFlag(argv)) {
-      handleDeepLink('hermes://close-preview')
+      handleDeepLink('beyond://close-preview')
     }
 
     const url = _extractDeepLink(argv)
@@ -17840,7 +17840,7 @@ if (!isPrimaryInstance) {
       handleDeepLink(url)
     }
 
-    // #130810: a second Start-menu / shortcut / Hermes.exe launch must never
+    // #130810: a second Start-menu / shortcut / Beyond.exe launch must never
     // silently exit. Log it so a future silent exit stays diagnosable, then
     // restore a live primary with activation (restore + show + focus), or
     // re-create it when it was destroyed.
@@ -17865,7 +17865,7 @@ app.on('open-url', (event, url) => {
 app.whenReady().then(() => {
   // Post-update relaunch detection (App Installer arm): when the previous
   // version wrote the one-shot pending-relaunch marker before quitting into
-  // an OS package swap, consume it here — the renderer toasts "Hermes
+  // an OS package swap, consume it here — the renderer toasts "Beyond
   // updated to vX.Y.Z" once its bridge is up. Same-version markers (update
   // never landed) are deleted silently.
   const relaunchInfo: ConsumedRelaunch = consumePendingRelaunch(app, app.getVersion())
@@ -17911,7 +17911,7 @@ app.whenReady().then(() => {
   // APIs don't register as screen readers, so Chromium never builds the tree
   // and the composer stays invisible to them. Must run after `ready` (the
   // API's requirement). Opt out with desktop.renderer_accessibility: false
-  // (bridged as HERMES_DESKTOP_RENDERER_ACCESSIBILITY=0); the platform/env
+  // (bridged as BEYOND_DESKTOP_RENDERER_ACCESSIBILITY=0); the platform/env
   // decision lives in the extracted helper.
   enableRendererAccessibility({ appApi: app })
 
@@ -17936,7 +17936,7 @@ app.whenReady().then(() => {
   mainProcessLagWatchdog.start()
   f12Blocked = readPersistedDisableF12()
   // Seed this before the first window exists: a picker can open before
-  // startHermes() finishes resolving the configured backend.
+  // startBeyond() finishes resolving the configured backend.
   const primaryProfile = primaryProfileKey()
 
   setActiveGatewayProfile(primaryProfile)
@@ -17989,7 +17989,7 @@ app.whenReady().then(() => {
     createWindow
   })
 
-  // Win/Linux cold start: the launching hermes:// URL is in our own argv.
+  // Win/Linux cold start: the launching beyond:// URL is in our own argv.
   const _coldStartLink = _extractDeepLink(process.argv)
 
   if (_coldStartLink) {
@@ -18047,8 +18047,8 @@ function quitStopsBackendWork(): boolean {
       resolveDesktopRemoteRoute({
         config: readDesktopConnectionConfig(),
         env: {
-          token: process.env.HERMES_DESKTOP_REMOTE_TOKEN,
-          url: process.env.HERMES_DESKTOP_REMOTE_URL
+          token: process.env.BEYOND_DESKTOP_REMOTE_TOKEN,
+          url: process.env.BEYOND_DESKTOP_REMOTE_URL
         },
         profile: primaryProfileKey(),
         registry: readDesktopConnectionsRegistry()
@@ -18292,7 +18292,7 @@ app.on('before-quit', event => {
   hudWindow = null
 
   // Same for the Quick Entry composer — and release its global accelerator so a
-  // quitting Hermes never keeps another app's chord hostage.
+  // quitting Beyond never keeps another app's chord hostage.
   closeQuickEntryWindow()
 
   // Quitting mid-install should stop the installer, not orphan it.

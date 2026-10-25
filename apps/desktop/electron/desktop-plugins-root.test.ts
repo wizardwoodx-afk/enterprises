@@ -14,7 +14,7 @@ import {
 const homes: string[] = []
 
 function makeHome(): string {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'hermes-dp-root-'))
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'beyond-dp-root-'))
   homes.push(home)
 
   return home
@@ -105,7 +105,7 @@ describe('reconcileUnifiedDesktopHalves', () => {
   it.skipIf(process.platform === 'win32')(
     'materializes a SYMLINKED dev package and re-syncs on any byte change, even with an older mtime',
     async () => {
-      // `ln -s ~/src/my-plugin ~/.hermes/plugins/` is how a plugin is developed in
+      // `ln -s ~/src/my-plugin ~/.beyond/plugins/` is how a plugin is developed in
       // place; the Python loader follows it, but the reconcile skipped the link
       // (Dirent.isDirectory() is false for a symlink) — the desktop half never loaded.
       const home = makeHome()
@@ -203,7 +203,7 @@ describe('reconcileUnifiedDesktopHalves', () => {
     const appRoot = path.join(home, 'desktop-plugins')
     write(path.join(home, 'plugins', 'cat', 'desktop', 'plugin.js'), 'x')
     write(
-      path.join(home, 'plugins', 'cat', '.hermes-catalog.json'),
+      path.join(home, 'plugins', 'cat', '.beyond-catalog.json'),
       JSON.stringify({ catalog_name: 'cat', repo: 'https://github.com/o/cat.git', sha: 'deadbeef' })
     )
     write(path.join(home, 'plugins', 'raw', 'desktop', 'plugin.js'), 'y')

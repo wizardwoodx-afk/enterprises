@@ -367,7 +367,7 @@ describe('readFileDataUrlForAttach', () => {
   it('prefers the attachment-specific desktop reader over the preview reader', async () => {
     const previewReader = vi.fn(async () => 'preview')
     const attachmentReader = vi.fn(async () => 'data:application/zip;base64,UEs=')
-    Object.defineProperty(window, 'hermesDesktop', {
+    Object.defineProperty(window, 'beyondDesktop', {
       configurable: true,
       value: { readFileDataUrl: previewReader, readFileDataUrlForAttach: attachmentReader }
     })
@@ -379,7 +379,7 @@ describe('readFileDataUrlForAttach', () => {
 
   it('falls back to the preview reader on older shells', async () => {
     const previewReader = vi.fn(async () => 'data:text/plain;base64,YQ==')
-    Object.defineProperty(window, 'hermesDesktop', {
+    Object.defineProperty(window, 'beyondDesktop', {
       configurable: true,
       value: { readFileDataUrl: previewReader }
     })
@@ -457,7 +457,7 @@ describe('renderRpcResult', () => {
 
   describe('session.status', () => {
     it('passes through the multi-line plain-text output verbatim', () => {
-      const output = 'Hermes TUI Status\n\nSession ID: s-1\nModel: nous-hermes-3 (unknown)'
+      const output = 'Beyond TUI Status\n\nSession ID: s-1\nModel: beyond-3 (unknown)'
       expect(renderRpcResult({ output }, 'status')).toBe(output)
     })
   })
@@ -478,12 +478,12 @@ describe('renderRpcResult', () => {
           input: 10,
           output: 20,
           total: 30,
-          credits_lines: ['Nous credits: 8,420 remaining', 'Resets: 2026-08-01']
+          credits_lines: ['Beyond credits: 8,420 remaining', 'Resets: 2026-08-01']
         },
         'usage'
       )
 
-      expect(body.split('\n').slice(1)).toEqual(['Nous credits: 8,420 remaining', 'Resets: 2026-08-01'])
+      expect(body.split('\n').slice(1)).toEqual(['Beyond credits: 8,420 remaining', 'Resets: 2026-08-01'])
     })
   })
 

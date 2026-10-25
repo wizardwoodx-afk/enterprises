@@ -52,7 +52,7 @@ beforeEach(() => {
   apiMocks.updateKeepGoingOnCredits.mockReset()
   gatewayMock.reset()
   $stepUpInFlight.set(false)
-  Object.defineProperty(window, 'hermesDesktop', { configurable: true, value: { openExternal: vi.fn() } })
+  Object.defineProperty(window, 'beyondDesktop', { configurable: true, value: { openExternal: vi.fn() } })
 })
 
 describe('KeepGoingOnCreditsRow', () => {
@@ -74,12 +74,12 @@ describe('KeepGoingOnCreditsRow', () => {
 
     act(() => {
       gatewayMock.emit('billing.step_up.verification', {
-        payload: { user_code: 'ABCD-1234', verification_url: 'https://portal.nousresearch.com/device' }
+        payload: { user_code: 'ABCD-1234', verification_url: 'https://portal.beyond.app/device' }
       })
     })
 
     // The browser opens on its own (no second "Verify" click).
-    expect(window.hermesDesktop?.openExternal).toHaveBeenCalledWith('https://portal.nousresearch.com/device')
+    expect(window.beyondDesktop?.openExternal).toHaveBeenCalledWith('https://portal.beyond.app/device')
     expect(screen.getByText('ABCD-1234')).toBeTruthy()
 
     await act(async () => resolveStepUp({ data: { granted: true, ok: true }, ok: true }))

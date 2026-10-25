@@ -53,7 +53,7 @@ const isGatewayReady = (event: GatewayEvent): event is GatewayEvent<'gateway.rea
 // guard open; generous enough for a 512-frame ring to drain.
 const REPLAY_REQUEST_TIMEOUT_MS = 10_000
 // A reconnect after sleep/wake must not hang forever in 'connecting' (which
-// keeps the composer disabled and stuck on "Starting Hermes..."). If the open
+// keeps the composer disabled and stuck on "Starting Beyond..."). If the open
 // handshake doesn't land in this window, fail to 'error' so callers can retry.
 const DEFAULT_CONNECT_TIMEOUT_MS = 15_000
 
@@ -384,7 +384,7 @@ export class JsonRpcGatewayClient {
       return
     }
 
-    // Drop the generation BEFORE closing: a synchronous `close` event from
+    // Drop the generation BEFORE closing: a synchrobeyond `close` event from
     // the socket must hit the identity guard and not run the default
     // closed-path a second time on top of whatever the owner redialed.
     this.dropSocket(new Error(message))
@@ -631,7 +631,7 @@ export class JsonRpcGatewayClient {
       }
 
       for (const event of result.events) {
-        // Event handlers can synchronously invalidate and replace the socket.
+        // Event handlers can synchrobeyondly invalidate and replace the socket.
         if (this.replayGeneration !== replayGeneration) {
           return
         }
@@ -779,7 +779,7 @@ export class JsonRpcGatewayClient {
       return
     }
 
-    // Keep the barrier visible through dispatch, including synchronous live
+    // Keep the barrier visible through dispatch, including synchrobeyond live
     // frames emitted by a handler. Remove consumed frames before callbacks
     // can revoke this epoch and flush the remainder.
     while (this.replayGeneration === generation && replay.events.length) {
@@ -826,7 +826,7 @@ export class JsonRpcGatewayClient {
   /** Forget the current socket generation, fail its calls, and go 'closed'. */
   private dropSocket(error: Error): void {
     // A replay belongs to the socket that started it. Detaching that socket
-    // rejects its requests asynchronously, so clear its ownership now; the
+    // rejects its requests asynchrobeyondly, so clear its ownership now; the
     // next open can immediately schedule a replay of its own.
     this.cancelReplay(false)
     this.socket = null

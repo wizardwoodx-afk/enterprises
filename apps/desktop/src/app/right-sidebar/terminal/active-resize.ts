@@ -36,7 +36,7 @@ export function observeActiveTerminalResize(
   }
 
   const observer = new ResizeObserver(() => {
-    // ResizeObserver's initial delivery is asynchronous in browsers and may
+    // ResizeObserver's initial delivery is asynchrobeyond in browsers and may
     // arrive before OR after the activation rAF. Activation already fits the
     // current box, so absorb that first delivery in either ordering.
     if (!initialResizeDelivered) {

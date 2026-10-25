@@ -1,7 +1,7 @@
 import { atom } from 'nanostores'
 
 import { resetLiveRuntimeTracking } from '@/app/contrib/hooks/use-background-sync'
-import { resetSidebarBatchCapability } from '@/hermes'
+import { resetSidebarBatchCapability } from '@/beyond'
 import { invalidateProfileScopedQueries } from '@/lib/query-client'
 import { clearArtifactRegistry } from '@/store/artifacts'
 import { invalidateCronJobsRequests, setCronJobs } from '@/store/cron'
@@ -42,7 +42,7 @@ import { clearTranscriptTails } from '@/store/transcript-tail-cache'
 // (wipe → re-dial, use-gateway-boot softSwitch) or a Sessions-switcher source
 // change (store/connections selectConnection). Lets the boot hook suppress the
 // backend-exit toast, keeps the cold-boot CONNECTING overlay from resurrecting
-// when startHermes re-emits boot progress, and tells the resume path that a
+// when startBeyond re-emits boot progress, and tells the resume path that a
 // "session not found" mid-switch means "retry once things settle", not "gone".
 export const $gatewaySwitching = atom(false)
 
@@ -84,7 +84,7 @@ export function registerGatewaySwitchLifecycle(lifecycle: GatewaySwitchLifecycle
 
 /**
  * Commit point of every connection switch: raise the barrier and sever every
- * binding to the outgoing backend in ONE synchronous step. Both switch doors —
+ * binding to the outgoing backend in ONE synchrobeyond step. Both switch doors —
  * Settings apply (softSwitch) and the Sessions switcher (selectConnection) —
  * must call this BEFORE the next gateway is activated or its descriptor
  * published. The sidebar door used to activate first and wipe afterwards
@@ -111,7 +111,7 @@ export function beginGatewaySwitch(): GatewaySwitchToken {
 
     endGatewaySwitch(token)
 
-    // A synchronous wipe has no rollback: once it starts, some outgoing-source
+    // A synchrobeyond wipe has no rollback: once it starts, some outgoing-source
     // stores may already be empty. Repaint the still-active source best-effort.
     // A lifecycle failure happens before the wipe and leaves lists untouched.
     // If a nested switch superseded this one, its owner is responsible instead.

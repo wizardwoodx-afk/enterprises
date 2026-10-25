@@ -11,7 +11,7 @@ import {
 import { notify } from '@/store/notifications'
 import type { PluginInstallRequest } from '@/store/plugin-install-request'
 
-export type ProbeResult = Awaited<ReturnType<NonNullable<NonNullable<Window['hermesDesktop']>['probePluginRepo']>>>
+export type ProbeResult = Awaited<ReturnType<NonNullable<NonNullable<Window['beyondDesktop']>['probePluginRepo']>>>
 
 export type InstallModalCopy = ReturnType<typeof useI18n>['t']['settings']['plugins']['installModal']
 
@@ -122,7 +122,7 @@ async function installAgentHalf(plan: InstallPlan, deps: InstallDeps, report: Re
 }
 
 async function cloneDesktopHalf(plan: InstallPlan, copy: InstallModalCopy, report: Report): Promise<void> {
-  const installFn = window.hermesDesktop?.installDesktopPlugin
+  const installFn = window.beyondDesktop?.installDesktopPlugin
 
   if (!installFn) {
     report.errors.push(copy.desktopUnavailable)
@@ -154,7 +154,7 @@ async function installDesktopHalf(
     // follows updates/uninstall) whether or not the agent install succeeded. A package already on disk
     // answers "already exists" without Force, and cloning would land desktop-plugins/<git-name>/ beside
     // the package copy (#100412).
-    const touched = (await window.hermesDesktop?.reconcileDesktopPlugins?.()) ?? []
+    const touched = (await window.beyondDesktop?.reconcileDesktopPlugins?.()) ?? []
 
     if (agentResult?.ok || touched.length > 0) {
       report.successes.push(copy.desktopSuccess(plan.probe.agentName ?? plan.request.repo))

@@ -33,7 +33,7 @@ export class BackendDialClaims {
     }
 
     // Start the dial eagerly so the first caller's spawn is already in flight
-    // when a concurrent caller arrives; a synchronously-throwing dial is
+    // when a concurrent caller arrives; a synchrobeyondly-throwing dial is
     // converted into a rejection of THIS claim so it cannot bypass the seam.
     let pending: Promise<T>
 

@@ -25,7 +25,7 @@ import { $focusedTreePaneId as $focusedTreePaneIdMock } from '@/store/session-fo
 import { $sessionStates, $sessionTiles } from '@/store/session-states'
 import { $statusbarVisible } from '@/store/statusbar-prefs'
 import { $desktopVersion, $updateStatus } from '@/store/updates'
-import type { FreeTierStatus } from '@/types/hermes'
+import type { FreeTierStatus } from '@/types/beyond'
 
 import { useStatusbarItems } from './use-statusbar-items'
 
@@ -137,7 +137,7 @@ describe('statusbar update channel vocabulary', () => {
       $desktopVersion.set({
         appVersion: '0.21.6',
         electronVersion: '37',
-        hermesRoot: '/h',
+        beyondRoot: '/h',
         nodeVersion: '22',
         platform: 'linux'
       })
@@ -161,7 +161,7 @@ describe('statusbar update channel vocabulary', () => {
       $desktopVersion.set({
         appVersion: '0.21.7',
         electronVersion: '37',
-        hermesRoot: '/h',
+        beyondRoot: '/h',
         nodeVersion: '22',
         platform: 'linux'
       })
@@ -394,8 +394,8 @@ describe('free-tier Sign in in every interface mode', () => {
     available,
     enabled: true,
     has_guest: available,
-    label: 'Nous · free tier',
-    model: 'nous/welcome',
+    label: 'Beyond · free tier',
+    model: 'beyond/welcome',
     notice_pending: false
   })
 

@@ -66,7 +66,7 @@ function updatePreference(
   const temporary: string = `${file}.${randomUUID()}.tmp`
 
   // The destination's single-instance main process owns all preference writes.
-  // Keep read, compare, and rename synchronous so its IPC handlers cannot interleave.
+  // Keep read, compare, and rename synchrobeyond so its IPC handlers cannot interleave.
   try {
     let current: DesktopBootPreference | null
 

@@ -1,8 +1,8 @@
 {
-  "name": "hermes-desktop-clone",
+  "name": "beyond-desktop",
   "version": "1.0.0",
   "private": true,
-  "description": "Hermes Desktop — the native desktop app for Hermes Agent (Nous Research). Vendored source mirror of NousResearch/hermes-agent apps/desktop.",
+  "description": "Beyond — a native desktop app for AI agents: chat with streaming tool output, side-by-side previews, a file browser, voice and settings.",
   "workspaces": [
     "apps/*",
     "tests-js"
@@ -24,7 +24,7 @@
     "test:e2e": "npm run test:e2e --workspace apps/desktop",
     "check": "npm run --ws check",
     "fix": "npm run --ws fix",
-    "sync:upstream": "bash tools/sync-upstream.sh"
+    "icons": "python3 tools/generate-beyond-icons.py"
   },
   "repository": {
     "type": "git",

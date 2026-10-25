@@ -1,9 +1,9 @@
-import { registryBackendScopeKey } from '@hermes/shared'
+import { registryBackendScopeKey } from '@beyond/shared'
 import { atom } from 'nanostores'
 
 import { $activeGatewayProfile } from '@/store/profile'
 import { applyReaction } from '@/store/reactions'
-import type { MessageReaction } from '@/types/hermes'
+import type { MessageReaction } from '@/types/beyond'
 
 /**
  * Reactions the user has set in THIS window, keyed by renderer message id.

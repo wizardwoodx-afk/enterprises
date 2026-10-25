@@ -32,7 +32,7 @@ import {
   recordTranscriptTail,
   transcriptTailState
 } from '@/store/transcript-tail'
-import type { StarmapGraph } from '@/types/hermes'
+import type { StarmapGraph } from '@/types/beyond'
 
 import {
   $gatewaySwitching,
@@ -46,7 +46,7 @@ import {
 // Each star map fetch records the connection requests route to when it is issued.
 const { starmapFetchScopes } = vi.hoisted(() => ({ starmapFetchScopes: [] as Array<null | string> }))
 
-vi.mock(import('@/hermes'), async importOriginal => ({
+vi.mock(import('@/beyond'), async importOriginal => ({
   ...(await importOriginal()),
   getStarmapGraph: () => {
     starmapFetchScopes.push($apiRequestScope.get().connectionId)
@@ -217,7 +217,7 @@ describe('beginGatewaySwitch / endGatewaySwitch — the shared switch commit poi
     $gatewaySwitching.set(false)
   })
 
-  it('raises the barrier, runs the registered machine-context reset, then wipes — synchronously, in that order', () => {
+  it('raises the barrier, runs the registered machine-context reset, then wipes — synchrobeyondly, in that order', () => {
     const seen: string[] = []
 
     const off = registerGatewaySwitchLifecycle({

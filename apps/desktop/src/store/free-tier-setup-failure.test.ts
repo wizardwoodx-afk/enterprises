@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { $freeTierStatus, type FreeTierRequester, freeTierSetupFailure, provisionFreeTier } from '@/store/free-tier'
-import type { FreeTierStatus } from '@/types/hermes'
+import type { FreeTierStatus } from '@/types/beyond'
 
 const NO_IDENTITY: FreeTierStatus = {
   available: false,
   enabled: true,
   has_guest: false,
-  label: 'Nous · free tier',
-  model: 'nous/welcome',
+  label: 'Beyond · free tier',
+  model: 'beyond/welcome',
   notice_pending: false
 }
 
