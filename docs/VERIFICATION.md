@@ -16,7 +16,8 @@ npm 10.9.8, after the Beyond rebrand. Re-run the commands to reproduce.
 | Icon presence | `python3 tools/generate-beyond-icons.py --check` | ✅ all present |
 | Beholders service (Python) | `python -m pytest tests` in `packages/beholders` | ✅ 47 passed |
 | Beholders engine import | `python -c "from beholders import Agent, Task, Crew, Process, Flow"` | ✅ imports; telemetry off |
-| Beholders renderer | `npx vitest run src/plugins/beholders src/contrib/beholders-plugin.test.tsx` | ✅ 32 passed |
+| Beholders renderer | `npx vitest run src/plugins/beholders src/contrib/beholders-plugin.test.tsx` | ✅ 62 passed (5 files) |
+| Plugin surface (scoped) | `npx vitest run src/plugins src/sdk src/contrib` | ⚠️ 1,217 passed · 1 failed of 1,218 (pre-existing) |
 
 The renderer — the entire UI across ~4,300 files — type-checks and builds clean
 with the Beyond branding in place.

@@ -64,11 +64,43 @@ Three properties make this a **merge** rather than a bolt-on:
 
 | Where | What |
 |---|---|
-| Route `/beholders` | The page: crew list, agents, tasks, runs, live timeline |
+| Route `/beholders` | The page: searchable crew list, crew editor, run form, staged timeline |
 | Sidebar nav | "Beholders" row, order 45, `organization` codicon |
 | ⌘K palette | `beholders.open`, `beholders.runCrew` |
 | Keyboard | `mod+alt+r` → run the selected crew (rebindable, shown in the palette) |
 | Status bar | count of the selected crew's in-flight runs; hidden when idle |
+
+The page has four panes, and the pane — like the selected crew — survives a
+reload:
+
+| Pane | What it does |
+|---|---|
+| `detail` | The selected crew: agents, tasks, runs and the timeline of the active run |
+| `new` | The blueprint picker, plus a blank crew |
+| `create` | The editor, for a crew that does not exist yet |
+| `edit` | The editor, seeded from the selected crew |
+
+The editor (`editor.tsx`) validates with `draft.ts` before the wire, applying the
+same rules as `CrewDefinition.from_dict`: a name, at least one agent with a
+unique non-blank role, at least one task whose description points at a real
+agent, and a hierarchical manager who is an agent and still leaves a worker.
+Errors appear under the field that caused them, and the save button names the
+count that blocks it. Unknown context links and blank optional fields are
+dropped when the draft is serialised, so the service never has to reject them.
+
+The run form (`inputs.tsx`) is derived from the definitions, not declared:
+`placeholdersOf` scans the task descriptions for `{identifier}` and asks for one
+value per distinct name. A crew without placeholders keeps the plain Run button;
+a crew with them cannot run until they are filled. This is what makes the
+blueprints usable — they are written as `Collect evidence about {topic}`, and
+before the form existed every run started with an empty subject and the agent
+invented one.
+
+The timeline (`timeline.tsx`) groups events into stages rather than printing a
+log: one row per task boundary, the duration measured from that task's own
+started event, wording that says what happened (`Finished gather`, `Run failed:
+…`) and the terminal event's error underneath. A live run scrolls to the newest
+stage; an unfinished task stays open rather than disappearing.
 
 The page ships **off by default**. A user who never runs a crew pays nothing for
 it. Enable it in Capabilities ▸ Plugins.
@@ -215,19 +247,22 @@ python -m venv .venv && .venv/bin/pip install -e '.[dev]'
 # Renderer
 cd apps/desktop
 npx vitest run src/plugins/beholders \
-  src/contrib/beholders-plugin.test.tsx    # 32 tests
+  src/contrib/beholders-plugin.test.tsx    # 62 tests
 ```
 
 What each gate covers:
 
 | Gate | Catches |
 |---|---|
+| `draft.test.ts` | the editor accepts a crew the service would reject, or sends a field the engine cannot use |
+| `timeline.test.ts` | a stage with the wrong duration, a lost error, a task that vanishes while running |
 | `compileall` + `from beholders import Agent, Task, Crew, Process, Flow` | the vendored rename broke an import |
 | `test_service.py` | REST/RPC/store/registry behaviour, cancellation, history cap |
 | `test_engine_wiring.py` | definition → real `Agent`/`Task`/`Crew` translation (LLM stubbed) |
 | `test_asgi_mount.py` | the gateway mount stops answering what the plugin sends |
 | `test_contract_parity.py` | Python and TypeScript drifted |
 | `api.test.ts` | the paths, verbs and bodies the client sends |
+| `page.test.tsx` | the page stops composing: a pane, the run form, the timeline |
 | `plugin.test.tsx` | the plugin registers/withdraws every contribution |
 | `verify.yml` ▸ `debrand` | an upstream name escaped the license file |
 
