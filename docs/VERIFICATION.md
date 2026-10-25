@@ -14,6 +14,9 @@ npm 10.9.8, after the Beyond rebrand. Re-run the commands to reproduce.
 | Electron-side suite | `npx vitest run --project electron` | ⚠️ 3,780 passed · 16 failed · 32 skipped (3,828) |
 | Icon generator | `python3 tools/generate-beyond-icons.py` | ✅ 86 files, deterministic |
 | Icon presence | `python3 tools/generate-beyond-icons.py --check` | ✅ all present |
+| Beholders service (Python) | `python -m pytest tests` in `packages/beholders` | ✅ 47 passed |
+| Beholders engine import | `python -c "from beholders import Agent, Task, Crew, Process, Flow"` | ✅ imports; telemetry off |
+| Beholders renderer | `npx vitest run src/plugins/beholders src/contrib/beholders-plugin.test.tsx` | ✅ 29 passed |
 
 The renderer — the entire UI across ~4,300 files — type-checks and builds clean
 with the Beyond branding in place.
@@ -109,9 +112,22 @@ python3 tools/generate-beyond-icons.py --check
 exhausts Node's default heap and aborts with
 `Ineffective mark-compacts near heap limit`.
 
+The Beholders engine is a separate distribution with a Python dependency tree, so
+its tests need their own environment:
+
+```bash
+cd packages/beholders
+python -m venv .venv && .venv/bin/pip install -e '.[dev]'
+.venv/bin/python -m pytest tests
+```
+
+Without those dependencies the engine-wiring tests skip rather than fail — the
+service tests need only pytest.
+
 ## Branding guard
 
-`.github/workflows/verify.yml` fails the build if an upstream mark appears
-anywhere outside [`THIRD_PARTY_LICENSES.md`](../THIRD_PARTY_LICENSES.md),
-`LICENSE`, and the fixed npm package names. See
+`.github/workflows/verify.yml` fails the build if an upstream mark — from either
+upstream tree, the desktop app or the crew engine — appears anywhere outside
+[`THIRD_PARTY_LICENSES.md`](../THIRD_PARTY_LICENSES.md), the two `LICENSE` files,
+the fixed npm package names and the vendored model-price catalog. See
 [BRANDING.md](BRANDING.md) for the full rule.

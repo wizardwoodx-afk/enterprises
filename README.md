@@ -84,8 +84,9 @@ apps/shared/             @beyond/shared — transport, protocol, types shared wi
 tests-js/                root JS test suites + the mock inference server used by `dev:mock`
 tests/fixtures/          fixtures referenced by desktop tests
 tests/install/e2e-assets/ install/update smoke assets referenced by desktop tests
+packages/beholders/      the Beholders crew runtime (vendored engine + service layer)
 scripts/                 build + release tooling the desktop build shells out to
-tools/                   Beyond-local tooling: icon generation, upstream sync
+tools/                   Beyond-local tooling: icon generation
 ```
 
 Inside `apps/desktop`, these guides are authoritative before changing anything:
@@ -107,6 +108,11 @@ Three boundaries:
 - **The agent runtime** runs as a headless `beyond serve` process exposing the
   `tui_gateway` JSON-RPC/WebSocket API. The renderer connects through
   `apps/shared`, which the browser dashboard uses too.
+
+**Beholders** — crew orchestration (role-playing agents working through tasks,
+with sequential or hierarchical processes) — is a bundled plugin backed by
+`packages/beholders`. It ships off by default; enable it in Capabilities ▸
+Plugins. See [docs/BEHOLDERS.md](docs/BEHOLDERS.md).
 
 Backend resolution order (non-bundled builds): explicit source-root override →
 development checkout → completed managed install → `BEYOND_DESKTOP_RUNTIME`
