@@ -214,7 +214,8 @@ python -m venv .venv && .venv/bin/pip install -e '.[dev]'
 
 # Renderer
 cd apps/desktop
-npx vitest run src/plugins/beholders      # 22 tests
+npx vitest run src/plugins/beholders \
+  src/contrib/beholders-plugin.test.tsx    # 32 tests
 ```
 
 What each gate covers:
