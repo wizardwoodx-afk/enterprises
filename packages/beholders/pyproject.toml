@@ -1,0 +1,105 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "beholders"
+version = "1.15.30"
+description = "The Beholders crew runtime — role-playing agents, tasks, crews and flows, embedded in Beyond."
+readme = "README.md"
+requires-python = ">=3.10, <3.14"
+license = { file = "LICENSE" }
+keywords = ["agents", "crews", "orchestration", "desktop", "beyond"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+dependencies = [
+  # ---- engine core ----
+  "pydantic>=2.11.9,<2.13",
+  "pydantic-settings>=2.14.2,<3",
+  "openai>=2.30.0,<3",
+  "instructor>=1.3.3,<1.16",
+  # ---- text / data ----
+  "pdfplumber~=0.11.4",
+  "regex~=2026.1.15",
+  "chromadb~=1.5.9",
+  "tokenizers>=0.21,<1",
+  "openpyxl~=3.1.5",
+  "lancedb>=0.33.0,<1.0.0",
+  # ---- auth / config ----
+  "python-dotenv>=1.2.2,<2",
+  "pyjwt>=2.15.0,<3",
+  "oauthlib>=4.0.0,<5",
+  "cryptography>=42.0",
+  "appdirs~=1.4.4",
+  "portalocker~=2.7.0",
+  "packaging>=23.0",
+  "rich>=13.7.1",
+  # ---- utilities ----
+  "click>=8.1.7,<9",
+  "jsonref~=1.1.0",
+  "json-repair~=0.60.1",
+  "cel-python>=0.5.0,<0.6",
+  "tomli-w~=1.1.0",
+  "tomli~=2.0.2",
+  "json5~=0.10.0",
+  "httpx~=0.28.1",
+  "mcp>=1.30.0,<2",
+  "aiosqlite~=0.21.0",
+  "pyyaml~=6.0",
+  "aiofiles~=24.1.0",
+  # ---- opentelemetry ----
+  # Imported by beholders_core.telemetry (which constructs no provider in this
+  # build — telemetry is disabled in code; see Telemetry._is_telemetry_disabled).
+  "opentelemetry-api>=1.45.1,<2",
+  "opentelemetry-sdk>=1.45.1,<2",
+  "opentelemetry-exporter-otlp-proto-http>=1.45.1,<2",
+]
+
+[project.optional-dependencies]
+embeddings = ["tiktoken>=0.8.0,<0.13"]
+pandas = ["pandas~=2.2.3"]
+mem0 = ["mem0ai>=2.0.0,<3"]
+# Everything the test suite needs; the runtime itself pulls none of this.
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.6",
+]
+
+[project.scripts]
+beholders = "beholders.service.cli:main"
+
+[project.urls]
+Documentation = "https://docs.beholder.app"
+Homepage = "https://beholder.app"
+
+[tool.hatch.version]
+path = "src/beholders/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/beholders", "src/beholders_core"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# The vendored engine is kept byte-close to upstream so future patches apply
+# cleanly; lint debt there is not ours to fix.
+"src/beholders/**" = ["ALL"]
+"src/beholders_core/**" = ["ALL"]

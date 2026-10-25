@@ -1,0 +1,22 @@
+/*
+ * Beholders ships no component CSS of its own — the page is built from the
+ * shared design-language primitives (Button, Badge, EmptyState, ErrorState,
+ * Codicon) and Tailwind utilities that resolve against the app's theme tokens.
+ *
+ * This file exists so the plugin has a stylesheet hook for the few things that
+ * genuinely cannot be a utility class: the timeline's scroll shadows, which
+ * need the mask-image gradient that utility syntax does not express cleanly.
+ */
+
+.beholders-timeline {
+  scrollbar-gutter: stable;
+}
+
+.beholders-timeline::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.beholders-timeline::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--ui-stroke-secondary);
+}

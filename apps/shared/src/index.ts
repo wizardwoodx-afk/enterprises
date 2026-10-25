@@ -55,6 +55,7 @@ export {
   type CronTriggerController,
   type CronTriggerRunResult
 } from './cron-trigger-controller'
+export * from './crew-contract'
 export {
   clampDataUrlReadMaxMb,
   DATA_URL_READ_DEFAULT_MAX_MB,

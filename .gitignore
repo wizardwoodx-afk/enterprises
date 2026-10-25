@@ -329,3 +329,9 @@ apps/desktop/.dist-build*
 # --- Added by this repository (not inherited) --------------------------------
 # TypeScript incremental build state
 *.tsbuildinfo
+
+# Beholders (Python) build artefacts
+packages/beholders/**/__pycache__/
+packages/beholders/**/*.egg-info/
+packages/beholders/.pytest_cache/
+packages/beholders/dist/

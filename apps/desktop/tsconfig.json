@@ -22,6 +22,7 @@
       "@beyond/shared/ansi": ["../shared/src/ansi.ts"],
       "@beyond/shared/billing": ["../shared/src/billing-types.ts"],
       "@beyond/shared/color": ["../shared/src/color.ts"],
+      "@beyond/shared/crew-contract": ["../shared/src/crew-contract.ts"],
       "@beyond/shared/i18n": ["../shared/src/i18n.ts"],
       "@beyond/shared/translucency": ["../shared/src/translucency.ts"],
       "@beyond/shared": ["../shared/src/index.ts"]

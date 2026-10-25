@@ -59,11 +59,16 @@ jobs:
       - name: Check for leftover upstream marks
         run: |
           # Allowed: THIRD_PARTY_LICENSES.md (the attribution file), LICENSE (the
-          # MIT notice text), the lockfile (fixed registry names) and this workflow.
+          # MIT notice texts), the lockfile (fixed registry names) and this workflow.
+          #
+          # Two upstreams are covered:
+          #   hermes|nous  -> the desktop app this fork is based on (now Beyond)
+          #   crewai       -> the agent engine vendored in packages/beholders (now Beholders)
           set +e
-          hits=$(grep -rniE "hermes|nous" \
+          hits=$(grep -rniE "hermes|nous|crewai" \
             --exclude-dir=node_modules --exclude-dir=.git \
-            --exclude-dir=dist --exclude-dir=build \
+            --exclude-dir=dist --exclude-dir=build --exclude-dir=__pycache__ \
+            --exclude-dir=.venv --exclude-dir=*.egg-info \
             --exclude=THIRD_PARTY_LICENSES.md --exclude=LICENSE \
             --exclude=package-lock.json --exclude=verify.yml . \
             | grep -viE "nous_?e|grammarnous|@nous-research/ui|hermes-(parser|estree)|hermespar|whermes|oyhermes")

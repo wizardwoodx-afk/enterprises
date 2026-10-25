@@ -237,6 +237,7 @@ export default defineConfig(({ command }) => ({
       '@beyond/plugin-sdk': path.resolve(__dirname, './src/sdk/index.ts'),
       '@beyond/shared/billing': path.resolve(__dirname, '../shared/src/billing-types.ts'),
       '@beyond/shared/color': path.resolve(__dirname, '../shared/src/color.ts'),
+      '@beyond/shared/crew-contract': path.resolve(__dirname, '../shared/src/crew-contract.ts'),
       '@beyond/shared': path.resolve(__dirname, '../shared/src'),
       // The tour tool's preview surface injects driver.js's prebuilt IIFE into
       // the pane's guest page as raw source; the package's exports map doesn't

@@ -124,6 +124,7 @@ import { $viewport, type ViewportRect } from './viewport'
 
 /** Pane, status bar and titlebar slots; see `./areas` for the mount rules. */
 export * from './areas'
+export * from './crew'
 /** The plugin authoring contract (`BeyondPlugin`, `PluginContext`, `ctx.*` door types). */
 export type * from './plugin-contract'
 export type { PluginProfileRequestOptions, PluginProfileRoute } from './profile-request'
@@ -2000,6 +2001,7 @@ export { Blobatar } from 'blobatar/react'
 /** Plugin-local reactive state (share between a trigger and its panel, poll
  *  loops, cross-component signals) — the same primitive `host.state` uses. */
 export { atom, computed } from 'nanostores'
+
 /** Markdown renderer (same pipeline core chat surfaces use) so plugins render
  *  message text as a preview instead of raw Markdown source. */
 export { Streamdown } from 'streamdown'
