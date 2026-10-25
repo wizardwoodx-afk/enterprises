@@ -98,7 +98,6 @@ def test_terminal_statuses_match(contract):
 
 
 def test_poll_constants_match(contract):
-    from beholders.service.api import BeholdersApi, _error
 
     # The service does not poll; this only guards that the contract documents a
     # cadence the UI actually uses. Kept here so a change is deliberate.

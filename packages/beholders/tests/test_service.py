@@ -18,7 +18,7 @@ from beholders.service.models import (
     Process,
     RunStatus,
 )
-from beholders.service.rpc import CrewRpc, RpcError, handle_request
+from beholders.service.rpc import CrewRpc, handle_request
 from beholders.service.runs import RunRegistry
 from beholders.service.store import CrewNotFound, CrewStore
 

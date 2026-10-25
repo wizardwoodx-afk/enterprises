@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import pytest
 
+
 def _engine_available() -> bool:
     """True when the engine's dependency tree is actually importable.
 
@@ -31,7 +32,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 from beholders.service.api import BeholdersApi  # noqa: E402
-from beholders.service.models import CrewDefinition, EventType, RunStatus  # noqa: E402
+from beholders.service.models import EventType, RunStatus  # noqa: E402
 from beholders.service.runs import EngineExecutor, RunRegistry  # noqa: E402
 from beholders.service.store import CrewStore  # noqa: E402
 
@@ -65,9 +66,10 @@ def captured(monkeypatch):
 
         seen["crew"] = self
         seen["inputs"] = inputs
-        # Drive the crew's own callback so the emit path is exercised too.
+        # Drive the crew's own callback once per task so the emit path is
+        # exercised too.
         for task in self.tasks:
-            self.task_callback(SimpleNamespace(name="done", agent="x", raw="out"))
+            self.task_callback(SimpleNamespace(name=task.name, agent="x", raw="out"))
         return FakeOutput()
 
     monkeypatch.setattr(beholders.Crew, "kickoff", fake_kickoff)
