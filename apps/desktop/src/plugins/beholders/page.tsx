@@ -165,7 +165,7 @@ function NewCrewPanel() {
     onSuccess: crew => {
       queryClient.setQueryData(crewKey(crew.id), crew)
       $selectedCrewId.set(crew.id)
-      $panel.set('crews')
+      $panel.set('detail')
       host.notify({ message: `${crew.name} created` })
     }
   })
@@ -440,7 +440,11 @@ export function BeholderPage() {
           </h1>
           <p className="truncate text-[0.6875rem] text-(--ui-text-tertiary)">{k.subtitle}</p>
         </div>
-        <Button onClick={() => $panel.set('runs')} size="xs" variant="outline">
+        <Button
+          onClick={() => $panel.set('new')}
+          size="xs"
+          variant={panel === 'new' ? 'secondary' : 'outline'}
+        >
           <Codicon name="add" size="0.7rem" />
           {k.newCrew}
         </Button>
@@ -459,7 +463,7 @@ export function BeholderPage() {
         </aside>
 
         <main className="min-h-0 overflow-y-auto p-4">
-          {panel === 'runs' ? (
+          {panel === 'new' ? (
             <div className="flex flex-col gap-2">
               <h2 className="text-xs font-semibold">{k.blueprints}</h2>
               <NewCrewPanel />

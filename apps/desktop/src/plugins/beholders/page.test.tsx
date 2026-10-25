@@ -101,7 +101,7 @@ beforeEach(() => {
   )
   $selectedCrewId.set('')
   $selectedRunId.set('')
-  $panel.set('crews')
+  $panel.set('detail')
 })
 
 afterEach(() => {
@@ -177,7 +177,7 @@ describe('Beholders page', () => {
   })
 
   it('offers the blueprints when the new-crew panel is open', async () => {
-    $panel.set('runs')
+    $panel.set('new')
     mount(<BeholderPage />)
 
     expect(await screen.findByText('Start from a blueprint')).toBeTruthy()

@@ -56,8 +56,8 @@ const STORE_KEYS = {
 /** The crew whose detail pane is open. Persisted so a restart lands where you left. */
 export const $selectedCrewId = atom<string>('')
 
-/** Which half of the split the user last touched — 'crews' or 'runs'. */
-export const $panel = atom<'crews' | 'runs'>('crews')
+/** The right-hand pane: the selected crew's detail, or the new-crew picker. */
+export const $panel = atom<'detail' | 'new'>('detail')
 
 /** The run the detail pane is showing. Empty means "the latest run". */
 export const $selectedRunId = atom<string>('')
@@ -84,7 +84,11 @@ export function bindApi(apiRest: Rest, storage: PluginStorage, _socket: Socket, 
   t = opts.t
 
   $selectedCrewId.set(storage.get(STORE_KEYS.lastCrewId, ''))
-  $panel.set(storage.get<'crews' | 'runs'>(STORE_KEYS.panel, 'crews'))
+  const saved = storage.get<string>(STORE_KEYS.panel, 'detail')
+
+  // An unknown persisted value (an older build, a hand-edited file) falls back
+  // to the detail pane rather than rendering neither.
+  $panel.set(saved === 'new' ? 'new' : 'detail')
 
   const unsubs = [
     $selectedCrewId.listen(id => storage.set(STORE_KEYS.lastCrewId, id)),

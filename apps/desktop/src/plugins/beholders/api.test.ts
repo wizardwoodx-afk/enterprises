@@ -191,13 +191,45 @@ describe('persistence', () => {
 
   it('restores the last selected crew from storage', async () => {
     const { $selectedCrewId, $panel } = await import('./api')
-    const { dispose } = harness(() => ({ ok: true }), { lastCrewId: 'crew_9', panel: 'runs' })
+    const { dispose } = harness(() => ({ ok: true }), { lastCrewId: 'crew_9', panel: 'new' })
 
     restore = dispose
 
     expect($selectedCrewId.get()).toBe('crew_9')
-    expect($panel.get()).toBe('runs')
+    expect($panel.get()).toBe('new')
 
     restore()
+  })
+})
+
+describe('panel persistence', () => {
+  it('falls back to the detail pane for an unknown persisted value', async () => {
+    const { $panel } = await import('./api')
+
+    const dispose = bindApi(
+      async <T>(): Promise<T> => ({ ok: true }) as T,
+      storage({ panel: 'something-old' }),
+      () => () => undefined,
+      { os: undefined as unknown as PluginOs, t: (key: string) => key }
+    )
+
+    expect($panel.get()).toBe('detail')
+
+    dispose()
+  })
+
+  it('restores the new-crew pane when that is what was saved', async () => {
+    const { $panel } = await import('./api')
+
+    const dispose = bindApi(
+      async <T>(): Promise<T> => ({ ok: true }) as T,
+      storage({ panel: 'new' }),
+      () => () => undefined,
+      { os: undefined as unknown as PluginOs, t: (key: string) => key }
+    )
+
+    expect($panel.get()).toBe('new')
+
+    dispose()
   })
 })
